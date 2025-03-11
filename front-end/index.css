@@ -1,0 +1,191 @@
+/* design palette  */
+:root {
+  --space: clamp(4px, 1vw + 4px, 30px);
+  --container: clamp(280px, calc(100dvw - calc(var(--space) * 2)), 1280px);
+  --key: 260;
+  --brand: hsl(var(--key), 65%, 35%);
+  --accent: hsl(var(--key), 15%, 50%);
+  --error: hsla(0, 100%, 67%, 1);
+  --paper: hsla(var(--key), 45%, 96%);
+  --ink: hsl(var(--key), 15%, 10%);
+  --outline: hsl(var(--key), 25%, 90%);
+  --shadow: var(--outline) 0px 0px 0px 1px, var(--outline) 0px 1px 0px 0px,
+    var(--outline) 0px 0px 2.5px 0px, 0px 3.25px 6px var(--outline);
+  --inset: inset 0px -3.25px 12px var(--outline);
+  --corner: 2.5px;
+  --pill: 9999px;
+}
+
+* {
+  box-sizing: border-box;
+}
+/* MAIN LAYOUT */
+
+/* // layout */
+body {
+  background: var(--paper);
+  animation: fade 600ms cubic-bezier(0.075, 0.82, 0.165, 1);
+  margin: 0;
+  display: grid;
+  grid-template:
+    ". header ." auto
+    ". main ." 1fr
+    ". footer ." auto / minmax(var(--space), 1fr) var(--container) minmax(var(--space), 1fr);
+  header {
+    grid-area: header;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  h1 {
+    display: flex;
+    align-items: center;
+  }
+  main {
+    grid-area: main;
+  }
+  footer {
+    grid-area: footer;
+  }
+}
+
+main {
+  display: grid;
+  grid-template:
+    "profile" auto
+    "bloom-form" min-content
+    "timeline" 1fr
+    "signup" auto / var(--container);
+  gap: 0 var(--space);
+}
+
+@media (min-width: 37.5em) {
+  main {
+    grid-template:
+      "profile bloom-form" min-content
+      "profile signup" min-content
+      "profile timeline" auto
+      "profile timeline" auto
+      "....... timeline" 1fr/ 280px auto;
+  }
+}
+
+profile-component {
+  grid-area: profile;
+}
+bloom-form-component {
+  grid-area: bloom-form;
+}
+signup-component {
+  grid-area: signup;
+}
+timeline-component {
+  grid-area: timeline;
+}
+
+/* base  elements */
+html {
+  box-sizing: border-box;
+  font: 100%/1.5 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    Roboto, sans-serif;
+  background-color: var(--paper);
+  color: var(--ink);
+}
+a:any-link {
+  color: var(--brand);
+  font-weight: bold;
+}
+ul[class],
+li[class] {
+  list-style: none;
+}
+
+button {
+  appearance: none;
+  border: 1px solid var(--outline);
+  padding: calc(var(--space) / 2) var(--space);
+  border-radius: var(--corner);
+}
+label,
+legend {
+  font-family: monospace;
+  font-weight: 900;
+}
+input,
+textarea {
+  width: 100%;
+  padding: calc(var(--space) / 1.5);
+  background-color: var(--paper);
+  box-shadow: var(--inset);
+  border-radius: var(--corner);
+  border: var(--border);
+}
+
+button {
+  font: 600 100% monospace, system-ui;
+  white-space: nowrap;
+  color: var(--ink);
+  background-color: transparent;
+  border: 0.5px solid var(--brand);
+  border-radius: var(--pill);
+  box-shadow: 2px 3px var(--brand);
+  padding: calc(var(--space) / 3) var(--space);
+  transition: all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275),
+    border-color 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+button.is-active,
+button:active,
+button:focus {
+  box-shadow: 0 0 var(--accent);
+  border-color: initial;
+  text-decoration: none;
+}
+
+@media (hover) {
+  button:hover {
+    box-shadow: 0 0 var(--accent);
+    border-color: initial;
+    text-decoration: none;
+  }
+}
+
+button:focus {
+  outline: 3px dotted var(--accent);
+}
+
+.system-message {
+  font-family: monospace;
+  color: var(--brand);
+}
+/* states, helpers*/
+.flex {
+  display: flex;
+  justify-content: space-between;
+}
+.box {
+  padding: var(--space);
+  background-color: var(--paper);
+  box-shadow: var(--shadow);
+  border-radius: var(--corner);
+  border: 0;
+  display: grid;
+  gap: var(--space);
+}
+.is-invisible {
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  height: 1px;
+  overflow: hidden;
+  position: absolute;
+  white-space: nowrap;
+  width: 1px;
+}
+.is-error {
+  color: var(--error);
+}
+
+/* We always want attribute hidden to sync with display:none, no matter what */
+[hidden] {
+  display: none !important;
+}

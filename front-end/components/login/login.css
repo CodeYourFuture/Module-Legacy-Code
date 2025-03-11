@@ -1,0 +1,12 @@
+login-component {
+  margin: 1em 0 auto auto;
+}
+
+.login__form {
+  display: flex;
+  gap: calc(var(--space) / 3);
+}
+
+.login__footer {
+  margin: 0;
+}
