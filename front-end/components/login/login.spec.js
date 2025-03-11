@@ -1,28 +1,6 @@
 import {test, expect} from "@playwright/test";
 import {TEST_PAGE_URL, loginTestUser} from "../../test-utilities.js";
 
-/**
- * Tests for LoginComponent based on specifications
- *
- * Following Given/When/Then specifications:
- *
- * 1. Given an index load or a switch from signup
- *    When the user is not LoggedIn
- *    Then the login form is shown
- *    And the signup CTA is shown
- *    And the logout button is hidden
- *
- * 2. When the user logs in
- *    Then the login form is hidden
- *    And the signup CTA is hidden
- *    And the logout button is shown
- *
- * 3. When the user is LoggedIn
- *    Then the login form is hidden
- *    And the signup CTA is hidden
- *    And the logout button is shown
- */
-
 test("Given an index load, when user is not logged in, then login form and signup CTA are shown, logout is hidden", async ({
   page,
 }) => {
