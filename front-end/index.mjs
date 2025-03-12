@@ -47,6 +47,51 @@ async function handleLogout() {
 }
 
 /**
+ * Parse the current URL and handle routing
+ */
+function handleRouteChange() {
+  const path = window.location.pathname;
+  const profileMatch = path.match(/^\/profile\/([^\/]+)$/);
+
+  if (profileMatch) {
+    const username = profileMatch[1];
+    // Dispatch a show-view event for the profile with this username
+    document.dispatchEvent(
+      new CustomEvent("show-view", {
+        detail: {view: "profile", username},
+      })
+    );
+  } else {
+    // Any other route shows the home page
+    document.dispatchEvent(
+      new CustomEvent("show-view", {
+        detail: {view: "home"},
+      })
+    );
+  }
+}
+
+/**
+ * Navigate to a new URL without page reload
+ * @param {string} path - The path to navigate to
+ */
+export function navigateTo(path) {
+  window.history.pushState({}, "", path);
+  handleRouteChange();
+}
+
+/**
+ * Initialize the router
+ */
+function initRouter() {
+  // Handle browser back/forward navigation
+  window.addEventListener("popstate", handleRouteChange);
+
+  // Handle initial route
+  handleRouteChange();
+}
+
+/**
  * Initialize the application
  */
 function init() {
@@ -79,6 +124,15 @@ function init() {
     logoutButton.addEventListener("click", handleLogout);
   }
 
+  // Set up home link navigation
+  const homeLink = document.querySelector("[data-view='home']");
+  if (homeLink) {
+    homeLink.addEventListener("click", (e) => {
+      e.preventDefault();
+      navigateTo("/");
+    });
+  }
+
   // Check for existing session
   const token = localStorage.getItem("auth_token");
   const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
@@ -91,6 +145,9 @@ function init() {
       isLoggedIn: true,
     });
   }
+
+  // Initialize the router
+  initRouter();
 }
 
 // Start the application when DOM is ready

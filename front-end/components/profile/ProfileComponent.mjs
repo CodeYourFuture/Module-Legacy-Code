@@ -118,7 +118,10 @@ class ProfileComponent extends HTMLElement {
 
   _handleShowView = (event) => {
     if (event.detail.view === "profile") {
+      this.hidden = false;
       this.setAttribute("username", event.detail.username || "");
+    } else if (event.detail.view === "home") {
+      this.hidden = true;
     }
   };
 

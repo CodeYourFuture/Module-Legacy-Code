@@ -64,15 +64,29 @@ class TimelineComponent extends HTMLElement {
   _addEventListeners() {
     document.addEventListener("bloom-posted", this._handleBloomPosted);
     document.addEventListener("state-change", this._handleStateChange);
+    document.addEventListener("show-view", this._handleShowView);
   }
 
   _removeEventListeners() {
     document.removeEventListener("bloom-posted", this._handleBloomPosted);
     document.removeEventListener("state-change", this._handleStateChange);
+    document.removeEventListener("show-view", this._handleShowView);
   }
 
   _handleBloomPosted = () => this._loadBlooms();
   _handleStateChange = () => this._loadBlooms();
+  _handleShowView = (event) => {
+    // Show the timeline component when the home view is requested
+    // or when a profile is shown with a username attribute
+    if (event.detail.view === "home") {
+      this.hidden = false;
+      this.removeAttribute("username"); // Clear any username filter
+      this._loadBlooms();
+    } else if (event.detail.view !== "profile") {
+      // Hide the timeline for views other than home or profile
+      this.hidden = true;
+    }
+  };
 
   // ===== DATA LOADING =====
   async _loadBlooms() {

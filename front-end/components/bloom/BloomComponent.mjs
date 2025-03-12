@@ -1,4 +1,4 @@
-import {apiService, getState} from "../../index.mjs";
+import {apiService, getState, navigateTo} from "../../index.mjs";
 import {formatTimestamp, initShadowDOM, applyStyles} from "../../utilities.mjs";
 /**
  * BloomComponent - A custom element that displays a single bloom
@@ -88,11 +88,7 @@ class BloomComponent extends HTMLElement {
 
   _handleUsernameClick = (event) => {
     event.preventDefault();
-    document.dispatchEvent(
-      new CustomEvent("show-profile", {
-        detail: {username: this._data.username},
-      })
-    );
+    navigateTo(`/profile/${this._data.username}`);
   };
 
   // ===== RENDER VIEW =====
@@ -102,8 +98,8 @@ class BloomComponent extends HTMLElement {
     const {username, content, timestamp, likes} = this._data;
 
     this.usernameElement.textContent = `@${username}`;
-    this.usernameElement.setAttribute("href", `#/profile/${username}`);
-    this.contentElement.innerHTML = content;
+    this.usernameElement.setAttribute("href", `/profile/${username}`);
+    this.contentElement.textContent = content;
 
     // Update timestamp
     const formattedDate = formatTimestamp(timestamp);
