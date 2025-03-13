@@ -3,6 +3,7 @@ import {handleRouteChange} from "./lib/router.mjs";
 import {apiService} from "./lib/api.mjs";
 
 // get all the dynamic areas of the initial DOM
+const getLogoutContainer = () => document.getElementById("logout-container");
 const getLoginContainer = () => document.getElementById("login-container");
 const getSignupContainer = () => document.getElementById("signup-container");
 const getBloomFormContainer = () =>
@@ -31,6 +32,7 @@ function init() {
 window.onload = init;
 
 export {
+  getLogoutContainer,
   getLoginContainer,
   getSignupContainer,
   getBloomFormContainer,

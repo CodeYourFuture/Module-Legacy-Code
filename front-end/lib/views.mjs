@@ -8,6 +8,7 @@ import {
   getBloomFormContainer,
 } from "../index.mjs";
 import {createLogin, handleLogin} from "../components/login/login.mjs";
+import {createLogout, handleLogout} from "../components/logout/logout.mjs";
 import {createSignup, handleSignup} from "../components/signup/signup.mjs";
 import {createProfile} from "../components/profile/profile.mjs";
 import {
@@ -15,7 +16,6 @@ import {
   handleBloomSubmit,
 } from "../components/bloom-form/bloom-form.mjs";
 import {createTimeline} from "../components/timeline/timeline.mjs";
-import {createBloom} from "../components/bloom/bloom.mjs";
 
 // Home view - not logged in
 function loginView() {
@@ -31,7 +31,7 @@ function loginView() {
     .addEventListener("submit", handleLogin);
 }
 
-// Signup view
+// Signup view, not  logged in
 function signupView() {
   destroy();
   render(
@@ -67,6 +67,15 @@ function homeView() {
       "bloom-form-template",
       createBloomForm
     );
+    render(
+      [state.isLoggedIn],
+      getLogoutContainer,
+      "logout-template",
+      createLogout
+    );
+    document
+      .querySelector("[data-logout-button]")
+      .addEventListener("click", handleLogout);
     document
       .querySelector("[data-bloom-form]")
       .addEventListener("submit", handleBloomSubmit);

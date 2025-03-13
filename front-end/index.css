@@ -65,7 +65,7 @@ main {
       "profile bloom-form" min-content
       "profile timeline" auto
       "....... timeline" auto
-      "....... signup" 1fr/ 280px auto;
+      "....... signup" minmax(80vh, 1fr) / 280px auto;
   }
 }
 

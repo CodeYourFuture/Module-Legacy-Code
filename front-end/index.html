@@ -14,6 +14,7 @@
           PurpleForest</a
         >
       </h1>
+      <div id="logout-container" class="logout__component"></div>
       <div id="login-container" class="login__component"></div>
     </header>
     <main tabindex="0">
@@ -26,6 +27,11 @@
       <h3>This Legacy Code project is coursework from Code Your Future</h3>
     </footer>
     <!---TEMPLATES FOLLOW, THESE ARE INERT-->
+    <template id="logout-template">
+      <button type="button" data-action="logout" data-logout-button>
+        Logout
+      </button>
+    </template>
     <!-- Login Component Template -->
     <template id="login-template">
       <section aria-label="Log in or sign up" class="login">
@@ -71,16 +77,12 @@
             aria-live="assertive"
           ></div>
         </form>
-
         <p class="login__footer system-message" data-signup>
           Don't have an account?
           <a href="#" data-action="signup" class="login__signup-link"
             >Sign up</a
           >
         </p>
-        <button type="button" data-action="logout" class="app__nav-item">
-          Logout
-        </button>
       </section>
     </template>
     <!-- Signup Component Template -->
