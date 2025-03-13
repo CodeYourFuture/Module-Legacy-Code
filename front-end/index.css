@@ -63,23 +63,22 @@ main {
   main {
     grid-template:
       "profile bloom-form" min-content
-      "profile signup" min-content
       "profile timeline" auto
-      "profile timeline" auto
-      "....... timeline" 1fr/ 280px auto;
+      "....... timeline" auto
+      "....... signup" 1fr/ 280px auto;
   }
 }
 
-profile-component {
+.profile_container {
   grid-area: profile;
 }
-bloom-form-component {
+.bloom-form_container {
   grid-area: bloom-form;
 }
-signup-component {
+.signup_container {
   grid-area: signup;
 }
-timeline-component {
+.timeline_container {
   grid-area: timeline;
 }
 
@@ -158,6 +157,58 @@ button:focus {
   font-family: monospace;
   color: var(--brand);
 }
+/* COMPONENTS */
+
+/* BLOOM FORM */
+
+.bloom-form__form {
+  display: grid;
+  grid-template:
+    "textarea textarea" auto
+    "char-count submit" auto / 1fr min-content;
+  margin-bottom: calc(-1 * var(--space));
+}
+
+.bloom-form__field {
+  grid-area: textarea;
+}
+
+.bloom-form__submit {
+  grid-area: submit;
+  margin: 0 auto auto 0;
+}
+
+.bloom-form__char-count {
+  grid-area: char-count;
+}
+
+/* LOGIN */
+.login__container {
+  margin: 1em 0 auto auto;
+}
+
+.login__form {
+  display: flex;
+  gap: calc(var(--space) / 3);
+}
+
+.login__footer {
+  margin: 0;
+}
+
+/* PROFILE */
+
+.profile__avatar {
+  font-size: 3em;
+}
+
+/* TIMELINE */
+.timeline__content {
+  min-height: 80dvh;
+  display: grid;
+  gap: var(--space);
+}
+
 /* states, helpers*/
 .flex {
   display: flex;

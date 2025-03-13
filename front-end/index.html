@@ -4,352 +4,239 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Purple Forest</title>
-    <script type="module" src="./index.mjs"></script>
     <link href="./index.css" rel="stylesheet" />
   </head>
   <body id="app">
     <header>
-      <a href="/" data-view="home"
-        ><h1>
+      <h1>
+        <a href="/">
           <img src="./logo.svg" alt="Purple Forest " width="50" height="60" />
-          PurpleForest
-        </h1>
-      </a>
-      <login-component>
-        <!-- Login Component Template -->
-        <template id="login-template">
-          <section aria-label="Log in or sign up" class="login">
-            <form data-form class="login__form">
-              <div class="login__field">
-                <label class="login__label is-invisible" for="username"
-                  >Username</label
-                >
-                <input
-                  class="login__input"
-                  type="text"
-                  id="username"
-                  name="username"
-                  autocomplete="username"
-                  required
-                  placeholder="Username"
-                />
-              </div>
-
-              <div class="login__field">
-                <label class="login__label is-invisible" for="password"
-                  >Password</label
-                >
-                <input
-                  class="login__input"
-                  type="password"
-                  id="password"
-                  name="password"
-                  autocomplete="current-password"
-                  required
-                  placeholder="password"
-                />
-              </div>
-
-              <button type="submit" data-submit class="login__submit">
-                Log in
-              </button>
-
-              <div
-                data-error
-                class="login__error system-message"
-                role="alert"
-                aria-live="assertive"
-              ></div>
-            </form>
-
-            <p class="login__footer system-message" data-signup>
-              Don't have an account?
-              <a href="#" data-action="signup" class="login__signup-link"
-                >Sign up</a
-              >
-            </p>
-            <button type="button" data-action="logout" class="app__nav-item">
-              Logout
-            </button>
-          </section>
-        </template>
-      </login-component>
+          PurpleForest</a
+        >
+      </h1>
+      <div id="login-container" class="login__component"></div>
     </header>
     <main tabindex="0">
-      <signup-component>
-        <!-- Signup Component Template -->
-        <template id="signup-template">
-          <section aria-labelledby="signup-heading" class="signup">
-            <h1 id="signup-heading" class="signup__title">
-              Create your account
-            </h1>
-
-            <form data-form class="signup__form">
-              <div class="signup__field">
-                <label class="signup__label" for="signup-username"
-                  >Username</label
-                >
-                <input
-                  class="signup__input"
-                  type="text"
-                  id="signup-username"
-                  name="username"
-                  autocomplete="username"
-                  required
-                />
-              </div>
-
-              <div class="signup__field">
-                <label class="signup__label" for="signup-display-name"
-                  >Display Name</label
-                >
-                <input
-                  class="signup__input"
-                  type="text"
-                  id="signup-display-name"
-                  name="signup-display-name"
-                  required
-                />
-              </div>
-
-              <div class="signup__field">
-                <label class="signup__label" for="signup-password"
-                  >Password</label
-                >
-                <input
-                  class="signup__input"
-                  type="password"
-                  id="signup-password"
-                  name="password"
-                  autocomplete="new-password"
-                  required
-                  minlength="5"
-                />
-              </div>
-
-              <div class="signup__field">
-                <label class="signup__label" for="signup-confirm-password"
-                  >Confirm Password</label
-                >
-                <input
-                  class="signup__input"
-                  type="password"
-                  id="signup-confirm-password"
-                  name="signup-confirm-password"
-                  autocomplete="new-password"
-                  required
-                  minlength="5"
-                />
-              </div>
-
-              <button type="submit" data-submit class="signup__submit">
-                Sign up
-              </button>
-
-              <div
-                data-error
-                class="signup__error system-message"
-                role="alert"
-                aria-live="polite"
-              ></div>
-            </form>
-
-            <footer class="signup__footer system-message">
-              <h3>
-                Already have an account?
-                <a href="#" data-action="login" class="signup__login-link"
-                  >Log in</a
-                >
-              </h3>
-            </footer>
-          </section>
-        </template>
-      </signup-component>
-      <profile-component>
-        <!-- Profile Component Template -->
-        <template id="profile-template">
-          <section aria-labelledby="profile-name" class="profile box">
-            <header class="profile__header flex">
-              <div
-                class="profile__avatar"
-                data-avatar
-                role="img"
-                aria-label="User avatar"
-              >
-                🟣
-              </div>
-              <h2 data-username class="profile__username"></h2>
-            </header>
-
-            <dl class="profile__stats">
-              <div class="profile__stat flex">
-                <dt>Following</dt>
-                <dd data-following-count>0</dd>
-              </div>
-              <div class="profile__stat flex">
-                <dt>Followers</dt>
-                <dd data-followers-count>0</dd>
-              </div>
-              <div class="profile__stat flex">
-                <dt>Blooms</dt>
-                <dd data-blooms-count>0</dd>
-              </div>
-            </dl>
-
-            <div class="profile__actions flex">
-              <button
-                type="button"
-                data-action="follow"
-                class="profile__follow"
-              >
-                Follow
-              </button>
-
-              <button
-                type="button"
-                data-action="unfollow"
-                class="profile__unfollow"
-                hidden
-              >
-                Unfollow
-              </button>
-            </div>
-            <div data-error></div>
-          </section>
-        </template>
-      </profile-component>
-      <bloom-form-component>
-        <!-- bloom Form Component Template -->
-        <template id="bloom-form-template">
-          <section aria-labelledby="compose-heading" class="bloom-form">
-            <h2 id="compose-heading" class="bloom-form__title is-invisible">
-              Compose bloom
-            </h2>
-
-            <form data-form class="bloom-form__form">
-              <div class="bloom-form__field">
-                <label for="bloom-content" class="is-invisible"
-                  >bloom content</label
-                >
-                <textarea
-                  id="bloom-content"
-                  data-content
-                  class="bloom-form__textarea"
-                  placeholder="What's happening?"
-                  required
-                  maxlength="280"
-                  rows="6"
-                  aria-describedby="char-count"
-                ></textarea>
-              </div>
-              <button type="submit" data-submit class="bloom-form__submit">
-                Bloom
-              </button>
-              <span
-                id="char-count"
-                data-char-count
-                class="bloom-form__char-count system-message"
-                aria-live="polite"
-              ></span>
-              <div
-                data-error
-                class="bloom-form__error system-message"
-                role="alert"
-                aria-live="assertive"
-              ></div>
-            </form>
-          </section>
-        </template>
-      </bloom-form-component>
-      <timeline-component>
-        <!-- Timeline Component Template -->
-        <template id="timeline-template">
-          <section aria-labelledby="timeline-heading" class="timeline">
-            <header class="timeline__header">
-              <h2 id="timeline-heading" data-title class="timeline__title">
-                Timeline
-              </h2>
-              <div data-actions class="timeline__actions"></div>
-            </header>
-
-            <div
-              data-error
-              hidden
-              class="timeline__error system-message"
-              role="alert"
-            ></div>
-
-            <div data-empty class="timeline__empty system-message">
-              <p>No blooms to display</p>
-            </div>
-
-            <div data-login-message class="timeline__login-message">
-              <p>Log in to see the forest</p>
-              <p>
-                Connect with other users and see their blooms in your timeline.
-              </p>
-            </div>
-
-            <section data-content class="timeline__content">
-              <!-- Will be populated dynamically with bloom-component elements -->
-            </section>
-          </section>
-        </template>
-        <!-- Bloom Component Template -->
-        <template id="bloom-template">
-          <article class="bloom box" aria-labelledby="bloom-username">
-            <header class="bloom__header flex">
-              <a
-                href="#"
-                id="bloom-username"
-                data-username
-                class="bloom__username"
-                aria-label="View user profile"
-              ></a>
-              <time data-timestamp class="bloom__timestamp" datetime=""></time>
-            </header>
-            <div data-content class="bloom__content"></div>
-            <footer class="bloom__actions">
-              <button
-                type="button"
-                data-action="like"
-                class="bloom__action bloom__action--like"
-                aria-label="Like bloom"
-              >
-                <span aria-hidden="true">❤️</span> <span data-like-count></span>
-              </button>
-            </footer>
-          </article>
-        </template>
-      </timeline-component>
+      <div id="signup-container" class="signup__component"></div>
+      <div id="profile-container" class="profile__component"></div>
+      <div id="bloom-form-container" class="bloom-form__component"></div>
+      <div id="timeline-container" class="timeline__component"></div>
     </main>
     <footer>
       <h3>This Legacy Code project is coursework from Code Your Future</h3>
     </footer>
+    <!---TEMPLATES FOLLOW, THESE ARE INERT-->
+    <!-- Login Component Template -->
+    <template id="login-template">
+      <section aria-label="Log in or sign up" class="login">
+        <form data-login-form class="login__form">
+          <div class="login__field">
+            <label class="login__label is-invisible" for="username"
+              >Username</label
+            >
+            <input
+              class="login__input"
+              type="text"
+              id="username"
+              name="username"
+              autocomplete="username"
+              required
+              placeholder="Username"
+            />
+          </div>
 
+          <div class="login__field">
+            <label class="login__label is-invisible" for="password"
+              >Password</label
+            >
+            <input
+              class="login__input"
+              type="password"
+              id="password"
+              name="password"
+              autocomplete="current-password"
+              required
+              placeholder="password"
+            />
+          </div>
+
+          <button type="submit" data-submit class="login__submit">
+            Log in
+          </button>
+
+          <div
+            data-error
+            class="login__error system-message"
+            role="alert"
+            aria-live="assertive"
+          ></div>
+        </form>
+
+        <p class="login__footer system-message" data-signup>
+          Don't have an account?
+          <a href="#" data-action="signup" class="login__signup-link"
+            >Sign up</a
+          >
+        </p>
+        <button type="button" data-action="logout" class="app__nav-item">
+          Logout
+        </button>
+      </section>
+    </template>
+    <!-- Signup Component Template -->
+    <template id="signup-template">
+      <section aria-labelledby="signup-heading" class="signup">
+        <h1 id="signup-heading" class="signup__title">Create your account</h1>
+
+        <form data-form class="signup__form">
+          <div class="signup__field">
+            <label class="signup__label" for="signup-username">Username</label>
+            <input
+              class="signup__input"
+              type="text"
+              id="signup-username"
+              name="username"
+              autocomplete="username"
+              required
+            />
+          </div>
+
+          <div class="signup__field">
+            <label class="signup__label" for="signup-password">Password</label>
+            <input
+              class="signup__input"
+              type="password"
+              id="signup-password"
+              name="password"
+              autocomplete="new-password"
+              required
+            />
+          </div>
+
+          <div class="signup__field">
+            <label class="signup__label" for="signup-password-confirmation"
+              >Confirm Password</label
+            >
+            <input
+              class="signup__input"
+              type="password"
+              id="signup-password-confirmation"
+              name="password_confirmation"
+              autocomplete="new-password"
+              required
+            />
+          </div>
+
+          <button type="submit" data-submit class="signup__submit">
+            Sign up
+          </button>
+
+          <div
+            data-error
+            class="signup__error system-message"
+            role="alert"
+            aria-live="assertive"
+          ></div>
+        </form>
+
+        <p class="signup__footer system-message">
+          Already have an account?
+          <a href="#" data-action="login" class="signup__login-link">Log in</a>
+        </p>
+      </section>
+    </template>
+    <!-- Profile Component Template -->
+    <template id="profile-template">
+      <section aria-labelledby="profile-username" class="profile">
+        <div class="profile__header">
+          <h1 id="profile-username" data-username class="profile__username">
+            Username
+          </h1>
+          <dl class="profile__stats" data-stats>
+            <div>
+              <dt>Blooms</dt>
+              <dd class="profile__count" data-bloom-count>0</dd>
+            </div>
+            <div>
+              <dt>Followers</dt>
+              <dd class="profile__count" data-follower-count>0</dd>
+            </div>
+          </dl>
+        </div>
+
+        <div data-error class="profile__error system-message"></div>
+      </section>
+    </template>
+    <!-- Bloom Form Component Template -->
+    <template id="bloom-form-template">
+      <section aria-labelledby="bloom-form-title" class="bloom-form">
+        <h2 id="bloom-form-title" class="bloom-form__title">Share a Bloom</h2>
+
+        <form data-form class="bloom-form__form">
+          <div class="bloom-form__field">
+            <label class="bloom-form__label is-invisible" for="bloom-content"
+              >What's happening?</label
+            >
+            <textarea
+              class="bloom-form__textarea"
+              id="bloom-content"
+              name="content"
+              placeholder="What's happening?"
+              maxlength="280"
+              required
+            ></textarea>
+            <div class="bloom-form__counter" data-counter>280</div>
+          </div>
+
+          <button type="submit" data-submit class="bloom-form__submit">
+            Bloom
+          </button>
+
+          <div
+            data-error
+            class="bloom-form__error system-message"
+            role="alert"
+            aria-live="assertive"
+          ></div>
+        </form>
+      </section>
+    </template>
+    <!-- Timeline Component Template -->
+    <template id="timeline-template">
+      <section aria-labelledby="timeline-title" class="timeline">
+        <header class="timeline__header">
+          <h2 id="timeline-title" data-title class="timeline__title">
+            Latest Blooms
+          </h2>
+        </header>
+
+        <div data-content class="timeline__content"></div>
+
+        <div data-error class="timeline__error system-message"></div>
+
+        <div data-empty class="timeline__empty">
+          <p>No blooms to display.</p>
+        </div>
+
+        <p data-login-message class="timeline__login-message">
+          Log in to see the forest grow.
+        </p>
+      </section>
+    </template>
+    <!-- Bloom Template -->
+    <template id="bloom-template">
+      <article class="bloom" data-bloom data-bloom-id="">
+        <div class="bloom__header">
+          <a href="#" class="bloom__username" data-username>Username</a>
+          <span class="bloom__time" data-time>2m</span>
+        </div>
+        <div class="bloom__content" data-content></div>
+      </article>
+    </template>
     <noscript>
       <p>Please enable JavaScript in your browser.</p>
     </noscript>
 
-    <!--all the components-->
     <script type="module" src="./index.mjs"></script>
-    <script type="module" src="./components/login/LoginComponent.mjs"></script>
-    <script
-      type="module"
-      src="./components/signup/SignupComponent.mjs"
-    ></script>
-    <script
-      type="module"
-      src="./components/profile/ProfileComponent.mjs"
-    ></script>
-    <script
-      type="module"
-      src="./components/bloom-form/BloomFormComponent.mjs"
-    ></script>
-    <script type="module" src="./components/bloom/BloomComponent.mjs"></script>
-    <script
-      type="module"
-      src="./components/timeline/TimelineComponent.mjs"
-    ></script>
   </body>
 </html>

@@ -1,5 +1,0 @@
-.timeline__content {
-  min-height: 80dvh;
-  display: grid;
-  gap: var(--space);
-}

@@ -47,27 +47,7 @@ test("Given an index page load, when a user posts a new bloom, then it appears i
   await expect(firstBloom).toContainText(uniqueContent);
 });
 
-test("Given an index page load, when I am not LoggedIn, then I see a message saying Log in to see the forest", async ({
-  page,
-}) => {
-  // Given an index page load
-  await page.goto(TEST_PAGE_URL);
-
-  // When I am not LoggedIn (default state)
-
-  // Then I see a message saying Log in to see the forest
-  await expect(
-    page.locator("timeline-component [data-login-message]")
-  ).toBeVisible();
-  await expect(
-    page.locator("timeline-component [data-login-message]")
-  ).toContainText("Log in to see the forest");
-
-  // And the timeline content should not have bloom components
-  await expect(page.locator("bloom-component")).toHaveCount(0);
-});
-
-test("Given a timeline, when clicking on a username, then the view switches to that user's profile", async ({
+test("Given a timeline, when clicking on a username, then the view navigates to that user's profile", async ({
   page,
 }) => {
   // Given a timeline with blooms
