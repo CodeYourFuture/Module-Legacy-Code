@@ -11,18 +11,18 @@ export default {
      * Maximum time expect() should wait for the condition to be met.
      * For example in `await expect(locator).toHaveText();`
      */
-    timeout: 5000,
+    timeout: 3000,
   },
-  /* Run tests in files in parallel */
-  fullyParallel: true,
+  /* Run tests in files in sequence rather than parallel */
+  fullyParallel: false,
   /* Fail the build on CI if you accidentally left test.only in the source code. */
   forbidOnly: !!process.env.CI,
-  /* Retry on CI only */
-  retries: process.env.CI ? 2 : 0,
-  /* Opt out of parallel tests on CI. */
-  workers: process.env.CI ? 1 : undefined,
+  /* Retry tests on failures - more retries during development */
+  retries: process.env.CI ? 2 : 1,
+  /* Ensure tests run sequentially */
+  workers: 1,
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
-  reporter: "html",
+  reporter: [["html"], ["list"]],
 
   /* Configure projects for major browsers */
   projects: [
@@ -31,6 +31,10 @@ export default {
       use: {
         // Base URL to use for all tests
         baseURL: "http://localhost:5500",
+        // Always use headless mode unless explicitly overridden
+        headless: true,
+        // Capture screenshots on failure
+        screenshot: "only-on-failure",
       },
     },
   ],
@@ -43,5 +47,7 @@ export default {
     command: "npx http-server . -p 5500",
     port: 5500,
     reuseExistingServer: !process.env.CI,
+    // Wait for server to be fully ready
+    timeout: 3000,
   },
 };

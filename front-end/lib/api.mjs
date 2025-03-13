@@ -1,287 +1,245 @@
 import {state} from "../index.mjs";
+import {handleErrorDialog} from "../components/error/error.mjs";
+
 // === ABOUT THE STATE
 // state gives you these two functions only
-// updateState(stateKey, newValues)
+// updateState({stateKey: newValues})
 // destroyState()
-// here are your state keys
-// currentUser: null,
-// currentProfile: null,
-// isLoggedIn: false,
-// profiles: {}, // Keyed by username
-// blooms: {}, // Keyed by username
 
-// ===== ABOUT THE BACKEND in main.py
-
-// backend endpoints you have available and what success returns
-// /login and  /register
-// { "success": true, "token": access_token }
-// /profile
-// {"username": username,
-// "follows": [username, username2]),
-// "followers": [username, username2]) }
-
-// /profile/<profile_username>
-// {"username": "profile_username",
-//  "recent_blooms": [{bloom}, {10 blooms total}],
-//  "follows": [username, username2],
-//  "followers": [username, username2],
-//  "is_following": Boolean,
-//  "is_self": Boolean,
-//  "total_blooms": Number }
-
-// /follow and /bloom
-// { "success": true}
-
-// /bloom/<id_str>
-// {bloom object tba}
-
-// /home and /blooms/<profile_username>
-// [{users_bloom}, {users_blooms}]
-
-// btw a bloom object is composed thus
-// {"id": Number,
-// "sender": username,
-// "content": "string from textarea",
-// "sent_timestamp": "datetime as ISO 8601 formatted string"}
-//
-
-// Base URL for API requests
-const API_BASE_URL = "/api";
+// All you can do in this file, please!
+// 1. You can go to the back end and make requests for data
+// 2. You can put the response data into state in the right place
+// 3. You can handle your errors
+// Don't touch any other part of the application with this file
 
 // Helper function for making API requests
-async function apiRequest(endpoint, options = {}) {
-  const token = localStorage.getItem("token");
+async function _apiRequest(endpoint, options = {}) {
+  const token = state.token;
+  const baseUrl = "http://localhost:3000";
 
   const defaultOptions = {
     headers: {
       "Content-Type": "application/json",
       ...(token ? {Authorization: `Bearer ${token}`} : {}),
     },
-    // Add CORS mode to handle cross-origin requests
     mode: "cors",
-    // Include credentials like cookies if needed
     credentials: "include",
   };
 
   const fetchOptions = {...defaultOptions, ...options};
+  const url = endpoint.startsWith("http") ? endpoint : `${baseUrl}${endpoint}`;
 
   try {
-    const response = await fetch(`${API_BASE_URL}${endpoint}`, fetchOptions);
+    const response = await fetch(url, fetchOptions);
 
-    // Check if the response is ok (status 200-299)
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
       const error = new Error(
-        errorData.message ||
-          `API error: ${response.status} ${response.statusText}`
+        errorData.message || `API error: ${response.status}`
       );
       error.status = response.status;
-      error.data = errorData;
+
+      // Handle auth errors
+      if (error.status === 401 || error.status === 403) {
+        if (!endpoint.includes("/login") && !endpoint.includes("/register")) {
+          localStorage.removeItem("token");
+          state.destroyState();
+        }
+      }
+
+      // Handle all errors through central error handler
+      handleErrorDialog(error);
       throw error;
     }
 
-    // Check if response is json
     const contentType = response.headers.get("content-type");
-    if (contentType && contentType.includes("application/json")) {
-      const data = await response.json();
-      return data;
-    } else {
-      return {success: true};
-    }
+    return contentType?.includes("application/json")
+      ? await response.json()
+      : {success: true};
   } catch (error) {
+    // Send all errors to central error handler if not already handled
+    if (!error.status) {
+      handleErrorDialog(error);
+    }
     console.error(`API request failed: ${endpoint}`, error);
     throw error;
   }
 }
 
-// Auth methods
+// Local helper to update a profile in the profiles array
+function _updateProfile(username, profileData) {
+  const profiles = [...state.profiles];
+  const index = profiles.findIndex((p) => p.username === username);
+
+  if (index !== -1) {
+    profiles[index] = {...profiles[index], ...profileData};
+  } else {
+    profiles.push({username, ...profileData});
+  }
+  state.updateState({profiles});
+}
+
+// ====== AUTH methods
 async function login(username, password) {
   try {
-    const data = await apiRequest("/login", {
+    const data = await _apiRequest("/login", {
       method: "POST",
       body: JSON.stringify({username, password}),
     });
 
     if (data.success && data.token) {
-      localStorage.setItem("token", data.token);
-      state.updateState("currentUser", username);
-      state.updateState("isLoggedIn", true);
-    } else {
-      throw new Error(data.message || "Login failed");
+      state.updateState({
+        token: data.token,
+        currentUser: username,
+        isLoggedIn: true,
+      });
+      await getBlooms();
     }
-
     return data;
   } catch (error) {
-    // Clear any sensitive data
-    state.updateState("isLoggedIn", false);
-    state.updateState("currentUser", null);
+    state.destroyState();
     throw error;
   }
 }
 
 async function signup(username, password) {
   try {
-    const data = await apiRequest("/register", {
+    const data = await _apiRequest("/register", {
       method: "POST",
       body: JSON.stringify({username, password}),
     });
 
     if (data.success && data.token) {
-      localStorage.setItem("token", data.token);
-      state.updateState("currentUser", username);
-      state.updateState("isLoggedIn", true);
-    } else {
-      throw new Error(data.message || "Registration failed");
+      state.updateState({
+        token: data.token,
+        currentUser: username,
+        isLoggedIn: true,
+      });
+      await getProfile(username);
     }
-
     return data;
   } catch (error) {
-    // Ensure failed signup doesn't leave partial state
-    state.updateState("isLoggedIn", false);
-    state.updateState("currentUser", null);
+    state.destroyState();
     throw error;
   }
 }
 
 function logout() {
-  try {
-    localStorage.removeItem("token");
-    state.destroyState();
-  } catch (error) {
-    console.error("Logout failed", error);
-    // Try to remove token anyway
-    localStorage.removeItem("token");
-    throw error;
-  }
+  state.destroyState();
+  return {success: true};
 }
 
-// Bloom methods
+// ===== BLOOM methods
 async function getBlooms(username) {
+  const endpoint = username ? `/blooms/${username}` : "/home";
+
   try {
-    // If username is provided, get blooms for that profile
-    // Otherwise, get blooms for home feed
-    const endpoint = username ? `/blooms/${username}` : "/home";
-    const blooms = await apiRequest(endpoint);
+    const blooms = await _apiRequest(endpoint);
 
     if (username) {
-      // Store blooms for this specific profile
-      state.updateState("profiles", {
-        [username]: {
-          ...state.profiles[username],
-          blooms,
-        },
-      });
+      _updateProfile(username, {blooms});
     } else {
-      // Store home feed blooms
-      state.updateState("blooms", blooms);
+      state.updateState({timelineBlooms: blooms});
     }
 
     return blooms;
   } catch (error) {
-    // Set empty blooms on error to prevent UI from breaking
     if (username) {
-      state.updateState("profiles", {
-        [username]: {
-          ...state.profiles[username],
-          blooms: [],
-        },
-      });
+      _updateProfile(username, {blooms: []});
     } else {
-      state.updateState("blooms", []);
+      state.updateState({timelineBlooms: []});
     }
+    throw error;
+  }
+}
+
+/**
+ * Fetches blooms containing a specific hashtag
+ */
+async function getBloomsByHashtag(hashtag) {
+  const tag = hashtag.startsWith("#") ? hashtag.substring(1) : hashtag;
+  const endpoint = `/search?q=%23${encodeURIComponent(tag)}`;
+
+  try {
+    const blooms = await _apiRequest(endpoint);
+    state.updateState({
+      hashtagBlooms: blooms,
+      currentHashtag: `#${tag}`,
+    });
+    return blooms;
+  } catch (error) {
+    state.updateState({
+      hashtagBlooms: [],
+      currentHashtag: null,
+    });
     throw error;
   }
 }
 
 async function postBloom(content) {
-  try {
-    const data = await apiRequest("/bloom", {
-      method: "POST",
-      body: JSON.stringify({content}),
-    });
+  const data = await _apiRequest("/bloom", {
+    method: "POST",
+    body: JSON.stringify({content}),
+  });
 
-    // If successful, refresh home blooms
-    if (data.success) {
-      try {
-        await getBlooms();
-      } catch (refreshError) {
-        console.error("Failed to refresh blooms after posting", refreshError);
-        // Continue since the post was successful
-      }
-    } else {
-      throw new Error(data.message || "Failed to post bloom");
-    }
-
-    return data;
-  } catch (error) {
-    throw error;
+  if (data.success) {
+    await getBlooms();
   }
+
+  return data;
 }
 
-// User methods
+// ======= USER methods
 async function getProfile(username) {
+  const endpoint = username ? `/profile/${username}` : "/profile";
+
   try {
-    const endpoint = username ? `/profile/${username}` : "/profile";
-    const profileData = await apiRequest(endpoint);
+    const profileData = await _apiRequest(endpoint);
 
     if (username) {
-      // Store profile data for this specific username
-      state.updateState("profiles", {
-        [username]: {
-          ...state.profiles[username],
-          ...profileData,
-        },
-      });
-      state.updateState("currentProfile", username);
+      _updateProfile(username, profileData);
     } else {
-      // Store current user's profile data
-      state.updateState("currentUser", profileData.username);
+      const currentUsername = profileData.username;
+      const fullProfileData = await _apiRequest(`/profile/${currentUsername}`);
+      _updateProfile(currentUsername, fullProfileData);
+      state.updateState({currentUser: currentUsername, isLoggedIn: true});
     }
 
     return profileData;
   } catch (error) {
-    // Set default profile values on error
-    if (username) {
-      state.updateState("profiles", {
-        [username]: {
-          ...state.profiles[username],
-        },
-      });
+    if (!username) {
+      state.updateState({isLoggedIn: false, currentUser: null});
     }
     throw error;
   }
 }
 
 async function followUser(username) {
-  try {
-    const data = await apiRequest("/follow", {
-      method: "POST",
-      body: JSON.stringify({username}),
-    });
+  const data = await _apiRequest("/follow", {
+    method: "POST",
+    body: JSON.stringify({follow_username: username}),
+  });
 
-    // If successful, refresh the profile to update follow status
-    if (data.success) {
-      try {
-        await getProfile(username);
-      } catch (refreshError) {
-        console.error(
-          "Failed to refresh profile after following",
-          refreshError
-        );
-        // Continue since the follow was successful
-      }
-    } else {
-      throw new Error(data.message || "Failed to follow user");
-    }
-
-    return data;
-  } catch (error) {
-    throw error;
+  if (data.success) {
+    await getProfile(username);
   }
+
+  return data;
 }
 
-// here are the functions you need to export
-export const apiService = {
+async function unfollowUser(username) {
+  const data = await _apiRequest(`/unfollow/${username}`, {
+    method: "POST",
+  });
+
+  if (data.success) {
+    await getProfile(username);
+  }
+
+  return data;
+}
+
+const apiService = {
   // Auth methods
   login,
   signup,
@@ -290,8 +248,12 @@ export const apiService = {
   // Bloom methods
   getBlooms,
   postBloom,
+  getBloomsByHashtag,
 
   // User methods
   getProfile,
   followUser,
+  unfollowUser,
 };
+
+export {apiService};

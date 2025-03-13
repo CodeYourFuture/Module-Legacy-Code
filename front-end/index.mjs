@@ -1,6 +1,10 @@
 import {state} from "./lib/state.mjs";
 import {handleRouteChange} from "./lib/router.mjs";
 import {apiService} from "./lib/api.mjs";
+import {
+  handleErrorDialog,
+  cleanupErrorDialog,
+} from "./components/error/error.mjs";
 
 // get all the dynamic areas of the initial DOM
 const getLogoutContainer = () => document.getElementById("logout-container");
@@ -11,25 +15,48 @@ const getBloomFormContainer = () =>
 const getProfileContainer = () => document.getElementById("profile-container");
 const getTimelineContainer = () =>
   document.getElementById("timeline-container");
+const getErrorDialog = () => document.getElementById("error-dialog");
 
 /**
- * Initialize the application
- * - Attempt to restore session if token exists
+ * Init the application
+ * - Check for token and restore session if exists
+ * - Handle the current route based on URL
  * - Set up state change listeners
- * - Initialize router
  */
-function init() {
-  // If we're still logged in, just restore that session
-  if (localStorage.getItem("token")) {
-    apiService.getProfile().finally(handleRouteChange);
-  } else {
-    handleRouteChange();
+async function init() {
+  const path = window.location.pathname;
+  const isProfilePage = path.startsWith("/profile/");
+  const profileUsername = isProfilePage ? path.split("/")[2] : null;
+
+  // Attempt to restore session if token exists
+  if (state.token || localStorage.getItem("token")) {
+    if (localStorage.getItem("token") && !state.token) {
+      state.updateState({token: localStorage.getItem("token")});
+    }
+    await apiService.getProfile();
+
+    if (isProfilePage && profileUsername) {
+      await apiService.getProfile(profileUsername);
+    }
   }
-  // listen for any more state changes
-  document.addEventListener("state-change", handleRouteChange);
+
+  handleRouteChange();
+
+  document.addEventListener("state-change", () => {
+    handleRouteChange();
+  });
 }
 
-window.onload = init;
+// Expose state and cleanup functions for testing
+if (window) {
+  window.state = state;
+  window.cleanupErrorDialog = cleanupErrorDialog;
+}
+
+// Let any unhandled errors bubble up to this central handler
+window.onload = () => {
+  init().catch(handleErrorDialog);
+};
 
 export {
   getLogoutContainer,
@@ -38,6 +65,7 @@ export {
   getBloomFormContainer,
   getProfileContainer,
   getTimelineContainer,
+  getErrorDialog,
   state,
   apiService,
 };

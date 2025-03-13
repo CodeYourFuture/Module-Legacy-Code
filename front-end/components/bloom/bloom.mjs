@@ -3,6 +3,12 @@
  * @param {string} template - The ID of the template to clone
  * @param {Object} bloom - The bloom data
  * @returns {DocumentFragment} - The bloom fragment of UI, for items in the Timeline
+ * btw a bloom object is composed thus
+ * {"id": Number,
+ * "sender": username,
+ * "content": "string from textarea",
+ * "sent_timestamp": "datetime as ISO 8601 formatted string"}
+
  */
 const createBloom = (template, bloom) => {
   if (!bloom) return;
@@ -13,12 +19,18 @@ const createBloom = (template, bloom) => {
   const bloomTime = bloomFrag.querySelector("[data-time]");
   const bloomContent = bloomFrag.querySelector("[data-content]");
 
+  const parsedContent = new DOMParser();
+
   // Populate with data
   bloomArticle.setAttribute("data-bloom-id", bloom.id);
-  bloomUsername.setAttribute("href", `/profile/${username}`);
-  bloomUsername.textContent = bloom.username;
-  bloomTime.textContent = _formatTimestamp(bloom.timestamp);
-  bloomContent.textContent = bloom.content || "";
+  bloomUsername.setAttribute("href", `/profile/${bloom.sender}`);
+  bloomUsername.textContent = bloom.sender;
+  bloomTime.textContent = _formatTimestamp(bloom.sent_timestamp);
+  // TODO when the back end gives us HTML, we can parse it
+  // bloomContent.textContent =
+  //   parsedContent.parseFromString(bloom.content, "text/html") ||
+  //   "Hmmm, this bloom is empty";
+  bloomContent.textContent = bloom.content;
 
   return bloomFrag;
 };

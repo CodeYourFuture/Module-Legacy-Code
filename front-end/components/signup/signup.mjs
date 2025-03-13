@@ -1,4 +1,4 @@
-import {state, apiService} from "../../index.mjs";
+import {apiService} from "../../index.mjs";
 
 /**
  * Create a signup component
@@ -7,6 +7,7 @@ import {state, apiService} from "../../index.mjs";
  * @returns {DocumentFragment} - The signup fragment
  */
 function createSignup(template, data) {
+  if (!data) return;
   const signupElement = document
     .getElementById(template)
     .content.cloneNode(true);
@@ -15,28 +16,25 @@ function createSignup(template, data) {
 
 /**
  * Handle signup form submission
+ * Errors are caught by the handler in apiService
  */
 async function handleSignup(event) {
   event.preventDefault();
   const form = event.target;
   const submitButton = form.querySelector("[data-submit]");
   const originalText = submitButton.textContent;
-  const errorContainer = form.querySelector("[data-error]");
-
-  const formData = new FormData(form);
-  const username = formData.get("username");
-  const password = formData.get("password");
 
   try {
-    // make form inert while we call the back end...
     form.inert = true;
     submitButton.textContent = "Signing up...";
+
+    const formData = new FormData(form);
+    const username = formData.get("username");
+    const password = formData.get("password");
+
     await apiService.signup(username, password);
-  } catch {
-    // Show error to user
-    errorContainer.textContent =
-      error.message || "Signup failed. Please try again.";
   } finally {
+    // Always reset UI state regardless of success/failure
     submitButton.textContent = originalText;
     form.inert = false;
   }

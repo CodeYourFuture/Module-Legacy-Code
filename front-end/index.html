@@ -4,28 +4,39 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Purple Forest</title>
-    <link href="./index.css" rel="stylesheet" />
+    <link href="/front-end/index.css" rel="stylesheet" />
   </head>
   <body id="app">
     <header>
-      <h1>
-        <a href="/">
-          <img src="./logo.svg" alt="Purple Forest " width="50" height="60" />
-          PurpleForest</a
-        >
-      </h1>
+      <a href="/"
+        ><h1>
+          <img
+            src="/front-end/logo.svg"
+            alt="Purple Forest "
+            width="50"
+            height="60"
+          />
+          PurpleForest
+        </h1></a
+      >
       <div id="logout-container" class="logout__component"></div>
       <div id="login-container" class="login__component"></div>
     </header>
+
     <main tabindex="0">
       <div id="signup-container" class="signup__component"></div>
       <div id="profile-container" class="profile__component"></div>
       <div id="bloom-form-container" class="bloom-form__component"></div>
-      <div id="timeline-container" class="timeline__component"></div>
+      <div id="timeline-container" class="timeline__component grid"></div>
     </main>
     <footer>
       <h3>This Legacy Code project is coursework from Code Your Future</h3>
     </footer>
+    <!-- Global Error Dialog -->
+    <dialog id="error-dialog" class="error-dialog" aria-live="assertive">
+      <div class="error-dialog__content"></div>
+      <button type="button" class="error-dialog__close">Dismiss</button>
+    </dialog>
     <!---TEMPLATES FOLLOW, THESE ARE INERT-->
     <template id="logout-template">
       <button type="button" data-action="logout" data-logout-button>
@@ -35,7 +46,7 @@
     <!-- Login Component Template -->
     <template id="login-template">
       <section aria-label="Log in or sign up" class="login">
-        <form data-login-form class="login__form">
+        <form data-form="login" class="login__form" method="post">
           <div class="login__field">
             <label class="login__label is-invisible" for="username"
               >Username</label
@@ -69,17 +80,10 @@
           <button type="submit" data-submit class="login__submit">
             Log in
           </button>
-
-          <div
-            data-error
-            class="login__error system-message"
-            role="alert"
-            aria-live="assertive"
-          ></div>
         </form>
         <p class="login__footer system-message" data-signup>
           Don't have an account?
-          <a href="#" data-action="signup" class="login__signup-link"
+          <a href="/signup" data-action="signup" class="login__signup-link"
             >Sign up</a
           >
         </p>
@@ -90,7 +94,7 @@
       <section aria-labelledby="signup-heading" class="signup">
         <h1 id="signup-heading" class="signup__title">Create your account</h1>
 
-        <form data-form class="signup__form">
+        <form data-form="signup" class="signup__form" method="post">
           <div class="signup__field">
             <label class="signup__label" for="signup-username">Username</label>
             <input
@@ -132,41 +136,54 @@
           <button type="submit" data-submit class="signup__submit">
             Sign up
           </button>
-
-          <div
-            data-error
-            class="signup__error system-message"
-            role="alert"
-            aria-live="assertive"
-          ></div>
         </form>
 
         <p class="signup__footer system-message">
           Already have an account?
-          <a href="#" data-action="login" class="signup__login-link">Log in</a>
+          <a href="/login" data-action="login" class="signup__login-link"
+            >Log in</a
+          >
         </p>
       </section>
     </template>
     <!-- Profile Component Template -->
     <template id="profile-template">
       <section aria-labelledby="profile-username" class="profile">
-        <div class="profile__header">
-          <h1 id="profile-username" data-username class="profile__username">
-            Username
-          </h1>
-          <dl class="profile__stats" data-stats>
-            <div>
-              <dt>Blooms</dt>
-              <dd class="profile__count" data-bloom-count>0</dd>
-            </div>
-            <div>
-              <dt>Followers</dt>
-              <dd class="profile__count" data-follower-count>0</dd>
-            </div>
-          </dl>
-        </div>
+        <header class="profile__header flex">
+          <div
+            class="profile__avatar"
+            data-avatar
+            role="img"
+            aria-label="User avatar"
+          >
+            🟣
+          </div>
+          <a
+            href=""
+            data-username
+            class="profile__username"
+            aria-label="View user profile"
+            ><h2>Username</h2></a
+          >
+        </header>
 
-        <div data-error class="profile__error system-message"></div>
+        <dl class="profile__stats">
+          <div class="profile__stat flex">
+            <dt>Following</dt>
+            <dd data-following-count>0</dd>
+          </div>
+          <div class="profile__stat flex">
+            <dt>Followers</dt>
+            <dd data-follower-count>0</dd>
+          </div>
+          <div class="profile__stat flex">
+            <dt>Blooms</dt>
+            <dd data-bloom-count>0</dd>
+          </div>
+        </dl>
+        <div class="profile__actions">
+          <button type="button" data-action="follow">Follow</button>
+        </div>
       </section>
     </template>
     <!-- Bloom Form Component Template -->
@@ -174,7 +191,7 @@
       <section aria-labelledby="bloom-form-title" class="bloom-form">
         <h2 id="bloom-form-title" class="bloom-form__title">Share a Bloom</h2>
 
-        <form data-form class="bloom-form__form">
+        <form data-form="bloom" class="bloom-form__form" method="post">
           <div class="bloom-form__field">
             <label class="bloom-form__label is-invisible" for="bloom-content"
               >What's happening?</label
@@ -185,6 +202,7 @@
               name="content"
               placeholder="What's happening?"
               maxlength="280"
+              spellcheck="true"
               required
             ></textarea>
             <div class="bloom-form__counter" data-counter>280</div>
@@ -193,52 +211,33 @@
           <button type="submit" data-submit class="bloom-form__submit">
             Bloom
           </button>
-
-          <div
-            data-error
-            class="bloom-form__error system-message"
-            role="alert"
-            aria-live="assertive"
-          ></div>
         </form>
       </section>
     </template>
-    <!-- Timeline Component Template -->
-    <template id="timeline-template">
-      <section aria-labelledby="timeline-title" class="timeline">
-        <header class="timeline__header">
-          <h2 id="timeline-title" data-title class="timeline__title">
-            Latest Blooms
-          </h2>
-        </header>
-
-        <div data-content class="timeline__content"></div>
-
-        <div data-error class="timeline__error system-message"></div>
-
-        <div data-empty class="timeline__empty">
-          <p>No blooms to display.</p>
-        </div>
-
-        <p data-login-message class="timeline__login-message">
-          Log in to see the forest grow.
-        </p>
-      </section>
-    </template>
+    <!-- Timeline  -->
     <!-- Bloom Template -->
     <template id="bloom-template">
-      <article class="bloom" data-bloom data-bloom-id="">
-        <div class="bloom__header">
+      <article class="bloom box" data-bloom data-bloom-id="">
+        <div class="bloom__header flex">
           <a href="#" class="bloom__username" data-username>Username</a>
-          <span class="bloom__time" data-time>2m</span>
+          <time class="bloom__time" data-time>2m</time>
         </div>
         <div class="bloom__content" data-content></div>
       </article>
     </template>
+
+    <!-- Error Dialog Template -->
+    <template id="error-template">
+      <dialog class="error-dialog__content" data-message></dialog>
+      <button data-action="close-error" class="error-dialog__close">
+        Dismiss
+      </button>
+    </template>
+
     <noscript>
       <p>Please enable JavaScript in your browser.</p>
     </noscript>
 
-    <script type="module" src="./index.mjs"></script>
+    <script type="module" src="/front-end/index.mjs"></script>
   </body>
 </html>

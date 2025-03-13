@@ -1,4 +1,5 @@
 import {
+  getLogoutContainer,
   getLoginContainer,
   getSignupContainer,
   getProfileContainer,
@@ -15,13 +16,14 @@ import {
  * @param {Function} creator - The function that creates the component
  */
 const render = (data, container, template, creator) => {
-  const fragment = data.map((data) => creator(template, data));
-  container.replaceChildren(...fragment);
+  const fragment = data.map((item) => creator(template, item));
+  if (fragment.some(Boolean)) container.replaceChildren(...fragment);
 };
 
 // to clear an entire page, not just the contents of one container
 const destroy = () => {
   [
+    getLogoutContainer(),
     getLoginContainer(),
     getSignupContainer(),
     getProfileContainer(),

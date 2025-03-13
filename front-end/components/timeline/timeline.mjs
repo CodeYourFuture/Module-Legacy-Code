@@ -14,16 +14,20 @@ function createTimeline(template, blooms) {
 
   // All the bits of the template we currently want to interact with
   const content = timelineElement.querySelector("[data-content]");
-  const errorContainer = timelineElement.querySelector("[data-error]");
   const emptyMessage = timelineElement.querySelector("[data-empty]");
 
   // Show/hide appropriate messages
-  const isEmpty = data.length === 0;
+  const isEmpty = blooms.length === 0;
   emptyMessage.hidden = !isEmpty;
 
-  // now let's make a piece of UI for each bloom
-  const bloomsUI = blooms.map((bloom) => createBloom("bloom-template", bloom));
-  content.appendChild(bloomsUI);
+  const bloomsFragment = document.createDocumentFragment();
+  // Accumulate blooms
+  blooms.forEach((bloom) => {
+    bloomsFragment.appendChild(createBloom("bloom-template", bloom));
+  });
+
+  // Add all blooms to the content container at once
+  content.appendChild(bloomsFragment);
 
   return timelineElement;
 }

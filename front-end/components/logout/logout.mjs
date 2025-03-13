@@ -1,4 +1,4 @@
-import {state, apiService} from "../../index.mjs";
+import {apiService} from "../../index.mjs";
 
 /**
  * Create a logout component
@@ -14,15 +14,11 @@ function createLogout(template, isLoggedIn) {
 }
 
 /**
- * Literally just logout
+ * Handle logout - state changes will trigger appropriate UI updates
  */
 async function handleLogout(event) {
-  event.preventDefault();
-  try {
-    apiService.logout();
-  } catch (error) {
-    console.error("Logout failed", error);
-  }
+  // Call API - state changes will trigger appropriate UI updates
+  apiService.logout();
 }
 
 export {createLogout, handleLogout};

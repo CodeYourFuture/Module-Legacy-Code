@@ -206,17 +206,28 @@ def get_bloom(id_str):
 def home_timeline():
     current_user = get_current_user().username
 
+    # Get blooms from followed users
     followed_users = follows.get(current_user)
     nested_user_blooms = [
         blooms.get_blooms_for_user(followed_user, limit=50)
         for followed_user in followed_users
     ]
-    user_blooms = [bloom for blooms in nested_user_blooms for bloom in blooms]
-    sorted_user_blooms = list(
-        sorted(user_blooms, key=lambda bloom: bloom.sent_timestamp, reverse=True)
+    
+    # Flatten list of blooms from followed users
+    followed_blooms = [bloom for blooms in nested_user_blooms for bloom in blooms]
+    
+    # Get the current user's own blooms
+    own_blooms = blooms.get_blooms_for_user(current_user, limit=50)
+    
+    # Combine own blooms with followed blooms
+    all_blooms = followed_blooms + own_blooms
+    
+    # Sort by timestamp (newest first)
+    sorted_blooms = list(
+        sorted(all_blooms, key=lambda bloom: bloom.sent_timestamp, reverse=True)
     )
 
-    return jsonify(sorted_user_blooms)
+    return jsonify(sorted_blooms)
 
 
 @app.route("/blooms/<profile_username>")

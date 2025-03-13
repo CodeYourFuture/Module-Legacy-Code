@@ -1,25 +1,37 @@
-import {profileView, signupView, loginView, homeView} from "./views.mjs";
+import {profileView} from "../views/profile.mjs";
+import {signupView} from "../views/signup.mjs";
+import {loginView} from "../views/login.mjs";
+import {homeView} from "../views/home.mjs";
+// import {hashtagView} from "../views/hashtag.mjs";
 
 /**
  * Handle route changes based on the current URL
  */
 function handleRouteChange() {
-  const path = window.location.pathname;
+  // We're going to use hash for routing
+  const hash = window.location.hash.substring(1) || "/";
 
   // Profile path with username
-  if (path.startsWith("/profile/")) {
-    const username = path.split("/")[2];
+  if (hash.startsWith("/profile/")) {
+    const username = hash.split("/")[2];
     profileView(username);
     return;
   }
 
+  // Hashtag path
+  // if (hash.startsWith("/hashtag/")) {
+  //   const hashtag = hash.split("/")[2];
+  //   hashtagView(hashtag);
+  //   return;
+  // }
+
   // Static routes
-  if (path === "/signup") {
+  if (hash === "/signup") {
     signupView();
     return;
   }
 
-  if (path === "/login") {
+  if (hash === "/login") {
     loginView();
     return;
   }
@@ -33,11 +45,22 @@ function handleRouteChange() {
  * @param {string} path - The path to navigate to
  */
 function navigateTo(path) {
-  history.pushState(null, "", path);
-  handleRouteChange();
+  window.location.hash = path;
 }
 
-// Listen for browser navigation events
-window.addEventListener("popstate", handleRouteChange);
+window.addEventListener("hashchange", handleRouteChange);
+
+// Intercept clicks on internal links
+document.addEventListener("click", (event) => {
+  const link = event.target.closest("a");
+  if (!link) return;
+
+  const href = link.getAttribute("href");
+  // Only handle internal links (starting with / and not # anchors)
+  if (href && href.startsWith("/") && !href.startsWith("#")) {
+    event.preventDefault();
+    navigateTo(href);
+  }
+});
 
 export {handleRouteChange, navigateTo};

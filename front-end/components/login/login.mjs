@@ -1,4 +1,4 @@
-import {state, apiService} from "../../index.mjs";
+import {apiService} from "../../index.mjs";
 
 /**
  * Create a login component
@@ -17,31 +17,25 @@ function createLogin(template, isLoggedIn) {
 
 /**
  * Handle login form submission
+ * Errors are automatically caught by the central error handler
  */
 async function handleLogin(event) {
   event.preventDefault();
   const form = event.target;
   const submitButton = form.querySelector("[data-submit]");
   const originalText = submitButton.textContent;
-  const errorContainer = form.querySelector("[data-error]");
-
-  const formData = new FormData(form);
-  const username = formData.get("username");
-  const password = formData.get("password");
 
   try {
-    // Make form inert while we call the back end
     form.inert = true;
     submitButton.textContent = "Logging in...";
 
-    // Call the API - state changes will trigger appropriate UI updates
+    const formData = new FormData(form);
+    const username = formData.get("username");
+    const password = formData.get("password");
+
     await apiService.login(username, password);
-  } catch (error) {
-    // Show error to user
-    errorContainer.textContent =
-      error.message || "Login failed. Please try again.";
   } finally {
-    // Restore form
+    // Always reset UI state regardless of success/failure
     submitButton.textContent = originalText;
     form.inert = false;
   }
