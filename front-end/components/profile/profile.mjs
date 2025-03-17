@@ -12,9 +12,11 @@ function createProfile(template, profileData) {
     .getElementById(template)
     .content.cloneNode(true);
 
-  // These values should come from state and be updated from api
   const usernameEl = profileElement.querySelector("[data-username]");
   const bloomCountEl = profileElement.querySelector("[data-bloom-count]");
+  const followingCountEl = profileElement.querySelector(
+    "[data-following-count]"
+  );
   const followerCountEl = profileElement.querySelector("[data-follower-count]");
   const followButtonEl = profileElement.querySelector("[data-action='follow']");
   // Populate with data

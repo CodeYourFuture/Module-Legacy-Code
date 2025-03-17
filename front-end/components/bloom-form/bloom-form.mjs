@@ -12,15 +12,6 @@ function createBloomForm(template, isLoggedIn) {
     .getElementById(template)
     .content.cloneNode(true);
 
-  // Initialize the counter with the maximum length value
-  const textarea = bloomFormElement.querySelector("textarea");
-  const counter = bloomFormElement.querySelector("[data-counter]");
-
-  if (textarea && counter && textarea.hasAttribute("maxlength")) {
-    const maxLength = parseInt(textarea.getAttribute("maxlength"), 10);
-    counter.textContent = maxLength;
-  }
-
   return bloomFormElement;
 }
 
@@ -41,8 +32,6 @@ async function handleBloomSubmit(event) {
     form.inert = true;
     submitButton.textContent = "Posting...";
     await apiService.postBloom(content);
-
-    // Clear the textarea
     textarea.value = "";
   } finally {
     // Restore form
@@ -57,15 +46,13 @@ async function handleBloomSubmit(event) {
  */
 function handleTyping(event) {
   const textarea = event.target;
-  const form = textarea.closest("[data-form]");
-  const counter = form.querySelector("[data-counter]");
-
-  if (counter && textarea.hasAttribute("maxlength")) {
-    const maxLength = parseInt(textarea.getAttribute("maxlength"), 10);
-    const currentLength = textarea.value.length;
-    const remainingChars = maxLength - currentLength;
-    counter.textContent = `${remainingChars} / ${maxLength}`;
-  }
+  const counter = textarea
+    .closest("[data-form]")
+    ?.querySelector("[data-counter]");
+  const maxLength = parseInt(textarea.getAttribute("maxlength"), 10);
+  const currentLength = textarea.value.length;
+  const remainingChars = maxLength - currentLength;
+  counter.textContent = `${remainingChars} / ${maxLength}`;
 }
 
 export {createBloomForm, handleBloomSubmit, handleTyping};

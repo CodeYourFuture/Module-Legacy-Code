@@ -192,3 +192,7 @@ This approach ensures the UI always reflects the current application state.
 1. **State-Driven UI Updates**: UI updates are driven by state changes
 1. **Event-Driven Updates**: UI updates are driven by state changes
 1. **Centralised Error Management**: All errors are handled through a central system
+1. **BEM** (Block Element Modifier) CSS Naming Convention: Used for consistent and maintainable CSS
+1. **ES6 Modules**: Used for modular code organization and encapsulation
+1. **Client-Side Routing**: Enables SPA behavior with hash-based routing
+1. **Native**: No external libraries or frameworks are used, HTML5 and ES6 features are used directly

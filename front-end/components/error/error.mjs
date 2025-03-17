@@ -96,7 +96,7 @@ function handleErrorDialog(error) {
 
 /**
  * Clean up the error dialog - can be called directly to force cleanup
- * This is useful for test cleanup or when switching between views
+ * This is useful for test cleanup or when switching between views TODO, simplify this all a bit
  */
 function cleanupErrorDialog() {
   const errorDialog = document.getElementById("error-dialog");

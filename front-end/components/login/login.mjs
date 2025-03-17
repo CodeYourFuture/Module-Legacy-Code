@@ -14,11 +14,7 @@ function createLogin(template, isLoggedIn) {
 
   return loginElement;
 }
-
-/**
- * Handle login form submission
- * Errors are automatically caught by the central error handler
- */
+// HANDLER
 async function handleLogin(event) {
   event.preventDefault();
   const form = event.target;

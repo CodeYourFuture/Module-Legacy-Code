@@ -13,11 +13,7 @@ function createLogout(template, isLoggedIn) {
   return logout;
 }
 
-/**
- * Handle logout - state changes will trigger appropriate UI updates
- */
 async function handleLogout(event) {
-  // Call API - state changes will trigger appropriate UI updates
   apiService.logout();
 }
 
