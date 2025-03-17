@@ -44,10 +44,17 @@ async function init() {
   });
 }
 
-// TODO Make any unhandled errors bubble up to this central handler
+// TODO Check any unhandled errors bubble up to this central handler
 window.onload = () => {
-  init().catch(handleErrorDialog);
+  init().catch((error) => {
+    handleErrorDialog(error);
+  });
 };
+// TODO rm this backstop
+window.addEventListener("unhandledrejection", (event) => {
+  console.error("Unhandled promise rejection:", event.reason);
+  handleErrorDialog(event.reason);
+});
 
 export {
   getLogoutContainer,

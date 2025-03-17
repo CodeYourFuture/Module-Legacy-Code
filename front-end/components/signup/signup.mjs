@@ -1,4 +1,5 @@
 import {apiService} from "../../index.mjs";
+import {navigateTo} from "../../lib/router.mjs";
 
 /**
  * Create a signup component
@@ -33,8 +34,10 @@ async function handleSignup(event) {
     const password = formData.get("password");
 
     // TODO check passwords match here
-
-    await apiService.signup(username, password);
+    const result = await apiService.signup(username, password);
+    if (result.success) {
+      navigateTo("/");
+    }
   } catch (error) {
     throw error;
   } finally {

@@ -52,9 +52,7 @@ function handleTyping(event) {
     .closest("[data-form]")
     ?.querySelector("[data-counter]");
   const maxLength = parseInt(textarea.getAttribute("maxlength"), 10);
-  const currentLength = textarea.value.length;
-  const remainingChars = maxLength - currentLength;
-  counter.textContent = `${remainingChars} / ${maxLength}`;
+  counter.textContent = `${textarea.value.length} / ${maxLength}`;
 }
 
 export {createBloomForm, handleBloomSubmit, handleTyping};

@@ -14,7 +14,11 @@ function createLogout(template, isLoggedIn) {
 }
 
 async function handleLogout(event) {
-  apiService.logout();
+  try {
+    apiService.logout();
+  } catch (error) {
+    throw error;
+  }
 }
 
 export {createLogout, handleLogout};

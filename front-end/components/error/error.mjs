@@ -25,7 +25,7 @@ function createErrorDialog(template, errorData) {
  */
 function handleErrorDialog(error) {
   console.error(error);
-  const errorDialog = document.getElementById("error-dialog");
+  const errorDialog = document.querySelector("[data-error]");
   if (!errorDialog) return;
   errorDialog.querySelector("[data-message]").textContent = "";
 

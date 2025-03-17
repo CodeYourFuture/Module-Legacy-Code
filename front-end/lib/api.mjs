@@ -42,12 +42,11 @@ async function _apiRequest(endpoint, options = {}) {
       // Handle auth errors
       if (error.status === 401 || error.status === 403) {
         if (!endpoint.includes("/login") && !endpoint.includes("/register")) {
-          localStorage.removeItem("token");
           state.destroyState();
         }
       }
 
-      // Handle all errors through central error handler
+      // Pass all errors forward to a dialog on the screen
       handleErrorDialog(error);
       throw error;
     }
@@ -57,12 +56,12 @@ async function _apiRequest(endpoint, options = {}) {
       ? await response.json()
       : {success: true};
   } catch (error) {
-    // Send all errors to central error handler if not already handled
     if (!error.status) {
+      // Only handle network errors here, response errors are handled above
       handleErrorDialog(error);
     }
     console.error(`API request failed: ${endpoint}`, error);
-    throw error;
+    throw error; // Re-throw so it can be caught by the calling function
   }
 }
 
@@ -95,10 +94,10 @@ async function login(username, password) {
       });
       await getBlooms();
     }
+
     return data;
   } catch (error) {
-    state.destroyState();
-    throw error;
+    return {success: false};
   }
 }
 
@@ -117,10 +116,10 @@ async function signup(username, password) {
       });
       await getProfile(username);
     }
+
     return data;
   } catch (error) {
-    state.destroyState();
-    throw error;
+    return {success: false};
   }
 }
 
@@ -144,12 +143,13 @@ async function getBlooms(username) {
 
     return blooms;
   } catch (error) {
+    // Error already handled by _apiRequest
     if (username) {
       _updateProfile(username, {blooms: []});
     } else {
       state.updateState({timelineBlooms: []});
     }
-    throw error;
+    return [];
   }
 }
 
@@ -168,25 +168,31 @@ async function getBloomsByHashtag(hashtag) {
     });
     return blooms;
   } catch (error) {
+    // Error already handled by _apiRequest
     state.updateState({
       hashtagBlooms: [],
       currentHashtag: null,
     });
-    throw error;
+    return [];
   }
 }
 
 async function postBloom(content) {
-  const data = await _apiRequest("/bloom", {
-    method: "POST",
-    body: JSON.stringify({content}),
-  });
+  try {
+    const data = await _apiRequest("/bloom", {
+      method: "POST",
+      body: JSON.stringify({content}),
+    });
 
-  if (data.success) {
-    await getBlooms();
+    if (data.success) {
+      await getBlooms();
+    }
+
+    return data;
+  } catch (error) {
+    // Error already handled by _apiRequest
+    return {success: false};
   }
-
-  return data;
 }
 
 // ======= USER methods
@@ -207,36 +213,47 @@ async function getProfile(username) {
 
     return profileData;
   } catch (error) {
+    // Error already handled by _apiRequest
     if (!username) {
       state.updateState({isLoggedIn: false, currentUser: null});
     }
-    throw error;
+    return {success: false};
   }
 }
 
 async function followUser(username) {
-  const data = await _apiRequest("/follow", {
-    method: "POST",
-    body: JSON.stringify({follow_username: username}),
-  });
+  try {
+    const data = await _apiRequest("/follow", {
+      method: "POST",
+      body: JSON.stringify({follow_username: username}),
+    });
 
-  if (data.success) {
-    await getProfile(username);
+    if (data.success) {
+      await getProfile(username);
+    }
+
+    return data;
+  } catch (error) {
+    // Error already handled by _apiRequest
+    return {success: false};
   }
-
-  return data;
 }
 
 async function unfollowUser(username) {
-  const data = await _apiRequest(`/unfollow/${username}`, {
-    method: "POST",
-  });
+  try {
+    const data = await _apiRequest(`/unfollow/${username}`, {
+      method: "POST",
+    });
 
-  if (data.success) {
-    await getProfile(username);
+    if (data.success) {
+      await getProfile(username);
+    }
+
+    return data;
+  } catch (error) {
+    // Error already handled by _apiRequest
+    return {success: false};
   }
-
-  return data;
 }
 
 const apiService = {
