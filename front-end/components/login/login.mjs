@@ -14,11 +14,7 @@ function createLogin(template, isLoggedIn) {
 
   return loginElement;
 }
-
-/**
- * Handle login form submission
- * Errors are automatically caught by the central error handler
- */
+// HANDLER
 async function handleLogin(event) {
   event.preventDefault();
   const form = event.target;
@@ -34,6 +30,8 @@ async function handleLogin(event) {
     const password = formData.get("password");
 
     await apiService.login(username, password);
+  } catch (error) {
+    throw error;
   } finally {
     // Always reset UI state regardless of success/failure
     submitButton.textContent = originalText;

@@ -12,16 +12,18 @@ function createProfile(template, profileData) {
     .getElementById(template)
     .content.cloneNode(true);
 
-  // These values should come from state and be updated from api
   const usernameEl = profileElement.querySelector("[data-username]");
   const bloomCountEl = profileElement.querySelector("[data-bloom-count]");
+  const followingCountEl = profileElement.querySelector(
+    "[data-following-count]"
+  );
   const followerCountEl = profileElement.querySelector("[data-follower-count]");
   const followButtonEl = profileElement.querySelector("[data-action='follow']");
   // Populate with data
   usernameEl.querySelector("h2").textContent = profileData.username || "";
   usernameEl.setAttribute("href", `/profile/${profileData.username}`);
   bloomCountEl.textContent = profileData.total_blooms || 0;
-  followerCountEl.textContent = profileData.followers.length || 0;
+  followerCountEl.textContent = profileData.follows.length || 0;
   followButtonEl.setAttribute("data-username", profileData.username || "");
   followButtonEl.hidden = profileData.is_self ?? profileData.is_following;
 

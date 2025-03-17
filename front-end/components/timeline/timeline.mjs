@@ -29,6 +29,8 @@ function createTimeline(template, blooms) {
   // Add all blooms to the content container at once
   content.appendChild(bloomsFragment);
 
+  // TODO: update heading maybe
+
   return timelineElement;
 }
 

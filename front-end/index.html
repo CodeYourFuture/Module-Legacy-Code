@@ -205,7 +205,7 @@
               spellcheck="true"
               required
             ></textarea>
-            <div class="bloom-form__counter" data-counter>280</div>
+            <div class="bloom-form__counter" data-counter>0/280</div>
           </div>
 
           <button type="submit" data-submit class="bloom-form__submit">
@@ -228,10 +228,12 @@
 
     <!-- Error Dialog Template -->
     <template id="error-template">
-      <dialog class="error-dialog__content" data-message></dialog>
-      <button data-action="close-error" class="error-dialog__close">
-        Dismiss
-      </button>
+      <dialog class="error-dialog" data-error>
+        <div class="error-dialog__content" data-content></div>
+        <button data-action="close-error" class="error-dialog__close">
+          Dismiss
+        </button>
+      </dialog>
     </template>
 
     <noscript>

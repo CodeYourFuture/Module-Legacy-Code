@@ -240,52 +240,18 @@ button:focus {
   width: 1px;
 }
 .is-error,
-:invalid {
-  color: var(--error);
-}
-
-/* Error messages */
+:invalid,
 [data-error] {
   color: var(--error);
-  font-size: 0.9em;
-  margin-top: 0.5em;
-  min-height: 1.5em;
 }
 
-/* Global Error Dialog */
 .error-dialog {
-  border: none;
-  background-color: var(--error);
-  color: white;
-  padding: var(--space);
-  text-align: center;
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   margin: 0;
   width: 100%;
-  max-width: 100%;
-  border-radius: 0;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
-}
-
-.error-dialog::backdrop {
-  background-color: rgba(0, 0, 0, 0.3);
-}
-
-.error-dialog__content {
-  margin-bottom: var(--space);
-}
-
-.error-dialog__close {
-  background-color: white;
-  color: var(--error);
-  border: none;
-  padding: calc(var(--space) / 2) var(--space);
-  border-radius: var(--corner);
-  cursor: pointer;
-  font-weight: bold;
 }
 
 @keyframes fade {

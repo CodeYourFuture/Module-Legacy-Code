@@ -1,10 +1,7 @@
 import {state} from "./lib/state.mjs";
 import {handleRouteChange} from "./lib/router.mjs";
 import {apiService} from "./lib/api.mjs";
-import {
-  handleErrorDialog,
-  cleanupErrorDialog,
-} from "./components/error/error.mjs";
+import {handleErrorDialog} from "./components/error/error.mjs";
 
 // get all the dynamic areas of the initial DOM
 const getLogoutContainer = () => document.getElementById("logout-container");
@@ -47,13 +44,7 @@ async function init() {
   });
 }
 
-// Expose state and cleanup functions for testing
-if (window) {
-  window.state = state;
-  window.cleanupErrorDialog = cleanupErrorDialog;
-}
-
-// Let any unhandled errors bubble up to this central handler
+// TODO Make any unhandled errors bubble up to this central handler
 window.onload = () => {
   init().catch(handleErrorDialog);
 };

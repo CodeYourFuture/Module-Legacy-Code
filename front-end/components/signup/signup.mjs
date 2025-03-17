@@ -32,7 +32,11 @@ async function handleSignup(event) {
     const username = formData.get("username");
     const password = formData.get("password");
 
+    // TODO check passwords match here
+
     await apiService.signup(username, password);
+  } catch (error) {
+    throw error;
   } finally {
     // Always reset UI state regardless of success/failure
     submitButton.textContent = originalText;
