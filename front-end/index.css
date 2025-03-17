@@ -157,6 +157,10 @@ button:focus {
   outline: 3px dotted var(--accent);
 }
 
+dialog {
+  min-width: var(--container);
+}
+
 .system-message {
   font-family: monospace;
   color: var(--brand);
@@ -243,15 +247,6 @@ button:focus {
 :invalid,
 [data-error] {
   color: var(--error);
-}
-
-.error-dialog {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  margin: 0;
-  width: 100%;
 }
 
 @keyframes fade {

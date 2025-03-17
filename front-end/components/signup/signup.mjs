@@ -44,6 +44,7 @@ async function handleSignup(event) {
     // Always reset UI state regardless of success/failure
     submitButton.textContent = originalText;
     form.inert = false;
+    form.reset();
   }
 }
 

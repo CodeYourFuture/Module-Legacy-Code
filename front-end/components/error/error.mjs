@@ -12,7 +12,7 @@ function createErrorDialog(template, errorData) {
   const errorFragment = document
     .getElementById(template)
     .content.cloneNode(true);
-  const errorMessage = errorFragment.querySelector("[data-message]");
+  const errorMessage = errorFragment.querySelector("[data-content]");
 
   errorMessage.textContent = errorData.message;
 
@@ -25,19 +25,27 @@ function createErrorDialog(template, errorData) {
  */
 function handleErrorDialog(error) {
   console.error(error);
-  const errorDialog = document.querySelector("[data-error]");
-  if (!errorDialog) return;
-  errorDialog.querySelector("[data-message]").textContent = "";
+  const errorContainer = document.getElementById("error-container");
+  if (!errorContainer) return;
 
-  // render the error dialog, we're doing this here instead of in views because it's triggered on any view
-  render([error.message], errorDialog, "error-template", createErrorDialog);
+  // Render the error message using the same render function as other components
+  render([error], errorContainer, "error-template", createErrorDialog);
 
-  const _handleErrorClose = (event) => event.target.parentElement.close();
-  errorDialog
-    .querySelector("[data-close-error]")
-    ?.addEventListener("click", _handleErrorClose);
+  // Add close handler if not already added
+  const closeButton = errorContainer.querySelector(
+    "[data-action='close-error']"
+  );
+  if (closeButton && !closeButton.hasListener) {
+    closeButton.hasListener = true;
+    closeButton.addEventListener("click", () => {
+      const dialog = errorContainer.querySelector("dialog");
+      if (dialog) dialog.close();
+    });
+  }
 
-  if (!errorDialog.open) errorDialog.showModal();
+  // Show the dialog
+  const dialog = errorContainer.querySelector("dialog");
+  if (dialog && !dialog.open) dialog.showModal();
 }
 
 export {createErrorDialog, handleErrorDialog};

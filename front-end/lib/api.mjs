@@ -186,6 +186,7 @@ async function postBloom(content) {
 
     if (data.success) {
       await getBlooms();
+      await getProfile(state.currentUser);
     }
 
     return data;

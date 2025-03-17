@@ -32,11 +32,7 @@
     <footer>
       <h3>This Legacy Code project is coursework from Code Your Future</h3>
     </footer>
-    <!-- Global Error Dialog -->
-    <dialog id="error-dialog" class="error-dialog" aria-live="assertive">
-      <div class="error-dialog__content"></div>
-      <button type="button" class="error-dialog__close">Dismiss</button>
-    </dialog>
+    <div id="error-container" class="error__component box"></div>
     <!---TEMPLATES FOLLOW, THESE ARE INERT-->
     <template id="logout-template">
       <button type="button" data-action="logout" data-logout-button>
@@ -229,7 +225,7 @@
     <!-- Error Dialog Template -->
     <template id="error-template">
       <dialog class="error-dialog" data-error>
-        <div class="error-dialog__content" data-content></div>
+        <div class="error-dialog__content system-message" data-content></div>
         <button data-action="close-error" class="error-dialog__close">
           Dismiss
         </button>
