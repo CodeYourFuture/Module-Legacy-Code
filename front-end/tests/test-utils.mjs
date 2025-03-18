@@ -16,12 +16,23 @@ export async function loginAsSample(page) {
 }
 
 /**
+ * Log in with sample credentials
+ * @param {import('@playwright/test').Page} page
+ */
+export async function loginAsSample2(page) {
+  await page.goto("/front-end/");
+  await page.fill('[data-form="login"] input[name="username"]', "sample2");
+  await page.fill('[data-form="login"] input[name="password"]', "sosecret");
+  await page.click('[data-form="login"] [data-submit]');
+}
+
+/**
  * Sign up with generated credentials
  * @param {import('@playwright/test').Page} page
  * @param {string} username - Username to sign up with
  */
 export async function signUp(page, username) {
-  await page.goto("/front-end/signup");
+  await page.goto("/front-end/#/signup");
   await page.fill('[data-form="signup"] input[name="username"]', username);
   await page.fill('[data-form="signup"] input[name="password"]', "sosecret");
   await page.fill(

@@ -39,7 +39,7 @@ test.describe("Home View", () => {
     await postBloom(page, "My first bloom!");
 
     // Then I see the bloom in the timeline
-    await expect(page.locator("[data-bloom]")).toBeVisible();
+    await expect(page.locator("[data-bloom]").first()).toBeVisible();
   });
 
   test("hides components after logout", async ({page}) => {
