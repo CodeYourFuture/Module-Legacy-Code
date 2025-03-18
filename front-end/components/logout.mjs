@@ -1,4 +1,4 @@
-import {apiService} from "../../index.mjs";
+import {apiService} from "../index.mjs";
 
 /**
  * Create a logout component

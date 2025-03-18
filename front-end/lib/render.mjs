@@ -5,6 +5,7 @@ import {
   getProfileContainer,
   getTimelineContainer,
   getBloomFormContainer,
+  getHeadingContainer,
 } from "../index.mjs";
 
 /**
@@ -29,6 +30,7 @@ const destroy = () => {
     getProfileContainer(),
     getTimelineContainer(),
     getBloomFormContainer(),
+    getHeadingContainer(),
   ].forEach((container) => {
     if (container) container.replaceChildren();
   });

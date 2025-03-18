@@ -1,6 +1,5 @@
 import {render, destroy} from "../lib/render.mjs";
 import {
-  apiService,
   state,
   getLogoutContainer,
   getLoginContainer,
@@ -8,15 +7,15 @@ import {
   getTimelineContainer,
   getBloomFormContainer,
 } from "../index.mjs";
-import {createLogin, handleLogin} from "../components/login/login.mjs";
-import {createLogout, handleLogout} from "../components/logout/logout.mjs";
-import {createProfile} from "../components/profile/profile.mjs";
+import {createLogin, handleLogin} from "../components/login.mjs";
+import {createLogout, handleLogout} from "../components/logout.mjs";
+import {createProfile} from "../components/profile.mjs";
 import {
   createBloomForm,
   handleBloomSubmit,
   handleTyping,
-} from "../components/bloom-form/bloom-form.mjs";
-import {createBloom} from "../components/bloom/bloom.mjs";
+} from "../components/bloom-form.mjs";
+import {createBloom} from "../components/bloom.mjs";
 
 // Home view - logged in or not
 function homeView() {

@@ -1,6 +1,6 @@
 import {render, destroy} from "../lib/render.mjs";
 import {state, getSignupContainer} from "../index.mjs";
-import {createSignup, handleSignup} from "../components/signup/signup.mjs";
+import {createSignup, handleSignup} from "../components/signup.mjs";
 
 // Signup view, only signup when not logged in
 function signupView() {

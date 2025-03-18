@@ -7,10 +7,10 @@ import {
   getProfileContainer,
   getTimelineContainer,
 } from "../index.mjs";
-import {createLogin, handleLogin} from "../components/login/login.mjs";
-import {createLogout, handleLogout} from "../components/logout/logout.mjs";
-import {createProfile, handleFollow} from "../components/profile/profile.mjs";
-import {createBloom} from "../components/bloom/bloom.mjs";
+import {createLogin, handleLogin} from "../components/login.mjs";
+import {createLogout, handleLogout} from "../components/logout.mjs";
+import {createProfile, handleFollow} from "../components/profile.mjs";
+import {createBloom} from "../components/bloom.mjs";
 
 // Profile view - just this person's tweets and their profile
 function profileView(username) {

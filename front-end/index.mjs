@@ -1,7 +1,7 @@
 import {state} from "./lib/state.mjs";
 import {handleRouteChange} from "./lib/router.mjs";
 import {apiService} from "./lib/api.mjs";
-import {handleErrorDialog} from "./components/error/error.mjs";
+import {handleErrorDialog} from "./components/error.mjs";
 
 // get all the dynamic areas of the initial DOM
 const getLogoutContainer = () => document.getElementById("logout-container");
@@ -12,7 +12,8 @@ const getBloomFormContainer = () =>
 const getProfileContainer = () => document.getElementById("profile-container");
 const getTimelineContainer = () =>
   document.getElementById("timeline-container");
-const getErrorDialog = () => document.getElementById("error-dialog");
+const getErrorDialog = () => document.getElementById("error-container");
+const getHeadingContainer = () => document.getElementById("heading-container");
 
 /**
  * Init the application
@@ -62,6 +63,7 @@ export {
   getSignupContainer,
   getBloomFormContainer,
   getProfileContainer,
+  getHeadingContainer,
   getTimelineContainer,
   getErrorDialog,
   state,

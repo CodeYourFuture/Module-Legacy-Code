@@ -5,10 +5,12 @@ import {
   getLogoutContainer,
   getLoginContainer,
   getTimelineContainer,
+  getHeadingContainer,
 } from "../index.mjs";
-import {createLogin, handleLogin} from "../components/login/login.mjs";
-import {createLogout, handleLogout} from "../components/logout/logout.mjs";
-import {createBloom} from "../components/bloom/bloom.mjs";
+import {createLogin, handleLogin} from "../components/login.mjs";
+import {createLogout, handleLogout} from "../components/logout.mjs";
+import {createBloom} from "../components/bloom.mjs";
+import {createHeading} from "../components/heading.mjs";
 
 // Hashtag view: show all tweets containing this tag
 
@@ -36,6 +38,12 @@ function hashtagView(hashtag) {
     .querySelector("[data-action='login']")
     ?.addEventListener("click", handleLogin);
 
+  render(
+    [state.currentHashtag],
+    getHeadingContainer(),
+    "heading-template",
+    createHeading
+  );
   render(
     state.hashtagBlooms || [],
     getTimelineContainer(),

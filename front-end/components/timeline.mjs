@@ -1,4 +1,4 @@
-import {createBloom} from "../bloom/bloom.mjs";
+import {createBloom} from "./bloom.mjs";
 
 /**
  * Create a timeline component

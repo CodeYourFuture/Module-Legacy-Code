@@ -1,5 +1,5 @@
 import {state} from "../index.mjs";
-import {handleErrorDialog} from "../components/error/error.mjs";
+import {handleErrorDialog} from "../components/error.mjs";
 
 // === ABOUT THE STATE
 // state gives you these two functions only

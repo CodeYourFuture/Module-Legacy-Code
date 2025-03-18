@@ -1,5 +1,5 @@
-import {apiService} from "../../index.mjs";
-import {navigateTo} from "../../lib/router.mjs";
+import {apiService} from "../index.mjs";
+import {navigateTo} from "../lib/router.mjs";
 
 /**
  * Create a signup component

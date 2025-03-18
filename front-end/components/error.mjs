@@ -1,4 +1,4 @@
-import {render} from "../../lib/render.mjs";
+import {render} from "../lib/render.mjs";
 
 // There are 163 status messages...
 const _STATUS_MESSAGES = {
