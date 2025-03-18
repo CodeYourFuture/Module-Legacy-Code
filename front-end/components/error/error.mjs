@@ -5,6 +5,7 @@ const _STATUS_MESSAGES = {
   400: "Bad Request - The server cannot process your request.",
   403: "Forbidden - You don't have permission to access this.",
   404: "Not Found - The requested resource does not exist.",
+  405: "Not Allowed - The server knows the request method, but the target resource doesn't support this method."
   418: "I'm a teapot - Server refuses to brew coffee with a teapot.",
   500: "Internal Server Error - Something went wrong on the server.",
 };

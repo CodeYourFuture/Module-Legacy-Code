@@ -13,27 +13,32 @@
 const createBloom = (template, bloom) => {
   if (!bloom) return;
   const bloomFrag = document.getElementById(template).content.cloneNode(true);
+  const bloomParser = new DOMParser();
 
   const bloomArticle = bloomFrag.querySelector("[data-bloom]");
   const bloomUsername = bloomFrag.querySelector("[data-username]");
   const bloomTime = bloomFrag.querySelector("[data-time]");
   const bloomContent = bloomFrag.querySelector("[data-content]");
 
-  const parsedContent = new DOMParser();
-
-  // Populate with data
   bloomArticle.setAttribute("data-bloom-id", bloom.id);
   bloomUsername.setAttribute("href", `/profile/${bloom.sender}`);
   bloomUsername.textContent = bloom.sender;
   bloomTime.textContent = _formatTimestamp(bloom.sent_timestamp);
-  // TODO when the back end gives us HTML, we can parse it
-  // bloomContent.textContent =
-  //   parsedContent.parseFromString(bloom.content, "text/html") ||
-  //   "Hmmm, this bloom is empty";
-  bloomContent.textContent = bloom.content;
+  bloomContent.replaceChildren(
+    ...bloomParser.parseFromString(_formatHashtags(bloom.content), "text/html")
+      .body.childNodes
+  );
 
   return bloomFrag;
 };
+
+function _formatHashtags(text) {
+  if (!text) return text;
+  return text.replace(
+    /\B#\w+/g,
+    (match) => `<a href="/hashtag/${match.slice(1)}">${match}</a>`
+  );
+}
 
 function _formatTimestamp(timestamp) {
   if (!timestamp) return "";
