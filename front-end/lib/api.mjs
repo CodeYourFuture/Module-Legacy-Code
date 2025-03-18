@@ -250,7 +250,11 @@ async function unfollowUser(username) {
 
     if (data.success) {
       // Update both the unfollowed user's profile and the current user's profile
-      await Promise.all([getProfile(username), getProfile(state.currentUser)]);
+      await Promise.all([
+        getProfile(username),
+        getProfile(state.currentUser),
+        getBlooms(),
+      ]);
     }
 
     return data;
