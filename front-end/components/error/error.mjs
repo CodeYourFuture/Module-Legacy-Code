@@ -1,5 +1,14 @@
 import {render} from "../../lib/render.mjs";
 
+// There are 163 status messages...
+const _STATUS_MESSAGES = {
+  400: "Bad Request - The server cannot process your request.",
+  403: "Forbidden - You don't have permission to access this.",
+  404: "Not Found - The requested resource does not exist.",
+  418: "I'm a teapot - Server refuses to brew coffee with a teapot.",
+  500: "Internal Server Error - Something went wrong on the server.",
+};
+
 /**
  * Create an error dialog component
  * @param {string} template - The ID of the template to clone
@@ -14,7 +23,11 @@ function createErrorDialog(template, errorData) {
     .content.cloneNode(true);
   const errorMessage = errorFragment.querySelector("[data-content]");
 
-  errorMessage.textContent = errorData.message;
+  const statusMessage = errorData.status
+    ? `\n${_STATUS_MESSAGES[errorData.status] || `Status ${errorData.status}`}`
+    : "";
+
+  errorMessage.textContent = `Error: ${errorData.message}${statusMessage}`;
 
   return errorFragment;
 }
@@ -25,26 +38,20 @@ function createErrorDialog(template, errorData) {
  */
 function handleErrorDialog(error) {
   console.error(error);
+
   const errorContainer = document.getElementById("error-container");
   if (!errorContainer) return;
 
-  // Render the error message using the same render function as other components
   render([error], errorContainer, "error-template", createErrorDialog);
 
-  // Add close handler if not already added
-  const closeButton = errorContainer.querySelector(
-    "[data-action='close-error']"
-  );
-  if (closeButton && !closeButton.hasListener) {
-    closeButton.hasListener = true;
-    closeButton.addEventListener("click", () => {
-      const dialog = errorContainer.querySelector("dialog");
-      if (dialog) dialog.close();
-    });
-  }
-
-  // Show the dialog
   const dialog = errorContainer.querySelector("dialog");
+  const closeButton = dialog?.querySelector("[data-action='close-error']");
+  // we are gonna use replaceChildren instead of closing the modal, because that's how we're emptying all components in this design
+
+  closeButton?.addEventListener("click", () =>
+    errorContainer.replaceChildren()
+  );
+
   if (dialog && !dialog.open) dialog.showModal();
 }
 

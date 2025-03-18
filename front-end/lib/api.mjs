@@ -60,7 +60,6 @@ async function _apiRequest(endpoint, options = {}) {
       // Only handle network errors here, response errors are handled above
       handleErrorDialog(error);
     }
-    console.error(`API request failed: ${endpoint}`, error);
     throw error; // Re-throw so it can be caught by the calling function
   }
 }
@@ -92,7 +91,7 @@ async function login(username, password) {
         currentUser: username,
         isLoggedIn: true,
       });
-      await getBlooms();
+      await Promise.all([getBlooms(), getProfile(username)]);
     }
 
     return data;
@@ -230,12 +229,15 @@ async function followUser(username) {
     });
 
     if (data.success) {
-      await getProfile(username);
+      await Promise.all([
+        getProfile(username),
+        getProfile(state.currentUser),
+        getBlooms(),
+      ]);
     }
 
     return data;
   } catch (error) {
-    // Error already handled by _apiRequest
     return {success: false};
   }
 }
@@ -247,7 +249,8 @@ async function unfollowUser(username) {
     });
 
     if (data.success) {
-      await getProfile(username);
+      // Update both the unfollowed user's profile and the current user's profile
+      await Promise.all([getProfile(username), getProfile(state.currentUser)]);
     }
 
     return data;

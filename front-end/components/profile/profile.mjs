@@ -23,7 +23,8 @@ function createProfile(template, profileData) {
   usernameEl.querySelector("h2").textContent = profileData.username || "";
   usernameEl.setAttribute("href", `/profile/${profileData.username}`);
   bloomCountEl.textContent = profileData.total_blooms || 0;
-  followerCountEl.textContent = profileData.follows.length || 0;
+  followerCountEl.textContent = profileData.followers?.length || 0;
+  followingCountEl.textContent = profileData.follows?.length || 0;
   followButtonEl.setAttribute("data-username", profileData.username || "");
   followButtonEl.hidden = profileData.is_self ?? profileData.is_following;
 
