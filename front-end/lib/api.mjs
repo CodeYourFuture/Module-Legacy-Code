@@ -168,11 +168,7 @@ async function getBloomsByHashtag(hashtag) {
     return blooms;
   } catch (error) {
     // Error already handled by _apiRequest
-    state.updateState({
-      hashtagBlooms: [],
-      currentHashtag: null,
-    });
-    return [];
+    return {success: false};
   }
 }
 

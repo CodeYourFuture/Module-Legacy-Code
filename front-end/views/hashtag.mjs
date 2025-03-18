@@ -8,6 +8,7 @@ import {
 } from "../index.mjs";
 import {createLogin, handleLogin} from "../components/login/login.mjs";
 import {createLogout, handleLogout} from "../components/logout/logout.mjs";
+import {createBloom} from "../components/bloom/bloom.mjs";
 
 // Hashtag view: show all tweets containing this tag
 
