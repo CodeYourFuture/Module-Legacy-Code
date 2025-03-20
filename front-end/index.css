@@ -53,6 +53,7 @@ body {
 main {
   display: grid;
   grid-template:
+    "heading" min-content
     "profile" auto
     "bloom-form" min-content
     "timeline" 1fr
@@ -64,6 +65,7 @@ main {
   main {
     grid-template:
       "profile bloom-form" min-content
+      "profile heading" min-content
       "profile timeline" auto
       "....... timeline" auto
       "....... signup" minmax(80vh, 1fr) / 280px auto;
@@ -84,6 +86,9 @@ main {
 }
 .logout__component {
   margin: auto 0 auto auto;
+}
+.heading__component {
+  grid-area: heading;
 }
 
 /* base  elements */
