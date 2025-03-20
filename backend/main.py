@@ -262,6 +262,11 @@ def suggested_follows(limit_str):
     return jsonify(suggestions)
 
 
+@app.route("/hashtag/<hashtag>")
+def hashtag(hashtag):
+    return jsonify(blooms.get_blooms_with_hashtag(hashtag))
+
+
 def verify_request_fields(names_to_types: Dict[str, type]) -> Union[Response, None]:
     for name, expected_type in names_to_types.items():
         if name not in request.json:

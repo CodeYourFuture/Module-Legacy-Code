@@ -42,3 +42,15 @@ class BloomStore:
 
     def get_bloom(self, id) -> Bloom:
         return self.blooms.get(id)
+
+    def get_blooms_with_hashtag(self, hashtag: str) -> List[Bloom]:
+        """
+        Gets blooms containing the passed hashtag.
+
+        Args:
+            hashtag (str): The hashtag, excluding the leading #. e.g. the Bloom "I like #cake" would be returned when querying for the argument "cake".
+        """
+        # TODO: This should probably have an index, at least for popular hashtags
+        hashtag_with_leading_hash = f"#{hashtag}"
+
+        return [bloom for bloom in self.blooms.values() if hashtag_with_leading_hash in bloom.content.split(" ")]
