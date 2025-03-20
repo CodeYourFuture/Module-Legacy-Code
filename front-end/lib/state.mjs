@@ -35,8 +35,8 @@ const state = {
         profiles: this.profiles,
         timelineBlooms: this.timelineBlooms,
         token: this.token,
-        currentHashtag: null,
-        hashtagBlooms: [],
+        currentHashtag: this.currentHashtag,
+        hashtagBlooms: this.hashtagBlooms,
       };
       localStorage.setItem(STATE_STORAGE_KEY, JSON.stringify(stateToCache));
     } catch (error) {
