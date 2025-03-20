@@ -157,7 +157,7 @@ async function getBlooms(username) {
  */
 async function getBloomsByHashtag(hashtag) {
   const tag = hashtag.startsWith("#") ? hashtag.substring(1) : hashtag;
-  const endpoint = `/search?q=%23${encodeURIComponent(tag)}`;
+  const endpoint = `/hashtag/${encodeURIComponent(tag)}`;
 
   try {
     const blooms = await _apiRequest(endpoint);
