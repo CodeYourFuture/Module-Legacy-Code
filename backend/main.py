@@ -25,24 +25,15 @@ app.json = CustomJsonProvider(app)
 # TODO Daniel not sure what I should have been doing so have just bunged this in for now
 CORS(
     app,
-    resources={r"/*": {
-        "origins": ["http://127.0.0.1:5500", "http://localhost:5500"],
-        "supports_credentials": True,
-        "allow_headers": ["Content-Type", "Authorization"],
-        "methods": ["GET", "POST", "OPTIONS"]
-    }}
+    supports_credentials=True,
+    resources={
+        r"/*": {
+            "origins": "*",
+            "allow_headers": ["Content-Type", "Authorization"],
+            "methods": ["GET", "POST", "OPTIONS"]
+        }
+    }
 )
-
-# Add a route to handle OPTIONS requests explicitly
-@app.route('/', defaults={'path': ''}, methods=['OPTIONS'])
-@app.route('/<path:path>', methods=['OPTIONS'])
-def handle_options(path):
-    response = make_response()
-    response.headers.add('Access-Control-Allow-Origin', request.headers.get('Origin', '*'))
-    response.headers.add('Access-Control-Allow-Headers', 'Content-Type, Authorization')
-    response.headers.add('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
-    response.headers.add('Access-Control-Allow-Credentials', 'true')
-    return response
 
 MINIMUM_PASSWORD_LENGTH = 5
 
