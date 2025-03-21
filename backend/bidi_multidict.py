@@ -16,3 +16,7 @@ class BidiMultiDict[K, V]:
     def add(self, key, value):
         self.forward[key].add(value)
         self.inverse[value].add(key)
+
+    def remove(self, key, value):
+        self.forward[key].remove(value)
+        self.inverse[value].remove(key)
