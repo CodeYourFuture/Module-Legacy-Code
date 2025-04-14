@@ -21,7 +21,19 @@ app = Flask("PurpleForest")
 
 app.json = CustomJsonProvider(app)
 
-CORS(app)
+# Configure CORS to handle preflight requests
+# TODO Daniel not sure what I should have been doing so have just bunged this in for now
+CORS(
+    app,
+    supports_credentials=True,
+    resources={
+        r"/*": {
+            "origins": "*",
+            "allow_headers": ["Content-Type", "Authorization"],
+            "methods": ["GET", "POST", "OPTIONS"]
+        }
+    }
+)
 
 MINIMUM_PASSWORD_LENGTH = 5
 
@@ -80,6 +92,13 @@ def register():
 @jwt_required()
 def self_profile():
     username = get_current_user().username
+    
+    # Check if the user exists
+    if username not in users:
+        return make_response(jsonify({
+            "success": False,
+            "reason": "User not found"
+        }), 404)
 
     return jsonify(
         {
@@ -93,6 +112,13 @@ def self_profile():
 @app.route("/profile/<profile_username>")
 @jwt_required(optional=True)
 def other_profile(profile_username):
+    # Check if the user exists
+    if profile_username not in users:
+        return make_response(jsonify({
+            "success": False,
+            "reason": f"User {profile_username} not found"
+        }), 404)
+        
     current_user = get_current_user()
 
     followers = follows.get_inverse(profile_username)
@@ -171,17 +197,28 @@ def get_bloom(id_str):
 def home_timeline():
     current_user = get_current_user().username
 
+    # Get blooms from followed users
     followed_users = follows.get(current_user)
     nested_user_blooms = [
         blooms.get_blooms_for_user(followed_user, limit=50)
         for followed_user in followed_users
     ]
-    user_blooms = [bloom for blooms in nested_user_blooms for bloom in blooms]
-    sorted_user_blooms = list(
-        sorted(user_blooms, key=lambda bloom: bloom.sent_timestamp, reverse=True)
+    
+    # Flatten list of blooms from followed users
+    followed_blooms = [bloom for blooms in nested_user_blooms for bloom in blooms]
+    
+    # Get the current user's own blooms
+    own_blooms = blooms.get_blooms_for_user(current_user, limit=50)
+    
+    # Combine own blooms with followed blooms
+    all_blooms = followed_blooms + own_blooms
+    
+    # Sort by timestamp (newest first)
+    sorted_blooms = list(
+        sorted(all_blooms, key=lambda bloom: bloom.sent_timestamp, reverse=True)
     )
 
-    return jsonify(sorted_user_blooms)
+    return jsonify(sorted_blooms)
 
 
 @app.route("/blooms/<profile_username>")
