@@ -128,6 +128,13 @@ function logout() {
 }
 
 // ===== BLOOM methods
+async function getBloom(bloomId) {
+  const endpoint = `/bloom/${bloomId}`;
+  const bloom = await _apiRequest(endpoint);
+  state.updateState({singleBloomToShow: bloom});
+  return bloom;
+}
+
 async function getBlooms(username) {
   const endpoint = username ? `/blooms/${username}` : "/home";
 
@@ -267,6 +274,7 @@ const apiService = {
   logout,
 
   // Bloom methods
+  getBloom,
   getBlooms,
   postBloom,
   getBloomsByHashtag,

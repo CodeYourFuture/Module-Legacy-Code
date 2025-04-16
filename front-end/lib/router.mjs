@@ -1,3 +1,4 @@
+import {bloomView} from "../views/bloom.mjs";
 import {profileView} from "../views/profile.mjs";
 import {signupView} from "../views/signup.mjs";
 import {loginView} from "../views/login.mjs";
@@ -10,6 +11,13 @@ import {hashtagView} from "../views/hashtag.mjs";
 function handleRouteChange() {
   // We're going to use hash for routing
   const hash = window.location.hash.substring(1) || "/";
+
+  // Bloom path for a single bloom
+  if (hash.startsWith("/bloom/")) {
+    const bloomId = hash.split("/")[2];
+    bloomView(bloomId);
+    return;
+  }
 
   // Profile path with username
   if (hash.startsWith("/profile/")) {

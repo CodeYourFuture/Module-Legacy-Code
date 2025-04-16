@@ -12,6 +12,7 @@ const loadCachedState = () => {
     token: null,
     currentHashtag: null,
     hashtagBlooms: [],
+    singleBloomToShow: null,
   };
 };
 
@@ -37,6 +38,7 @@ const state = {
         token: this.token,
         currentHashtag: this.currentHashtag,
         hashtagBlooms: this.hashtagBlooms,
+        singleBloomToShow: this.singleBloomToShow,
       };
       localStorage.setItem(STATE_STORAGE_KEY, JSON.stringify(stateToCache));
     } catch (error) {
@@ -53,6 +55,7 @@ const state = {
       timelineBlooms: [],
       currentHashtag: null,
       hashtagBlooms: [],
+      singleBloomToShow: null,
     });
 
     // Clear from localStorage too

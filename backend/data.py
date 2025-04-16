@@ -34,20 +34,7 @@ def generate_salt() -> bytes:
     ).encode("utf-8")
 
 
-users: Dict[str, User] = {
-    "sample": User(
-        username="sample",
-        password_salt=b"kala namak",
-        # Original password: sosecret
-        password_scrypt=b"~\xd7\xa8\xe7\x94\xf7\xfaJ\xe7\x9b\xd0\xb3\x96;\x01m\xfb\xca\xe5\xa6w\xa9\xf7\xc7\xf1=2\xc9\x03\x90)\xaeN~\xc3e\xac\xd9Tn\x9d\xccx\xae\xaa\x86\xf0\xb9\xae?\x9e\x1d\x85\xb1\xac0\xc5\xe5t\xd1\xc6rL\xee",
-    ),
-    "sample2": User(
-        username="sample2",
-        password_salt=b"kala namak",
-        # Original password: sosecret
-        password_scrypt=b"~\xd7\xa8\xe7\x94\xf7\xfaJ\xe7\x9b\xd0\xb3\x96;\x01m\xfb\xca\xe5\xa6w\xa9\xf7\xc7\xf1=2\xc9\x03\x90)\xaeN~\xc3e\xac\xd9Tn\x9d\xccx\xae\xaa\x86\xf0\xb9\xae?\x9e\x1d\x85\xb1\xac0\xc5\xe5t\xd1\xc6rL\xee",
-    )
-}
+users: Dict[str, User] = {}
 
 
 def register_user(username: str, password_plaintext: str) -> User:
