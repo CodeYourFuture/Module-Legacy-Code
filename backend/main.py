@@ -2,7 +2,9 @@ import os
 import random
 
 from custom_json_provider import CustomJsonProvider
-from data import blooms, follows, lookup_user, register_user, users
+from data import blooms
+from data.follows import follow, get_followed_usernames, get_inverse_followed_usernames
+from data.users import UserRegistrationError, get_all_users, get_user, lookup_user, register_user
 
 from dotenv import load_dotenv
 from flask import Flask, Response, jsonify, make_response, request
@@ -43,9 +45,9 @@ def login():
     type_check_error = verify_request_fields({"username": str, "password": str})
     if type_check_error is not None:
         return type_check_error
-    if request.json["username"] not in users:
+    user = get_user(request.json["username"])
+    if user is None:
         return make_response(({"success": False, "reason": "Unknown user"}, 403))
-    user = users[request.json["username"]]
     if not user.check_password(request.json["password"]):
         return make_response(({"success": False, "reason": "Incorrect password"}, 403))
     access_token = create_access_token(
@@ -64,8 +66,6 @@ def register():
     type_check_error = verify_request_fields({"username": str, "password": str})
     if type_check_error is not None:
         return type_check_error
-    if request.json["username"] in users:
-        return make_response(({"success": False, "reason": "User already exists"}, 400))
     if len(request.json["password"]) < MINIMUM_PASSWORD_LENGTH:
         return make_response(
             (
@@ -76,7 +76,15 @@ def register():
                 400,
             )
         )
-    register_user(request.json["username"], request.json["password"])
+    try:
+      register_user(request.json["username"], request.json["password"])
+    except UserRegistrationError as error:
+        return jsonify(
+            {
+                "success": False,
+                "reason": error.reason,
+            }
+        )
     access_token = create_access_token(
         identity=request.json["username"], expires_delta=timedelta(days=1)
     )
@@ -94,7 +102,8 @@ def self_profile():
     username = get_current_user().username
     
     # Check if the user exists
-    if username not in users:
+    user = get_user(username)
+    if user is None:
         return make_response(jsonify({
             "success": False,
             "reason": "User not found"
@@ -103,8 +112,8 @@ def self_profile():
     return jsonify(
         {
             "username": username,
-            "follows": list(follows.get(username)),
-            "followers": list(follows.get_inverse(username)),
+            "follows": get_followed_usernames(user),
+            "followers": get_inverse_followed_usernames(user),
         }
     )
 
@@ -113,7 +122,8 @@ def self_profile():
 @jwt_required(optional=True)
 def other_profile(profile_username):
     # Check if the user exists
-    if profile_username not in users:
+    profile_user = get_user(profile_username)
+    if profile_user is None:
         return make_response(jsonify({
             "success": False,
             "reason": f"User {profile_username} not found"
@@ -121,19 +131,17 @@ def other_profile(profile_username):
         
     current_user = get_current_user()
 
-    followers = follows.get_inverse(profile_username)
+    followers = get_inverse_followed_usernames(profile_user)
     all_blooms = blooms.get_blooms_for_user(profile_username)
     all_blooms.reverse()
     return jsonify(
         {
             "username": profile_username,
             "recent_blooms": all_blooms[:10],
-            "follows": list(follows.get(profile_username)),
+            "follows": get_followed_usernames(profile_user),
             "followers": list(followers),
-            "is_following": current_user is not None
-            and current_user.username in followers,
-            "is_self": current_user is not None
-            and current_user.username == profile_username,
+            "is_following": current_user is not None and current_user.username in followers,
+            "is_self": current_user is not None and current_user.username == profile_username,
             "total_blooms": len(all_blooms),
         }
     )
@@ -141,20 +149,21 @@ def other_profile(profile_username):
 
 @app.route("/follow", methods=["POST"])
 @jwt_required()
-def follow():
+def do_follow():
     type_check_error = verify_request_fields({"follow_username": str})
     if type_check_error is not None:
         return type_check_error
 
-    username = get_current_user().username
+    current_user = get_current_user()
 
     follow_username = request.json["follow_username"]
-    if follow_username not in users:
+    follow_user = get_user(follow_username)
+    if follow_user is None:
         return make_response(
             (f"Cannot follow {follow_username} - user does not exist", 404)
         )
 
-    follows.add(username, follow_username)
+    follow(current_user, follow_user)
     return jsonify(
         {
             "success": True,
@@ -169,9 +178,9 @@ def send_bloom():
     if type_check_error is not None:
         return type_check_error
 
-    username = get_current_user().username
+    user = get_current_user()
 
-    blooms.add_bloom(sender=username, content=request.json["content"])
+    blooms.add_bloom(sender=user, content=request.json["content"])
 
     return jsonify(
         {
@@ -195,10 +204,10 @@ def get_bloom(id_str):
 @app.route("/home")
 @jwt_required()
 def home_timeline():
-    current_user = get_current_user().username
+    current_user = get_current_user()
 
     # Get blooms from followed users
-    followed_users = follows.get(current_user)
+    followed_users = get_followed_usernames(current_user)
     nested_user_blooms = [
         blooms.get_blooms_for_user(followed_user, limit=50)
         for followed_user in followed_users
@@ -208,7 +217,7 @@ def home_timeline():
     followed_blooms = [bloom for blooms in nested_user_blooms for bloom in blooms]
     
     # Get the current user's own blooms
-    own_blooms = blooms.get_blooms_for_user(current_user, limit=50)
+    own_blooms = blooms.get_blooms_for_user(current_user.username, limit=50)
     
     # Combine own blooms with followed blooms
     all_blooms = followed_blooms + own_blooms
@@ -236,15 +245,15 @@ def suggested_follows(limit_str):
     except ValueError:
         return make_response((f"Invalid limit", 400))
 
-    current_user = get_current_user().username
+    current_user = get_current_user()
 
-    existing_follows = follows.get(current_user)
+    existing_follows = get_followed_usernames(current_user)
 
     suggestions = []
-    all_users = list(users.keys())
+    all_users = get_all_users()
     random.shuffle(all_users)
     for user in all_users:
-        if user == current_user:
+        if user == current_user.username:
             continue
         if user not in existing_follows:
             suggestions.append({"username": user})

@@ -1,10 +1,14 @@
 import {render, destroy} from "../lib/render.mjs";
 import {
   apiService,
+  getLoginContainer,
+  getLogoutContainer,
   getTimelineContainer,
   state,
 } from "../index.mjs";
 import {createBloom} from "../components/bloom.mjs";
+import {createLogin, handleLogin} from "../components/login.mjs";
+import {createLogout, handleLogout} from "../components/logout.mjs";
 
 // Bloom view - just a single bloom
 function bloomView(bloomId) {
@@ -16,6 +20,25 @@ function bloomView(bloomId) {
   } else {
     blooms.push(state.singleBloomToShow);
   }
+
+  render(
+    [state.isLoggedIn],
+    getLogoutContainer(),
+    "logout-template",
+    createLogout
+  );
+  document
+    .querySelector("[data-action='logout']")
+    ?.addEventListener("click", handleLogout);
+  render(
+    [state.isLoggedIn],
+    getLoginContainer(),
+    "login-template",
+    createLogin
+  );
+  document
+    .querySelector("[data-form='login']")
+    ?.addEventListener("submit", handleLogin);
 
   render(
     blooms,
