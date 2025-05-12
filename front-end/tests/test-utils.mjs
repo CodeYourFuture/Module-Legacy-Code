@@ -9,7 +9,7 @@ import {expect} from "@playwright/test";
  * @param {import('@playwright/test').Page} page
  */
 export async function loginAsSample(page) {
-  await page.goto("/front-end/");
+  await page.goto("/");
   await page.fill('[data-form="login"] input[name="username"]', "sample");
   await page.fill('[data-form="login"] input[name="password"]', "sosecret");
   await page.click('[data-form="login"] [data-submit]');
@@ -20,7 +20,7 @@ export async function loginAsSample(page) {
  * @param {import('@playwright/test').Page} page
  */
 export async function loginAsSample2(page) {
-  await page.goto("/front-end/");
+  await page.goto("/");
   await page.fill('[data-form="login"] input[name="username"]', "sample2");
   await page.fill('[data-form="login"] input[name="password"]', "sosecret");
   await page.click('[data-form="login"] [data-submit]');
@@ -32,7 +32,7 @@ export async function loginAsSample2(page) {
  * @param {string} username - Username to sign up with
  */
 export async function signUp(page, username) {
-  await page.goto("/front-end/#/signup");
+  await page.goto("/#/signup");
   await page.fill('[data-form="signup"] input[name="username"]', username);
   await page.fill('[data-form="signup"] input[name="password"]', "sosecret");
   await page.fill(

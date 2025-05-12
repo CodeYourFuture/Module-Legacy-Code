@@ -4,7 +4,7 @@ import {signUp, generateUsername, logout} from "./test-utils.mjs";
 test.describe("Signup View", () => {
   test("navigates to signup view when clicking signup link", async ({page}) => {
     // Given an index load
-    await page.goto("/front-end/");
+    await page.goto("/");
 
     // When I click the signup link
     await page.click('[data-action="signup"]');
@@ -15,7 +15,7 @@ test.describe("Signup View", () => {
 
   test("successfully signs up as new user", async ({page}) => {
     // Given I am on the signup view
-    await page.goto("/front-end/#/signup");
+    await page.goto("/#/signup");
 
     // When I signup with a unique username
     const username = generateUsername();
@@ -33,7 +33,7 @@ test.describe("Signup View", () => {
     page,
   }) => {
     // Given I am on the signup view
-    await page.goto("/front-end/#/signup");
+    await page.goto("/#/signup");
 
     // When I attempt to signup as sample
     await signUp(page, "sample");
@@ -44,7 +44,7 @@ test.describe("Signup View", () => {
 
   test("returns to login view when clicking login link", async ({page}) => {
     // Given I am on the signup view
-    await page.goto("/front-end/#/signup");
+    await page.goto("/#/signup");
 
     // When I click the login link
     await page.click('[data-action="login"]');

@@ -4,7 +4,7 @@ import {loginAsSample} from "./test-utils.mjs";
 test.describe("Login Component", () => {
   test("should successfully log in with valid credentials", async ({page}) => {
     // Given an index page load
-    await page.goto("/front-end");
+    await page.goto("/");
 
     // When I enter username "sample" and password "sosecret"
     await loginAsSample(page);
@@ -21,7 +21,7 @@ test.describe("Login Component", () => {
 // and I do not navigate
 test("should show error when user does not exist", async ({page}) => {
   // Given an index page load
-  await page.goto("/front-end");
+  await page.goto("/");
 
   // When I enter invalid credentials
   await page.fill('[data-form="login"] input[name="username"]', "nonexistent");

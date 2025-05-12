@@ -4,7 +4,7 @@ import {loginAsSample, postBloom, logout} from "./test-utils.mjs";
 test.describe("Home View", () => {
   test("shows login component when not logged in", async ({page}) => {
     // Given an index load
-    await page.goto("/front-end");
+    await page.goto("/");
 
     // And I am not logged in
     // (no login action needed)
