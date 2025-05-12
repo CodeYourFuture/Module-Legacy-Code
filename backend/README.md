@@ -21,6 +21,6 @@ If you ever need to wipe the database, just delete `../db/pg_data` (and remember
 
 ### Each time
 
-1. Activate the virtual environment: `. .venv/bin/activate`
-2. Run the database: `../db/run.sh` (you must have Docker installed and running).
-3. Run the backend: `python3 main.py`
+1. In one terminal, run the database: `../db/run.sh` (you must have Docker installed and running).
+2. In another terminal, activate the virtual environment: `. .venv/bin/activate`
+3. With the virtual environment activated, run the backend: `python3 main.py`
