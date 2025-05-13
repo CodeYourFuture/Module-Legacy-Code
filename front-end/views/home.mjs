@@ -1,4 +1,4 @@
-import {render, destroy} from "../lib/render.mjs";
+import {renderEach, renderOne, destroy} from "../lib/render.mjs";
 import {
   state,
   getLogoutContainer,
@@ -22,26 +22,29 @@ function homeView() {
   destroy();
 
   if (state.isLoggedIn) {
-    render(
-      [state.profiles.find((p) => p.username === state.currentUser)],
+    renderOne(
+      {
+        profileData: state.profiles.find((p) => p.username === state.currentUser),
+        whoToFollow: state.whoToFollow,
+      },
       getProfileContainer(),
       "profile-template",
       createProfile
     );
-    render(
+    renderEach(
       state.timelineBlooms,
       getTimelineContainer(),
       "bloom-template",
       createBloom
     );
-    render(
-      [state.isLoggedIn],
+    renderOne(
+      state.isLoggedIn,
       getBloomFormContainer(),
       "bloom-form-template",
       createBloomForm
     );
-    render(
-      [state.isLoggedIn],
+    renderOne(
+      state.isLoggedIn,
       getLogoutContainer(),
       "logout-template",
       createLogout
@@ -54,8 +57,8 @@ function homeView() {
       ?.addEventListener("submit", handleBloomSubmit);
     document.querySelector("textarea")?.addEventListener("input", handleTyping);
   } else {
-    render(
-      [state.isLoggedIn],
+    renderOne(
+      state.isLoggedIn,
       getLoginContainer(),
       "login-template",
       createLogin

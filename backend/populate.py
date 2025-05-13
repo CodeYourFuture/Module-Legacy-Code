@@ -53,6 +53,9 @@ def main():
     writer_access_token = create_user("AS", "neverSt0pTalking")
     send_bloom(writer_access_token, "In this essay I will convince you that my views are correct in ways you have never imagined. If it doesn't change your life, read it again. Marshmallows are magnificent. They have great squish, tasty good, and you can even toast them over a fire. Toast them just right until they have a tiny bit of crunch when you bite into them, and have just started melting in the middle.")
 
+    justsomeguy_access_token = create_user("JustSomeGuy", "mysterious")
+    send_bloom(justsomeguy_access_token, "Hello.")
+
     follow(follower_access_token=sample_access_token, follow_username="TechInfluencer")
     follow(follower_access_token=sample_access_token, follow_username="Swiz")
     follow(follower_access_token=sample_access_token, follow_username="AS")

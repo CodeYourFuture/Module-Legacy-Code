@@ -1,4 +1,4 @@
-import {render, destroy} from "../lib/render.mjs";
+import {renderEach, renderOne, destroy} from "../lib/render.mjs";
 import {
   apiService,
   getLoginContainer,
@@ -21,8 +21,8 @@ function bloomView(bloomId) {
     blooms.push(state.singleBloomToShow);
   }
 
-  render(
-    [state.isLoggedIn],
+  renderOne(
+    state.isLoggedIn,
     getLogoutContainer(),
     "logout-template",
     createLogout
@@ -30,8 +30,8 @@ function bloomView(bloomId) {
   document
     .querySelector("[data-action='logout']")
     ?.addEventListener("click", handleLogout);
-  render(
-    [state.isLoggedIn],
+  renderOne(
+    state.isLoggedIn,
     getLoginContainer(),
     "login-template",
     createLogin
@@ -40,7 +40,7 @@ function bloomView(bloomId) {
     .querySelector("[data-form='login']")
     ?.addEventListener("submit", handleLogin);
 
-  render(
+  renderEach(
     blooms,
     getTimelineContainer(),
     "bloom-template",

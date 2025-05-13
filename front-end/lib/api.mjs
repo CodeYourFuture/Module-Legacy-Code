@@ -91,12 +91,26 @@ async function login(username, password) {
         currentUser: username,
         isLoggedIn: true,
       });
-      await Promise.all([getBlooms(), getProfile(username)]);
+      await Promise.all([getBlooms(), getProfile(username), getWhoToFollow()]);
     }
 
     return data;
   } catch (error) {
     return {success: false};
+  }
+}
+
+async function getWhoToFollow() {
+  try {
+    const usernamesToFollow = await _apiRequest("/suggested-follows/3");
+
+    state.updateState({whoToFollow: usernamesToFollow});
+
+    return usernamesToFollow;
+  } catch (error) {
+    // Error already handled by _apiRequest
+    state.updateState({usernamesToFollow: []});
+    return [];
   }
 }
 
@@ -283,6 +297,7 @@ const apiService = {
   getProfile,
   followUser,
   unfollowUser,
+  getWhoToFollow,
 };
 
 export {apiService};

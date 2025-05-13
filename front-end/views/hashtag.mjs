@@ -1,4 +1,4 @@
-import {render, destroy} from "../lib/render.mjs";
+import {renderOne, renderEach, destroy} from "../lib/render.mjs";
 import {
   state,
   apiService,
@@ -19,8 +19,8 @@ function hashtagView(hashtag) {
 
   apiService.getBloomsByHashtag(hashtag);
 
-  render(
-    [state.isLoggedIn],
+  renderOne(
+    state.isLoggedIn,
     getLogoutContainer(),
     "logout-template",
     createLogout
@@ -28,8 +28,8 @@ function hashtagView(hashtag) {
   document
     .querySelector("[data-action='logout']")
     ?.addEventListener("click", handleLogout);
-  render(
-    [state.isLoggedIn],
+  renderOne(
+    state.isLoggedIn,
     getLoginContainer(),
     "login-template",
     createLogin
@@ -38,13 +38,13 @@ function hashtagView(hashtag) {
     .querySelector("[data-action='login']")
     ?.addEventListener("click", handleLogin);
 
-  render(
-    [state.currentHashtag],
+  renderOne(
+    state.currentHashtag,
     getHeadingContainer(),
     "heading-template",
     createHeading
   );
-  render(
+  renderEach(
     state.hashtagBlooms || [],
     getTimelineContainer(),
     "bloom-template",

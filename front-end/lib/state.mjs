@@ -13,6 +13,7 @@ const loadCachedState = () => {
     currentHashtag: null,
     hashtagBlooms: [],
     singleBloomToShow: null,
+    whoToFollow: [],
   };
 };
 
@@ -39,6 +40,7 @@ const state = {
         currentHashtag: this.currentHashtag,
         hashtagBlooms: this.hashtagBlooms,
         singleBloomToShow: this.singleBloomToShow,
+        whoToFollow: this.whoToFollow,
       };
       localStorage.setItem(STATE_STORAGE_KEY, JSON.stringify(stateToCache));
     } catch (error) {
@@ -56,6 +58,7 @@ const state = {
       currentHashtag: null,
       hashtagBlooms: [],
       singleBloomToShow: null,
+      whoToFollow: [],
     });
 
     // Clear from localStorage too

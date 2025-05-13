@@ -1,4 +1,4 @@
-import {render} from "../lib/render.mjs";
+import {renderOne} from "../lib/render.mjs";
 
 // There are 163 status messages...
 const _STATUS_MESSAGES = {
@@ -43,7 +43,7 @@ function handleErrorDialog(error) {
   const errorContainer = document.getElementById("error-container");
   if (!errorContainer) return;
 
-  render([error], errorContainer, "error-template", createErrorDialog);
+  renderOne(error, errorContainer, "error-template", createErrorDialog);
 
   const dialog = errorContainer.querySelector("dialog");
   const closeButton = dialog?.querySelector("[data-action='close-error']");

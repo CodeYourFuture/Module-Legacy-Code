@@ -6,7 +6,7 @@ import {apiService} from "../index.mjs";
  * @param {Object} profileData - The profile data to display
  * @returns {DocumentFragment} - The profile UI
  */
-function createProfile(template, profileData) {
+function createProfile(template, {profileData, whoToFollow}) {
   if (!template || !profileData) return;
   const profileElement = document
     .getElementById(template)
@@ -19,6 +19,7 @@ function createProfile(template, profileData) {
   );
   const followerCountEl = profileElement.querySelector("[data-follower-count]");
   const followButtonEl = profileElement.querySelector("[data-action='follow']");
+  const whoToFollowContainer = profileElement.querySelector(".profile__who-to-follow");
   // Populate with data
   usernameEl.querySelector("h2").textContent = profileData.username || "";
   usernameEl.setAttribute("href", `/profile/${profileData.username}`);
@@ -27,6 +28,25 @@ function createProfile(template, profileData) {
   followingCountEl.textContent = profileData.follows?.length || 0;
   followButtonEl.setAttribute("data-username", profileData.username || "");
   followButtonEl.hidden = profileData.is_self || profileData.is_following;
+  followButtonEl.addEventListener("click", handleFollow);
+
+  if (whoToFollow.length > 0) {
+    const whoToFollowList = whoToFollowContainer.querySelector("[data-who-to-follow]");
+    const whoToFollowTemplate = document.querySelector("#who-to-follow-chip");
+    for (const userToFollow of whoToFollow) {
+      const wtfElement = whoToFollowTemplate.content.cloneNode(true);
+      const usernameLink = wtfElement.querySelector("a[data-username]");
+      usernameLink.innerText = userToFollow.username;
+      usernameLink.setAttribute("href", `/profile/${userToFollow.username}`);
+      const followButton = wtfElement.querySelector("button");
+      followButton.setAttribute("data-username", userToFollow.username);
+      followButton.addEventListener("click", handleFollow);
+
+      whoToFollowList.appendChild(wtfElement);
+    }
+  } else {
+    whoToFollowContainer.innerText = "";
+  }
 
   return profileElement;
 }
@@ -37,6 +57,7 @@ async function handleFollow(event) {
   if (!username) return;
 
   await apiService.followUser(username);
+  await apiService.getWhoToFollow();
 }
 
 export {createProfile, handleFollow};

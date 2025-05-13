@@ -1,4 +1,4 @@
-import {render, destroy} from "../lib/render.mjs";
+import {renderEach, renderOne, destroy} from "../lib/render.mjs";
 import {
   apiService,
   state,
@@ -23,8 +23,8 @@ function profileView(username) {
     apiService.getProfile(username);
   }
 
-  render(
-    [state.isLoggedIn],
+  renderOne(
+    state.isLoggedIn,
     getLogoutContainer(),
     "logout-template",
     createLogout
@@ -32,8 +32,8 @@ function profileView(username) {
   document
     .querySelector("[data-action='logout']")
     ?.addEventListener("click", handleLogout);
-  render(
-    [state.isLoggedIn],
+  renderOne(
+    state.isLoggedIn,
     getLoginContainer(),
     "login-template",
     createLogin
@@ -44,21 +44,21 @@ function profileView(username) {
 
   const profileData = state.profiles.find((p) => p.username === username);
   if (profileData) {
-    render(
-      [profileData],
+    renderOne(
+      {
+        profileData,
+        whoToFollow: state.isLoggedIn ? state.whoToFollow : [],
+      },
       getProfileContainer(),
       "profile-template",
       createProfile
     );
-    render(
+    renderEach(
       profileData.recent_blooms || [],
       getTimelineContainer(),
       "bloom-template",
       createBloom
     );
-    document
-      .querySelector("[data-action='follow']")
-      ?.addEventListener("click", handleFollow);
   }
 }
 
