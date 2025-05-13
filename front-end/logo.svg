@@ -1,0 +1,6 @@
+<svg width="70" height="70" xmlns="http://www.w3.org/2000/svg" viewBox="15 10 70 60">
+  <!-- Tree layers - triangular shapes in purple shades -->
+  <polygon points="50,10 15,50 85,50" fill="#9370DB"/>
+  <polygon points="50,30 20,60 80,60" fill="#8A2BE2"/>
+  <polygon points="50,50 25,70 75,70" fill="#6A0DAD"/>
+</svg>

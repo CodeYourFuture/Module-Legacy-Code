@@ -1,0 +1,17 @@
+{
+  "name": "front-end",
+  "version": "1.0.0",
+  "description": "Vanilla JS es6 modules. Vanilla CSS. Playwright tests.",
+  "main": "index.mjs",
+  "type": "module",
+  "scripts": {
+    "test": "npx playwright test --ui"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.41.2",
+    "@types/node": "^20.11.24"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
