@@ -46,6 +46,10 @@ def main():
     jwt = JWTManager(app)
     jwt.user_lookup_loader(lookup_user)
 
+    @app.route("/")
+    def index():
+        return "PurpleForest backend is running!"
+
     app.add_url_rule("/register", methods=["POST"], view_func=register)
     app.add_url_rule("/login", methods=["POST"], view_func=login)
 
