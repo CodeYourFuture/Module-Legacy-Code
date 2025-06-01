@@ -1,7 +1,1 @@
-node_modules
-.env
-.specstory/
 .DS_Store
-playwright-report/
-.vscode/
-test-results/
