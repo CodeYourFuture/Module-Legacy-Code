@@ -18,6 +18,7 @@ Your objective is to understand the codebase, debug and fix the bug reports, and
 - Run `./quickstart.sh`
 - Restart VS Code to pick up the new virtual environment
 - Run `python backend/main.py` and `db/run.sh` in separate terminal tabs
+- Open `front-end/index.html` with Live Server
 - In a third tab, run:
   - `db/create-schema.sh`; then
   - `python backend/populate.py`; then
