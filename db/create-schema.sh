@@ -6,9 +6,9 @@ SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &> /dev/null && pwd)"
 
 source "$SCRIPT_DIR/../backend/.env"
 
-psql \
-  --dbname "${PGDATABASE:-postgres}" \
+PGPASSWORD="$POSTGRES_PASSWORD" psql \
+  --dbname "${POSTGRES_DB:-postgres}" \
   --file "${SCRIPT_DIR}/schema.sql" \
-  --host "${PGHOST:-127.0.0.1}" \
-  --port "${PGPORT:-5432}" \
-  --username "${PGUSER:-postgres}"
+  --host "${POSTGRES_HOST:-127.0.0.1}" \
+  --port "${POSTGRES_PORT:-5432}" \
+  --username "${POSTGRES_USER:-postgres}"
