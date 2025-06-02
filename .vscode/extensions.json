@@ -1,0 +1,7 @@
+{
+  "recommendations": [
+    "ms-playwright.playwright",
+    "ms-python.python",
+    "ritwickdey.liveserver"
+  ]
+}

@@ -4,6 +4,11 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &> /dev/null && pwd)"
 
-export PGPASSWORD="$(cat "${SCRIPT_DIR}/../backend/.env" | grep ^PGPASSWORD= | cut -d= -f2-)"
+source "$SCRIPT_DIR/../backend/.env"
 
-psql -h 127.0.0.1 -U postgres -f "${SCRIPT_DIR}/schema.sql"
+PGPASSWORD="$POSTGRES_PASSWORD" psql \
+  --dbname "${POSTGRES_DB:-postgres}" \
+  --file "${SCRIPT_DIR}/schema.sql" \
+  --host "${POSTGRES_HOST:-127.0.0.1}" \
+  --port "${POSTGRES_PORT:-5432}" \
+  --username "${POSTGRES_USER:-postgres}"

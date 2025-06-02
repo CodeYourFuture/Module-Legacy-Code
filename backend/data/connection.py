@@ -6,11 +6,11 @@ import psycopg2
 @contextmanager
 def db_cursor():
     with psycopg2.connect(
-        dbname=os.getenv("PGDATABASE"),
-        user=os.getenv("PGUSER"),
-        password=os.environ["PGPASSWORD"],
-        host=os.getenv("PGHOST", "127.0.0.1"),
-        port=os.getenv("PGPORT"),
+        dbname=os.getenv("POSTGRES_DB"),
+        user=os.getenv("POSTGRES_USER"),
+        password=os.environ["POSTGRES_PASSWORD"],
+        host=os.getenv("POSTGRES_HOST", "127.0.0.1"),
+        port=os.getenv("POSTGRES_PORT"),
     ) as conn:
         with conn.cursor() as cur:
             yield cur
