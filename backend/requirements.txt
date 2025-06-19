@@ -16,5 +16,5 @@ pycparser==2.22
 PyJWT==2.10.1
 python-dotenv==1.0.1
 requests==2.32.3
-urllib3==2.4.0
+urllib3==2.5.0
 Werkzeug==3.1.3
