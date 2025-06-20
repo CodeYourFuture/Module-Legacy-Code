@@ -35,11 +35,11 @@ const createBloom = (template, bloom) => {
 };
 
 function _formatHashtags(text) {
-  if (!text) return text;
-  return text.replace(
-    /\B#[^#]+/g,
-    (match) => `<a href="/hashtag/${match.slice(1)}">${match}</a>`
-  );
+    if (!text) return text;
+    return text.replace(/\B#(\w+)/g, (match, tag) => {
+        const normalizedTag = tag.toLowerCase();       
+        return `<a href="/hashtag/${encodeURIComponent(normalizedTag)}">${match}</a>`;
+    });
 }
 
 function _formatTimestamp(timestamp) {
