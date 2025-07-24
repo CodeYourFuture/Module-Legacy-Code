@@ -52,7 +52,17 @@ function handleTyping(event) {
     .closest("[data-form]")
     ?.querySelector("[data-counter]");
   const maxLength = parseInt(textarea.getAttribute("maxlength"), 10);
-  counter.textContent = `${textarea.value.length} / ${maxLength}`;
+  const currentLength = textarea.value.length;
+
+  counter.textContent = `${currentLength} / ${maxLength}`;
+
+  if (currentLength >= maxLength) {
+    counter.style.color = "red";
+    counter.textContent += " — character limit reached!";
+  } else {
+    counter.style.color = "";
+  }
 }
+
 
 export {createBloomForm, handleBloomSubmit, handleTyping};

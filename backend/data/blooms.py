@@ -16,10 +16,13 @@ class Bloom:
 
 
 def add_bloom(*, sender: User, content: str) -> Bloom:
-    hashtags = [word[1:] for word in content.split(" ") if word.startswith("#")]
+    if len(content) > 280:
+        raise ValueError("Bloom content exceeds the 280 character limit.")
 
+    hashtags = [word[1:] for word in content.split(" ") if word.startswith("#")]
     now = datetime.datetime.now(tz=datetime.UTC)
     bloom_id = int(now.timestamp() * 1000000)
+
     with db_cursor() as cur:
         cur.execute(
             "INSERT INTO blooms (id, sender_id, content, send_timestamp) VALUES (%(bloom_id)s, %(sender_id)s, %(content)s, %(timestamp)s)",
