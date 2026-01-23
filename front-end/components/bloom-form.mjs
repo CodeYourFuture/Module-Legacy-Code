@@ -55,4 +55,5 @@ function handleTyping(event) {
   counter.textContent = `${textarea.value.length} / ${maxLength}`;
 }
 
+
 export {createBloomForm, handleBloomSubmit, handleTyping};
