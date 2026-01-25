@@ -212,6 +212,45 @@ async function postBloom(content) {
   }
 }
 
+async function rebloomBloom(bloomId) {
+  try {
+    const data = await _apiRequest("/reblooms", {
+      method: "POST",
+      body: JSON.stringify({ bloom_id: bloomId }),
+    });
+
+    if (data.success) {
+      // Update the timeline to reflect the new rebloom count
+      // Update the specific bloom in timelineBlooms
+      const timelineBlooms = state.timelineBlooms.map(b => {
+        if (b.id === bloomId) {
+          return { ...b, rebloom_count: data.rebloom_count || 1 };
+        }
+        return b;
+      });
+      state.updateState({ timelineBlooms });
+
+      // Also update in current profile if needed
+      const profiles = state.profiles.map(profile => {
+        if (profile.blooms) {
+          profile.blooms = profile.blooms.map(b => {
+            if (b.id === bloomId) {
+              return { ...b, rebloom_count: data.rebloom_count || 1 };
+            }
+            return b;
+          });
+        }
+        return profile;
+      });
+      state.updateState({ profiles });
+    }
+
+    return data;
+  } catch (error) {
+    return { success: false };
+  }
+}
+
 // ======= USER methods
 async function getProfile(username) {
   const endpoint = username ? `/profile/${username}` : "/profile";
@@ -292,6 +331,7 @@ const apiService = {
   getBlooms,
   postBloom,
   getBloomsByHashtag,
+  rebloomBloom,
 
   // User methods
   getProfile,
