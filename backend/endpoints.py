@@ -177,6 +177,26 @@ def get_bloom(id_str):
         return make_response((f"Bloom not found", 404))
     return jsonify(bloom)
 
+@jwt_required()
+def rebloom():
+    type_check_error = verify_request_fields({"bloom_id": int})
+    if type_check_error is not None:
+        return type_check_error
+
+    current_user = get_current_user()
+    bloom_id = request.json["bloom_id"]
+
+    # Add the rebloom
+    blooms.add_rebloom(user=current_user, bloom_id=bloom_id)
+
+    #return new rebloom count
+    count = blooms.get_rebloom_count(bloom_id)
+
+    return jsonify({
+        "success": True,
+        "rebloom_count": count
+    })
+
 
 @jwt_required()
 def home_timeline():
