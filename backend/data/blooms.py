@@ -140,3 +140,28 @@ def make_limit_clause(limit: Optional[int], kwargs: Dict[Any, Any]) -> str:
     else:
         limit_clause = ""
     return limit_clause
+
+#rebloom function
+
+def add_rebloom(*, user: User, bloom_id: int) -> None:
+    """Adds a rebloom for a user."""
+    with db_cursor() as cur:
+        cur.execute(
+            """
+            INSERT INTO reblooms (user_id, bloom_id)
+            VALUES (%(user_id)s, %(bloom_id)s)
+            ON CONFLICT (user_id, bloom_id) DO NOTHING
+            """,
+            dict(user_id=user.id, bloom_id=bloom_id),
+        )
+
+
+def get_rebloom_count(bloom_id: int) -> int:
+    """Returns the number of times a bloom has been rebloomed."""
+    with db_cursor() as cur:
+        cur.execute(
+            "SELECT COUNT(*) FROM reblooms WHERE bloom_id = %s",
+            (bloom_id,),
+        )
+        count = cur.fetchone()[0]
+    return count
