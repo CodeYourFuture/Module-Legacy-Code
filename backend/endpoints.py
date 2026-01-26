@@ -201,35 +201,30 @@ def rebloom():
 @jwt_required()
 def home_timeline():
     current_user = get_current_user()
-
-    # Get blooms from followed users
+    
+    # 1. Get reblooms 
+    user_reblooms = blooms.get_user_reblooms(current_user.username, limit=50)
+    
+    # 2. Get blooms from followed users
     followed_users = get_followed_usernames(current_user)
     nested_user_blooms = [
         blooms.get_blooms_for_user(followed_user, limit=50)
         for followed_user in followed_users
     ]
-
-    # Flatten list of blooms from followed users
-    followed_blooms = [bloom for blooms in nested_user_blooms for bloom in blooms]
-
-    # Get the current user's own blooms
+    
+    # 3. Flatten followed blooms
+    followed_blooms = [bloom for blooms_list in nested_user_blooms for bloom in blooms_list]
+    
+    # 4. Get original blooms  
     own_blooms = blooms.get_blooms_for_user(current_user.username, limit=50)
-
-    # Combine own blooms with followed blooms
-    all_blooms = followed_blooms + own_blooms
-
-    # Sort by timestamp (newest first)
-    sorted_blooms = list(
-        sorted(all_blooms, key=lambda bloom: bloom.sent_timestamp, reverse=True)
-    )
-
+    
+    # 5. COMBINE: followed + own + reblooms 
+    all_blooms = followed_blooms + own_blooms + user_reblooms
+    
+    # 6. Sort newest first
+    sorted_blooms = sorted(all_blooms, key=lambda b: b['sent_timestamp'], reverse=True)
+    
     return jsonify(sorted_blooms)
-
-
-def user_blooms(profile_username):
-    user_blooms = blooms.get_blooms_for_user(profile_username)
-    user_blooms.reverse()
-    return jsonify(user_blooms)
 
 
 @jwt_required()
