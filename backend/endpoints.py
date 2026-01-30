@@ -1,6 +1,6 @@
 from typing import Dict, Union
 from data import blooms
-from data.follows import follow,unfollw, get_followed_usernames, get_inverse_followed_usernames
+from data.follows import follow,unfollow , get_followed_usernames, get_inverse_followed_usernames
 from data.users import (
     UserRegistrationError,
     get_suggested_follows,
