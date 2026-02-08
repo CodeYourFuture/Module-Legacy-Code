@@ -39,8 +39,8 @@ function profileView(username) {
     createLogin
   );
   document
-    .querySelector("[data-action='login']")
-    ?.addEventListener("click", handleLogin);
+    .querySelector("[data-form='login']") // data action
+    ?.addEventListener("submit", handleLogin); // click
 
   const profileData = state.profiles.find((p) => p.username === username);
   if (profileData) {
