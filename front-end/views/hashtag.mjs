@@ -17,8 +17,10 @@ import {createHeading} from "../components/heading.mjs";
 function hashtagView(hashtag) {
   destroy();
 
-  apiService.getBloomsByHashtag(hashtag);
-
+  if (state.currentHashtag !== hashtag) { // fetches only when the hashtag changes
+    state.updateState({ currentHashtag: hashtag });
+    apiService.getBloomsByHashtag(hashtag);
+  } 
   renderOne(
     state.isLoggedIn,
     getLogoutContainer(),
