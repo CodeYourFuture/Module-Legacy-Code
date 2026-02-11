@@ -37,8 +37,8 @@ const createBloom = (template, bloom) => {
 function _formatHashtags(text) {
   if (!text) return text;
   return text.replace(
-    /\B#[^#]+/g,
-    (match) => `<a href="/hashtag/${match.slice(1)}">${match}</a>`
+    /#([a-zA-Z0-9_]+)/g,
+    (match,tag) => `<a href="/hashtag/${tag}">${match}</a>`
   );
 }
 
