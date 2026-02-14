@@ -1,4 +1,5 @@
-from datetime import datetime
+from datetime import datetime, timezone
+now = datetime.now(timezone.utc)
 from flask.json.provider import DefaultJSONProvider
 
 

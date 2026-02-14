@@ -184,7 +184,7 @@ async function getBloomsByHashtag(hashtag) {
     const blooms = await _apiRequest(endpoint);
     state.updateState({
       hashtagBlooms: blooms,
-      currentHashtag: `#${tag}`,
+      currentHashtag: hashtag,
     });
     return blooms;
   } catch (error) {

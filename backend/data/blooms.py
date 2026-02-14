@@ -1,4 +1,4 @@
-import datetime
+from datetime import datetime, timezone
 
 from dataclasses import dataclass
 from typing import Any, Dict, List, Optional
@@ -12,13 +12,13 @@ class Bloom:
     id: int
     sender: User
     content: str
-    sent_timestamp: datetime.datetime
+    sent_timestamp: datetime
 
 
 def add_bloom(*, sender: User, content: str) -> Bloom:
     hashtags = [word[1:] for word in content.split(" ") if word.startswith("#")]
 
-    now = datetime.datetime.now(tz=datetime.UTC)
+    now = datetime.now(timezone.utc)
     bloom_id = int(now.timestamp() * 1000000)
     with db_cursor() as cur:
         cur.execute(
@@ -27,7 +27,7 @@ def add_bloom(*, sender: User, content: str) -> Bloom:
                 bloom_id=bloom_id,
                 sender_id=sender.id,
                 content=content,
-                timestamp=datetime.datetime.now(datetime.UTC),
+                timestamp=datetime.now(timezone.utc),
             ),
         )
         for hashtag in hashtags:
