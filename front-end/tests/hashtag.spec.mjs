@@ -1,5 +1,5 @@
 import { test, expect } from "@playwright/test";
-import { loginAsSample } from "./test-utils.mjs"; 
+import { loginAsSample } from "./test-utils.mjs";
 
 test.describe("Hashtag Page", () => {
   test("should not make infinite hashtag endpoint requests", async ({
