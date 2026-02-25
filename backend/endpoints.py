@@ -156,6 +156,15 @@ def send_bloom():
     if type_check_error is not None:
         return type_check_error
 
+    content = request.json["content"]
+
+    #----Validation-----
+    if len(content) > 280:
+        return make_response(jsonify({
+            "success": False,
+            "message" : "Bloom is too long! Max 280 characters"
+        }), 400)
+
     user = get_current_user()
 
     blooms.add_bloom(sender=user, content=request.json["content"])
