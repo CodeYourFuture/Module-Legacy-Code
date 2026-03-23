@@ -1,9 +1,10 @@
 # Module-Legacy-Code
 
-This repository hosts an existing codebase for you to work with.
+This repository hosts existing codebases for you to work with.
 
-The codebase is a web-app called PurpleForest. It consists of a single-page application frontend written in JavaScript, a backend written in Python, and a PostgreSQL database.
+Each top-level directory contains an existing project. You will work with different projects for different assignments.
 
-The repository contains a number of bug reports and feature requests as issues in this repo.
-
-Your objective is to understand the codebase, debug and fix the bug reports, and implement the feature requests.
+In general, your objective is to get comfortable and able to work in the codebases. You will need to:
+* Understand the codebase (but not spend _too_ long getting to know all the details)
+* Debug and fix bugs reported against the codebase
+* Implement new feature requests to extend the codebase with new functionality
