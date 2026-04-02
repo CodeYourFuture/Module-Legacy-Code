@@ -9,7 +9,8 @@
   --paper: hsla(var(--key), 45%, 96%);
   --ink: hsl(var(--key), 15%, 10%);
   --outline: hsl(var(--key), 25%, 90%);
-  --shadow: var(--outline) 0px 0px 0px 1px, var(--outline) 0px 1px 0px 0px,
+  --shadow:
+    var(--outline) 0px 0px 0px 1px, var(--outline) 0px 1px 0px 0px,
     var(--outline) 0px 0px 2.5px 0px, 0px 3.25px 6px var(--outline);
   --inset: inset 0px -3.25px 12px var(--outline);
   --corner: 2.5px;
@@ -30,7 +31,10 @@ body {
   grid-template:
     ". header ." auto
     ". main ." 1fr
-    ". footer ." auto / minmax(var(--space), 1fr) var(--container) minmax(var(--space), 1fr);
+    ". footer ." auto / minmax(var(--space), 1fr) var(--container) minmax(
+      var(--space),
+      1fr
+    );
   header {
     grid-area: header;
     display: flex;
@@ -94,8 +98,13 @@ main {
 /* base  elements */
 html {
   box-sizing: border-box;
-  font: 100%/1.5 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
-    Roboto, sans-serif;
+  font:
+    100%/1.5 system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    Roboto,
+    sans-serif;
   background-color: var(--paper);
   color: var(--ink);
 }
@@ -130,7 +139,9 @@ textarea {
 }
 
 button {
-  font: 600 100% monospace, system-ui;
+  font:
+    600 100% monospace,
+    system-ui;
   white-space: nowrap;
   color: var(--ink);
   background-color: transparent;
@@ -138,7 +149,8 @@ button {
   border-radius: var(--pill);
   box-shadow: 2px 3px var(--brand);
   padding: calc(var(--space) / 3) var(--space);
-  transition: all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275),
+  transition:
+    all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275),
     border-color 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
@@ -219,6 +231,17 @@ dialog {
   min-height: 80dvh;
   display: grid;
   gap: var(--space);
+}
+
+.bloom__rebloom-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  align-items: center;
+}
+
+.bloom__rebloom-button {
+  justify-self: start;
 }
 
 /* states, helpers*/

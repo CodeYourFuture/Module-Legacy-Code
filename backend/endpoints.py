@@ -167,6 +167,32 @@ def send_bloom():
     )
 
 
+@jwt_required()
+def rebloom():
+    type_check_error = verify_request_fields({"original_bloom_id": int})
+    if type_check_error is not None:
+        return type_check_error
+
+    current_user = get_current_user()
+    original_bloom_id = request.json["original_bloom_id"]
+
+    original_bloom = blooms.get_bloom(original_bloom_id)
+    if original_bloom is None:
+        return make_response(("Original bloom not found", 404))
+
+    inserted = blooms.add_rebloom(
+        rebloomer=current_user,
+        original_bloom_id=original_bloom_id,
+    )
+
+    return jsonify(
+        {
+            "success": True,
+            "rebloomed": inserted,
+        }
+    )
+
+
 def get_bloom(id_str):
     try:
         id_int = int(id_str)
@@ -182,28 +208,48 @@ def get_bloom(id_str):
 def home_timeline():
     current_user = get_current_user()
 
-    # Get blooms from followed users
     followed_users = get_followed_usernames(current_user)
-    nested_user_blooms = [
-        blooms.get_blooms_for_user(followed_user, limit=50)
-        for followed_user in followed_users
-    ]
+    relevant_usernames = [*followed_users, current_user.username]
 
-    # Flatten list of blooms from followed users
-    followed_blooms = [bloom for blooms in nested_user_blooms for bloom in blooms]
+    feed_items = []
+    original_bloom_ids = []
 
-    # Get the current user's own blooms
-    own_blooms = blooms.get_blooms_for_user(current_user.username, limit=50)
+    for username in relevant_usernames:
+        user_blooms = blooms.get_blooms_for_user(username, limit=50)
+        original_bloom_ids.extend(bloom.id for bloom in user_blooms)
+        feed_items.extend(
+            blooms.FeedItem(
+                kind="bloom",
+                timestamp=bloom.sent_timestamp,
+                bloom=bloom,
+            )
+            for bloom in user_blooms
+        )
 
-    # Combine own blooms with followed blooms
-    all_blooms = followed_blooms + own_blooms
+        user_reblooms = blooms.get_reblooms_for_user(username, limit=50)
+        original_bloom_ids.extend(
+            rebloom.original_bloom.id for rebloom in user_reblooms
+        )
+        feed_items.extend(
+            blooms.FeedItem(
+                kind="rebloom",
+                timestamp=rebloom.rebloom_timestamp,
+                bloom=rebloom.original_bloom,
+                rebloomer=rebloom.rebloomer,
+            )
+            for rebloom in user_reblooms
+        )
 
-    # Sort by timestamp (newest first)
-    sorted_blooms = list(
-        sorted(all_blooms, key=lambda bloom: bloom.sent_timestamp, reverse=True)
+    rebloom_counts = blooms.get_rebloom_counts(original_bloom_ids)
+
+    for feed_item in feed_items:
+        feed_item.bloom.rebloom_count = rebloom_counts.get(feed_item.bloom.id, 0)
+
+    sorted_feed_items = sorted(
+        feed_items, key=lambda feed_item: feed_item.timestamp, reverse=True
     )
 
-    return jsonify(sorted_blooms)
+    return jsonify(sorted_feed_items)
 
 
 def user_blooms(profile_username):
