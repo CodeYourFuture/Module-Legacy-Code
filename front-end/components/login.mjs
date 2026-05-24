@@ -30,6 +30,8 @@ async function handleLogin(event) {
     const password = formData.get("password");
 
     await apiService.login(username, password);
+    //the browser refreshes on that exact same URL
+    window.location.reload();
   } catch (error) {
     throw error;
   } finally {

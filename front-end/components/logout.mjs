@@ -16,6 +16,7 @@ function createLogout(template, isLoggedIn) {
 async function handleLogout(event) {
   try {
     apiService.logout();
+    window.location.href = "/";
   } catch (error) {
     throw error;
   }
