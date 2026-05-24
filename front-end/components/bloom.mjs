@@ -10,6 +10,7 @@
  * "sent_timestamp": "datetime as ISO 8601 formatted string"}
 
  */
+export const MAX_BLOOM_LENGTH = 280;
 const createBloom = (template, bloom) => {
   if (!bloom) return;
   const bloomFrag = document.getElementById(template).content.cloneNode(true);
@@ -26,6 +27,11 @@ const createBloom = (template, bloom) => {
   bloomUsername.textContent = bloom.sender;
   bloomTime.textContent = _formatTimestamp(bloom.sent_timestamp);
   bloomTimeLink.setAttribute("href", `/bloom/${bloom.id}`);
+  // FIX: If a bloom from the database is over 280 characters, cut it short
+  let displayContent = bloom.content || "";
+  if (displayContent.length > MAX_BLOOM_LENGTH) {
+    displayContent = displayContent.slice(0, MAX_BLOOM_LENGTH - 3) + "...";
+  }
   bloomContent.replaceChildren(
     ...bloomParser.parseFromString(_formatHashtags(bloom.content), "text/html")
       .body.childNodes

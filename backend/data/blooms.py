@@ -6,6 +6,7 @@ from typing import Any, Dict, List, Optional
 from data.connection import db_cursor
 from data.users import User
 
+MAX_BLOOM_LENGTH = 280
 
 @dataclass
 class Bloom:
@@ -16,6 +17,10 @@ class Bloom:
 
 
 def add_bloom(*, sender: User, content: str) -> Bloom:
+    # reject any new posts that are longer than 280 characters
+    if len(content) > MAX_BLOOM_LENGTH:
+        raise ValueError("Bloom content cannot exceed 280 characters.")
+    
     hashtags = [word[1:] for word in content.split(" ") if word.startswith("#")]
 
     now = datetime.datetime.now(tz=datetime.timezone.utc)

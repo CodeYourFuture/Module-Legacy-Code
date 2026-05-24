@@ -1,5 +1,5 @@
 import {apiService} from "../index.mjs";
-
+import { MAX_BLOOM_LENGTH } from "./bloom.mjs";
 /**
  * Create a bloom form component
  * @param {string} template - The ID of the template to clone
@@ -51,7 +51,7 @@ function handleTyping(event) {
   const counter = textarea
     .closest("[data-form]")
     ?.querySelector("[data-counter]");
-  const maxLength = parseInt(textarea.getAttribute("maxlength"), 10);
+  const maxLength = parseInt(textarea.getAttribute("maxlength"), 10) || MAX_BLOOM_LENGTH;
   counter.textContent = `${textarea.value.length} / ${maxLength}`;
 }
 
