@@ -18,7 +18,7 @@ class Bloom:
 def add_bloom(*, sender: User, content: str) -> Bloom:
     hashtags = [word[1:] for word in content.split(" ") if word.startswith("#")]
 
-    now = datetime.datetime.now(tz=datetime.UTC)
+    now = datetime.datetime.now(tz=datetime.timezone.utc)
     bloom_id = int(now.timestamp() * 1000000)
     with db_cursor() as cur:
         cur.execute(
@@ -27,7 +27,7 @@ def add_bloom(*, sender: User, content: str) -> Bloom:
                 bloom_id=bloom_id,
                 sender_id=sender.id,
                 content=content,
-                timestamp=datetime.datetime.now(datetime.UTC),
+                timestamp=datetime.datetime.now(datetime.timezone.utc),
             ),
         )
         for hashtag in hashtags:
