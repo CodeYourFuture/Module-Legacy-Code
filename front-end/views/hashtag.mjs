@@ -17,7 +17,13 @@ import {createHeading} from "../components/heading.mjs";
 function hashtagView(hashtag) {
   destroy();
 
-  apiService.getBloomsByHashtag(hashtag);
+  //Only fetch if we are actually switching to a NEW hashtag or haven't loaded it yet
+  if (state.currentHashtag !== hashtag) {
+    // Tell the state what hashtag we are trying to load so it doesn't get stuck
+    state.updateState({ currentHashtag: hashtag });
+    apiService.getBloomsByHashtag(hashtag);
+    return; // Stop this cycle; the state-change listener will re-trigger this view cleanly with data!
+  }
 
   renderOne(
     state.isLoggedIn,
