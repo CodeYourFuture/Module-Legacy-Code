@@ -177,6 +177,29 @@ def get_bloom(id_str):
         return make_response((f"Bloom not found", 404))
     return jsonify(bloom)
 
+@jwt_required()
+def do_rebloom(id_str):
+    """
+    Endpoint to handle reblooming an existing bloom post
+    """
+    # 1. Parse the incoming original bloom ID
+    try:
+        original_id_int = int(id_str)
+    except ValueError:
+        return make_response(("Invalid bloom id", 400))
+
+    # 2. Grab the logged-in user who clicked the rebloom button
+    current_user = get_current_user()
+
+    # 3. Call your core dataclass layer function to perform the clone insert
+    try:
+        blooms.add_rebloom(rebloomer=current_user, original_bloom_id=original_id_int)
+        return jsonify({
+            "success": True,
+            "message": "Rebloomed successfully!"
+        })
+    except Exception as error:
+        return make_response(({"success": False, "message": str(error)}, 500))
 
 @jwt_required()
 def home_timeline():

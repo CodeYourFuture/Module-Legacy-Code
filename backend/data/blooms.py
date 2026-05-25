@@ -13,6 +13,8 @@ class Bloom:
     sender: User
     content: str
     sent_timestamp: datetime.datetime
+    rebloomed_by: Optional[str] = None  # Tracks if someone shared it
+    rebloom_count: int = 0              # Tracks share count
 
 
 def add_bloom(*, sender: User, content: str) -> Bloom:
@@ -36,6 +38,29 @@ def add_bloom(*, sender: User, content: str) -> Bloom:
                 dict(hashtag=hashtag, bloom_id=bloom_id),
             )
 
+def add_rebloom(*, rebloomer: User, original_bloom_id: int) -> None:
+    original = get_bloom(original_bloom_id)
+    if not original:
+        return
+        
+    now = datetime.datetime.now(tz=datetime.UTC)
+    new_bloom_id = int(now.timestamp() * 1000000)
+    
+    with db_cursor() as cur:
+        # 1. Insert the shared copy as a new timeline entry attributed to the rebloomer
+        cur.execute(
+            """INSERT INTO blooms 
+               (id, sender_id, content, send_timestamp, rebloomed_by_id) 
+               VALUES (%(bloom_id)s, %(sender_id)s, %(content)s, %(timestamp)s, %(rebloomed_by_id)s)""",
+            dict(
+                bloom_id=new_bloom_id,
+                sender_id=original.sender_id, # Keep original author tracking if needed, or mapping structure
+                content=original.content,
+                timestamp=now,
+                rebloomed_by_id=rebloomer.id
+            ),
+        )
+        # 2. Increment a counter system or handle via a tracking table aggregation
 
 def get_blooms_for_user(
     username: str, *, before: Optional[int] = None, limit: Optional[int] = None
@@ -54,13 +79,21 @@ def get_blooms_for_user(
 
         cur.execute(
             f"""SELECT
-              blooms.id, users.username, content, send_timestamp
+              b.id, 
+              u.username AS sender_username, 
+              b.content, 
+              b.send_timestamp,
+              rb_u.username AS rebloomed_by_username,
+              (SELECT COUNT(*) FROM blooms WHERE rebloomed_from_id = b.id) AS rebloom_count
             FROM
-              blooms INNER JOIN users ON users.id = blooms.sender_id
+              blooms b
+              INNER JOIN users u ON u.id = b.sender_id
+              LEFT JOIN users rb_u ON rb_u.id = b.rebloomed_by_id
             WHERE
-              username = %(sender_username)s
+              (u.username = %(sender_username)s AND b.rebloomed_by_id IS NULL)
+              OR rb_u.username = %(sender_username)s
               {before_clause}
-            ORDER BY send_timestamp DESC
+            ORDER BY b.send_timestamp DESC
             {limit_clause}
             """,
             kwargs,
@@ -68,13 +101,15 @@ def get_blooms_for_user(
         rows = cur.fetchall()
         blooms = []
         for row in rows:
-            bloom_id, sender_username, content, timestamp = row
+            bloom_id, sender_username, content, timestamp, rebloomed_by, rebloom_count = row
             blooms.append(
                 Bloom(
                     id=bloom_id,
                     sender=sender_username,
                     content=content,
                     sent_timestamp=timestamp,
+                    rebloomed_by=rebloomed_by,
+                    rebloom_count=rebloom_count
                 )
             )
     return blooms
