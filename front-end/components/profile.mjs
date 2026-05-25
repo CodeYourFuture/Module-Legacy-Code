@@ -27,8 +27,23 @@ function createProfile(template, {profileData, whoToFollow, isLoggedIn}) {
   followerCountEl.textContent = profileData.followers?.length || 0;
   followingCountEl.textContent = profileData.follows?.length || 0;
   followButtonEl.setAttribute("data-username", profileData.username || "");
-  followButtonEl.hidden = profileData.is_self || profileData.is_following;
-  followButtonEl.addEventListener("click", handleFollow);
+  if (profileData.is_self) {
+    // Hide the button completely on your own profile page
+    followButtonEl.hidden = true;
+  } else if (profileData.is_following) {
+    // If already following, transform it into an Unfollow button
+    followButtonEl.hidden = false;
+    followButtonEl.textContent = "Unfollow";
+    followButtonEl.setAttribute("data-action", "unfollow");
+    followButtonEl.addEventListener("click", handleUnfollow); // Attach the new delete listener
+  } else {
+    // Standard Follow button setup
+    followButtonEl.hidden = false;
+    followButtonEl.textContent = "Follow";
+    followButtonEl.setAttribute("data-action", "follow");
+    followButtonEl.addEventListener("click", handleFollow);
+  }
+
   if (!isLoggedIn) {
     followButtonEl.style.display = "none";
   }
@@ -66,4 +81,14 @@ async function handleFollow(event) {
   await apiService.getWhoToFollow();
 }
 
-export {createProfile, handleFollow};
+async function handleUnfollow(event) {
+  const button = event.target;
+  const username = button.getAttribute("data-username");
+  if (!username) return;
+
+  // Triggers the apiService method we verified earlier
+  await apiService.unfollowUser(username);
+  await apiService.getWhoToFollow();
+}
+
+export {createProfile, handleFollow, handleUnfollow};

@@ -149,6 +149,30 @@ def do_follow():
         }
     )
 
+@jwt_required()
+def do_unfollow(unfollow_username):
+    """Endpoint to handle unfollowing a user via URL path variable."""
+    current_user = get_current_user()
+
+    # Prevent users from managing rules on themselves
+    if current_user.username == unfollow_username:
+        return make_response(({"success": False, "message": "You cannot unfollow yourself"}, 400))
+
+    unfollow_user = get_user(unfollow_username)
+    if unfollow_user is None:
+        return make_response(
+            ({"success": False, "message": f"User {unfollow_username} does not exist"}, 404)
+        )
+
+    # Execute database deletion command
+    from data.follows import unfollow as db_unfollow
+    db_unfollow(current_user, unfollow_user)
+    
+    return jsonify(
+        {
+            "success": True,
+        }
+    )
 
 @jwt_required()
 def send_bloom():
