@@ -1,4 +1,5 @@
 from typing import Dict, Union
+
 from data import blooms
 from data.follows import follow, get_followed_usernames, get_inverse_followed_usernames
 from data.users import (
@@ -7,30 +8,42 @@ from data.users import (
     get_user,
     register_user,
 )
-
 from flask import Response, jsonify, make_response, request
 from flask_jwt_extended import (
     create_access_token,
     get_current_user,
     jwt_required,
 )
-
 from datetime import timedelta
 
 MINIMUM_PASSWORD_LENGTH = 5
 
 
 def login():
+    data = request.get_json(silent=True) or {}
+    if not data:
+        return make_response(
+            jsonify({"success": False, "message": "Missing or invalid JSON body"}),
+            400,
+        )
+
     type_check_error = verify_request_fields({"username": str, "password": str})
     if type_check_error is not None:
         return type_check_error
-    user = get_user(request.json["username"])
+
+    user = get_user(data["username"])
     if user is None:
-        return make_response(({"success": False, "message": "Unknown user"}, 403))
-    if not user.check_password(request.json["password"]):
-        return make_response(({"success": False, "message": "Incorrect password"}, 403))
+        return make_response(
+            jsonify({"success": False, "message": "Unknown user"}), 403
+        )
+
+    if not user.check_password(data["password"]):
+        return make_response(
+            jsonify({"success": False, "message": "Incorrect password"}), 403
+        )
+
     access_token = create_access_token(
-        identity=request.json["username"], expires_delta=timedelta(days=1)
+        identity=data["username"], expires_delta=timedelta(days=1)
     )
     return jsonify(
         {
@@ -44,28 +57,35 @@ def register():
     type_check_error = verify_request_fields({"username": str, "password": str})
     if type_check_error is not None:
         return type_check_error
-    if len(request.json["password"]) < MINIMUM_PASSWORD_LENGTH:
+
+    request_data = request.get_json() or {}
+    username = request_data["username"]
+    password = request_data["password"]
+
+    if len(password) < MINIMUM_PASSWORD_LENGTH:
         return make_response(
-            (
+            jsonify(
                 {
                     "success": False,
                     "message": f"Password must be at least {MINIMUM_PASSWORD_LENGTH} characters long",
-                },
-                400,
-            )
+                }
+            ),
+            400,
         )
     try:
-        register_user(request.json["username"], request.json["password"])
+        register_user(username, password)
     except UserRegistrationError as error:
         return make_response(
-            {
-                "success": False,
-                "message": error.reason,
-            },
+            jsonify(
+                {
+                    "success": False,
+                    "message": error.reason,
+                }
+            ),
             400,
         )
     access_token = create_access_token(
-        identity=request.json["username"], expires_delta=timedelta(days=1)
+        identity=username, expires_delta=timedelta(days=1)
     )
     return jsonify(
         {
@@ -102,16 +122,19 @@ def other_profile(profile_username):
     if profile_user is None:
         return make_response(
             jsonify(
-                {"success": False, "message": f"User {profile_username} not found"}
+                {
+                    "success": False,
+                    "message": f"User {profile_username} not found",
+                }
             ),
             404,
         )
 
     current_user = get_current_user()
-
     followers = get_inverse_followed_usernames(profile_user)
     all_blooms = blooms.get_blooms_for_user(profile_username)
     all_blooms.reverse()
+
     return jsonify(
         {
             "username": profile_username,
@@ -135,11 +158,18 @@ def do_follow():
 
     current_user = get_current_user()
 
-    follow_username = request.json["follow_username"]
+    request_data = request.get_json() or {}
+    follow_username = request_data["follow_username"]
     follow_user = get_user(follow_username)
     if follow_user is None:
         return make_response(
-            (f"Cannot follow {follow_username} - user does not exist", 404)
+            jsonify(
+                {
+                    "success": False,
+                    "message": f"Cannot follow {follow_username} - user does not exist",
+                }
+            ),
+            404,
         )
 
     follow(current_user, follow_user)
@@ -156,10 +186,22 @@ def send_bloom():
     if type_check_error is not None:
         return type_check_error
 
+    request_data = request.get_json() or {}
+    content = request_data["content"]
+
+    if len(content) > 280:
+        return make_response(
+            jsonify(
+                {
+                    "success": False,
+                    "message": "Bloom content cannot exceed 280 characters",
+                }
+            ),
+            400,
+        )
+
     user = get_current_user()
-
-    blooms.add_bloom(sender=user, content=request.json["content"])
-
+    blooms.add_bloom(sender=user, content=content)
     return jsonify(
         {
             "success": True,
@@ -171,10 +213,14 @@ def get_bloom(id_str):
     try:
         id_int = int(id_str)
     except ValueError:
-        return make_response((f"Invalid bloom id", 400))
+        return make_response(
+            jsonify({"success": False, "message": "Invalid bloom id"}), 400
+        )
     bloom = blooms.get_bloom(id_int)
     if bloom is None:
-        return make_response((f"Bloom not found", 404))
+        return make_response(
+            jsonify({"success": False, "message": "Bloom not found"}), 404
+        )
     return jsonify(bloom)
 
 
@@ -190,7 +236,9 @@ def home_timeline():
     ]
 
     # Flatten list of blooms from followed users
-    followed_blooms = [bloom for blooms in nested_user_blooms for bloom in blooms]
+    followed_blooms = [
+        bloom for blooms in nested_user_blooms for bloom in blooms
+    ]
 
     # Get the current user's own blooms
     own_blooms = blooms.get_blooms_for_user(current_user.username, limit=50)
@@ -200,7 +248,9 @@ def home_timeline():
 
     # Sort by timestamp (newest first)
     sorted_blooms = list(
-        sorted(all_blooms, key=lambda bloom: bloom.sent_timestamp, reverse=True)
+        sorted(
+            all_blooms, key=lambda bloom: bloom.sent_timestamp, reverse=True
+        )
     )
 
     return jsonify(sorted_blooms)
@@ -217,7 +267,9 @@ def suggested_follows(limit_str):
     try:
         limit_int = int(limit_str)
     except ValueError:
-        return make_response((f"Invalid limit", 400))
+        return make_response(
+            jsonify({"success": False, "message": "Invalid limit"}), 400
+        )
 
     current_user = get_current_user()
 
@@ -232,16 +284,34 @@ def hashtag(hashtag):
     return jsonify(blooms.get_blooms_with_hashtag(hashtag))
 
 
-def verify_request_fields(names_to_types: Dict[str, type]) -> Union[Response, None]:
+def verify_request_fields(
+    names_to_types: Dict[str, type]
+) -> Union[Response, None]:
+    data = request.get_json(silent=True)
+    if data is None:
+        return make_response(
+            jsonify(
+                {"success": False, "message": "Missing or invalid JSON body"}
+            ),
+            400,
+        )
     for name, expected_type in names_to_types.items():
-        if name not in request.json:
-            return make_response((f"Request missing field: {name}", 400))
-        actual_type = type(request.json[name])
+        if name not in data:
+            return make_response(
+                jsonify(
+                    {"success": False, "message": f"Request missing field: {name}"}
+                ),
+                400,
+            )
+        actual_type = type(data[name])
         if actual_type != expected_type:
             return make_response(
-                (
-                    f"Request field {name} had wrong type - expected {expected_type.__name__} but got {actual_type.__name__}",
-                    400,
-                )
+                jsonify(
+                    {
+                        "success": False,
+                        "message": f"Request field {name} had wrong type - expected {expected_type.__name__} but got {actual_type.__name__}",
+                    }
+                ),
+                400,
             )
     return None
