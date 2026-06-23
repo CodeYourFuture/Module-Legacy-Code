@@ -201,7 +201,7 @@ def add_rebloom(*, current_user: User, original_bloom_id: int) -> Optional[Bloom
     # Return the new Bloom object 
     return Bloom(
         id=new_bloom_id,
-        sender=orig_bloom.sender,
+        sender=current_user.username,
         content=orig_bloom.content,
         sent_timestamp=now,
         is_rebloom=True,
