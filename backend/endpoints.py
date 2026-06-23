@@ -315,3 +315,32 @@ def verify_request_fields(
                 400,
             )
     return None
+
+
+@jwt_required()
+def rebloom(id_str):
+    try:
+        original_bloom_id = int(id_str)
+    except ValueError:
+        return make_response(
+            jsonify({"success": False, "message": "Invalid bloom id"}), 
+            400
+        )
+
+    current_user = get_current_user()
+    
+    new_rebloom = blooms.add_rebloom(
+        current_user=current_user, 
+        original_bloom_id=original_bloom_id
+    )
+    
+    if new_rebloom is None:
+        return make_response(
+            jsonify({"success": False, "message": "Original bloom not found"}), 
+            404
+        )
+
+    return jsonify({
+        "success": True,
+        "bloom": new_rebloom
+    })
