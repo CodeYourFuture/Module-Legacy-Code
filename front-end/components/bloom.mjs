@@ -24,6 +24,7 @@ const createBloom = (template, bloom) => {
   const bloomTimeLink = bloomFrag.querySelector("a:has(> [data-time])");
   const bloomContent = bloomFrag.querySelector("[data-content]");
   const rebloomButton = bloomFrag.querySelector("[data-rebloom]")
+  const timesRebloomedCounter = bloomFrag.querySelector("[data-times-rebloomed]")
 
   bloomArticle.setAttribute("data-bloom-id", bloom.id);
   bloomUsername.setAttribute("href", `/profile/${bloom.sender}`);
@@ -37,11 +38,13 @@ const createBloom = (template, bloom) => {
   rebloomButton.hidden = state.currentUser === bloom.sender
   rebloomButton.addEventListener("click", async () => {
     try {
-      await apiService.postRebloom(bloom.id, bloom.sender, bloom.content);
+      await apiService.postRebloom(bloom.id, bloom.sender, bloom.content, bloom.sent_timestamp);
     } catch (error) {
       throw error;
     }
   });
+  timesRebloomedCounter.hidden = !bloom.rebloomed;
+  timesRebloomedCounter.textContent = `Times rebloomed: ${bloom.rebloomed}`
   return bloomFrag;
 };
 
