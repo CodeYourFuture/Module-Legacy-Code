@@ -15,6 +15,13 @@ class Bloom:
     sent_timestamp: datetime.datetime
 
 
+class Rebloom:
+    id: int
+    resender: User
+    sender: User
+    content: str
+    sent_timestamp: datetime.datetime
+
 def add_bloom(*, sender: User, content: str) -> Bloom:
     hashtags = [word[1:] for word in content.split(" ") if word.startswith("#")]
 
@@ -37,6 +44,20 @@ def add_bloom(*, sender: User, content: str) -> Bloom:
             )
 
 
+def rebloom(*, rebloom_id: int, resender: User, sender: User, content: str) -> Rebloom:
+
+    with db_cursor() as cur:
+        cur.execute(
+            "INSERT INTO reblooms (id, resender_id, original_sender_id, content, send_timestamp, times_rebloomed) VALUES (%(rebloom_id)s, %(resender_id)s, %(sender_id)s, %(content)s, %(timestamp)s, 1) ON CONFLICT (resender_id, original_sender_id, content) DO UPDATE SET times_rebloomed = times_rebloomed + 1",
+            dict(
+                rebloom_id=rebloom_id,
+                resender_id=resender.id,
+                sender_id=sender.id,
+                content=content,
+                timestamp=datetime.datetime.now(datetime.UTC),
+            ),
+        )
+        
 def get_blooms_for_user(
     username: str, *, before: Optional[int] = None, limit: Optional[int] = None
 ) -> List[Bloom]:
