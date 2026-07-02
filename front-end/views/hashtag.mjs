@@ -17,7 +17,7 @@ import { createHeading } from "../components/heading.mjs";
 function hashtagView(hashtag) {
   destroy();
 
-  if (hashtag === state.currentHashtag) {
+  if (hashtag !== state.currentHashtag) {
     apiService.getBloomsByHashtag(hashtag);
   }
 
@@ -37,8 +37,8 @@ function hashtagView(hashtag) {
     createLogin,
   );
   document
-    .querySelector("[data-form='login']")
-    ?.addEventListener("submit", handleLogin);
+    .querySelector("[data-action='login']")
+    ?.addEventListener("click", handleLogin);
 
   renderOne(
     state.currentHashtag,
