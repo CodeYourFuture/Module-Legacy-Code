@@ -52,7 +52,7 @@ def rebloom(*, rebloom_id: int, resender: User, sender: User, content: str) -> R
             dict(
                 rebloom_id=rebloom_id,
                 resender_id=resender.id,
-                sender_id=sender.id,
+                sender_name=sender,
                 content=content,
                 timestamp=datetime.datetime.now(datetime.UTC),
             ),
