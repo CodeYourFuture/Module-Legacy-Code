@@ -166,6 +166,26 @@ def send_bloom():
         }
     )
 
+@jwt_required()
+def send_rebloom():
+    type_check_error = verify_request_fields({"content": str})
+    if type_check_error is not None:
+        return type_check_error
+
+    user = get_current_user()
+
+    if user.username == request.json["sender"]:
+        return make_response((f"Cannot rebloom own bloom", 422))
+
+    print(request.json["sender"])
+
+    blooms.rebloom(rebloom_id=request.json["id"], resender=user, sender=request.json["sender"], content=request.json["content"])
+
+    return jsonify(
+        {
+            "success": True,
+        }
+    )
 
 def get_bloom(id_str):
     try:
