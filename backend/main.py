@@ -3,6 +3,7 @@ import os
 from custom_json_provider import CustomJsonProvider
 from data.users import lookup_user
 from endpoints import (
+    do_rebloom,
     do_follow,
     get_bloom,
     hashtag,
@@ -60,6 +61,11 @@ def main():
     app.add_url_rule("/bloom/<id_str>", methods=["GET"], view_func=get_bloom)
     app.add_url_rule("/blooms/<profile_username>", view_func=user_blooms)
     app.add_url_rule("/hashtag/<hashtag>", view_func=hashtag)
+    app.add_url_rule(
+    "/rebloom/<bloom_id>",
+    methods=["POST"],
+    view_func=do_rebloom,
+)
 
     app.run(host="0.0.0.0", port="3000", debug=True)
 
