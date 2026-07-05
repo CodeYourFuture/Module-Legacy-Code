@@ -110,7 +110,10 @@ def other_profile(profile_username):
     current_user = get_current_user()
 
     followers = get_inverse_followed_usernames(profile_user)
-    all_blooms = blooms.get_blooms_for_user(profile_username)
+    all_blooms = blooms.get_blooms_for_user(
+    profile_username,
+    viewer_username=current_user.username if current_user else None,
+    )
     all_blooms.reverse()
     return jsonify(
         {
@@ -185,7 +188,7 @@ def home_timeline():
     # Get blooms from followed users
     followed_users = get_followed_usernames(current_user)
     nested_user_blooms = [
-        blooms.get_blooms_for_user(followed_user, limit=50)
+        blooms.get_blooms_for_user(followed_user, limit=50, viewer_username=current_user.username)
         for followed_user in followed_users
     ]
 
@@ -193,18 +196,17 @@ def home_timeline():
     followed_blooms = [bloom for blooms in nested_user_blooms for bloom in blooms]
 
     # Get the current user's own blooms
-    own_blooms = blooms.get_blooms_for_user(current_user.username, limit=50)
+    own_blooms = blooms.get_blooms_for_user(current_user.username, limit=50, viewer_username=current_user.username)
 
     # Combine own blooms with followed blooms
     all_blooms = followed_blooms + own_blooms
 
     # Sort by timestamp (newest first)
     sorted_blooms = list(
-        sorted(all_blooms, key=lambda bloom: bloom.sent_timestamp, reverse=True)
+        sorted(all_blooms, key=lambda bloom: bloom.rebloom_timestamp or bloom.sent_timestamp, reverse=True)
     )
 
     return jsonify(sorted_blooms)
-
 
 def user_blooms(profile_username):
     user_blooms = blooms.get_blooms_for_user(profile_username)
@@ -245,3 +247,25 @@ def verify_request_fields(names_to_types: Dict[str, type]) -> Union[Response, No
                 )
             )
     return None
+
+@jwt_required()
+def do_rebloom(id_str):
+    try:
+        bloom_id = int(id_str)
+    except ValueError:
+        return make_response((f"Invalid bloom id", 400))
+    if blooms.get_bloom(bloom_id) is None:
+        return make_response((f"Bloom not found", 404))
+    blooms.add_rebloom(rebloomer=get_current_user(), bloom_id=bloom_id)
+    return jsonify({"success": True})
+
+
+@jwt_required()
+def undo_rebloom(id_str):
+    try:
+        bloom_id = int(id_str)
+    except ValueError:
+        return make_response((f"Invalid bloom id", 400))
+    blooms.remove_rebloom(rebloomer=get_current_user(), bloom_id=bloom_id)
+    return jsonify({"success": True})
+

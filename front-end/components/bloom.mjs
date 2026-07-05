@@ -1,3 +1,5 @@
+import { apiService } from "../lib/api.mjs";
+
 /**
  * Create a bloom component
  * @param {string} template - The ID of the template to clone
@@ -20,16 +22,63 @@ const createBloom = (template, bloom) => {
   const bloomTime = bloomFrag.querySelector("[data-time]");
   const bloomTimeLink = bloomFrag.querySelector("a:has(> [data-time])");
   const bloomContent = bloomFrag.querySelector("[data-content]");
+  const rebloomBanner = bloomFrag.querySelector("[data-rebloom-banner]");
+  const rebloomUsername = bloomFrag.querySelector("[data-rebloom-username]");
+  const rebloomButton = bloomFrag.querySelector('[data-action="rebloom"]');
+  const rebloomCount = bloomFrag.querySelector("[data-rebloom-count]");
+  
+  const displayTimestamp = bloom.rebloomed_by
+    ? bloom.rebloom_timestamp
+    : bloom.sent_timestamp;
 
   bloomArticle.setAttribute("data-bloom-id", bloom.id);
   bloomUsername.setAttribute("href", `/profile/${bloom.sender}`);
   bloomUsername.textContent = bloom.sender;
-  bloomTime.textContent = _formatTimestamp(bloom.sent_timestamp);
+  bloomTime.textContent = _formatTimestamp(displayTimestamp);
   bloomTimeLink.setAttribute("href", `/bloom/${bloom.id}`);
   bloomContent.replaceChildren(
     ...bloomParser.parseFromString(_formatHashtags(bloom.content), "text/html")
-      .body.childNodes
+      .body.childNodes,
   );
+
+ 
+  if (bloom.rebloomed_by) {
+    bloomArticle.setAttribute("data-is-rebloom", "true");
+    if (rebloomBanner && rebloomUsername) {
+      rebloomUsername.setAttribute("href", `/profile/${bloom.rebloomed_by}`);
+      rebloomUsername.textContent = bloom.rebloomed_by;
+      rebloomBanner.hidden = false;
+    }
+  }
+
+  if (rebloomCount) {
+    if (bloom.rebloom_count > 0) {
+      rebloomCount.textContent = bloom.rebloom_count;
+      rebloomCount.hidden = false;
+    } else {
+      rebloomCount.hidden = true;
+    }
+  }
+
+  if (rebloomButton) {
+    let isRebloomedByViewer = Boolean(bloom.rebloomed_by_viewer);
+    rebloomButton.setAttribute("data-active", String(isRebloomedByViewer));
+    rebloomButton.setAttribute("aria-pressed", String(isRebloomedByViewer));
+
+    rebloomButton.addEventListener("click", async () => {
+      rebloomButton.disabled = true;
+      const action = isRebloomedByViewer
+        ? apiService.unrebloom
+        : apiService.rebloom;
+      const result = await action(bloom.id);
+      if (result.success) {
+        isRebloomedByViewer = !isRebloomedByViewer;
+        rebloomButton.setAttribute("data-active", String(isRebloomedByViewer));
+        rebloomButton.setAttribute("aria-pressed", String(isRebloomedByViewer));
+      }
+      rebloomButton.disabled = false;
+    });
+  }
 
   return bloomFrag;
 };
@@ -38,7 +87,7 @@ function _formatHashtags(text) {
   if (!text) return text;
   return text.replace(
     /\B#[^#]+/g,
-    (match) => `<a href="/hashtag/${match.slice(1)}">${match}</a>`
+    (match) => `<a href="/hashtag/${match.slice(1)}">${match}</a>`,
   );
 }
 
@@ -84,4 +133,4 @@ function _formatTimestamp(timestamp) {
   }
 }
 
-export {createBloom};
+export { createBloom };
