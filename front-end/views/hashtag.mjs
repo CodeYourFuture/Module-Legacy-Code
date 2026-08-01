@@ -17,9 +17,8 @@ import {createHeading} from "../components/heading.mjs";
 function hashtagView(hashtag) {
   destroy();
 
-  apiService.getBloomsByHashtag(hashtag);
-
-  renderOne(
+  apiService.getBloomsByHashtag(hashtag).then(() =>{
+    renderOne(
     state.isLoggedIn,
     getLogoutContainer(),
     "logout-template",
@@ -36,7 +35,7 @@ function hashtagView(hashtag) {
   );
   document
     .querySelector("[data-action='login']")
-    ?.addEventListener("click", handleLogin);
+    ?.addEventListener("submit", handleLogin);
 
   renderOne(
     state.currentHashtag,
@@ -50,6 +49,8 @@ function hashtagView(hashtag) {
     "bloom-template",
     createBloom
   );
+});
 }
+
 
 export {hashtagView};
