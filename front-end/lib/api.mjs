@@ -193,22 +193,37 @@ async function getBloomsByHashtag(hashtag) {
   }
 }
 
-async function postBloom(content) {
+async function postBloom(content, original_sender=null) {
   try {
     const data = await _apiRequest("/bloom", {
       method: "POST",
-      body: JSON.stringify({content}),
+      body: JSON.stringify({
+        content: content,
+        original_sender: original_sender
+      }),
     });
 
     if (data.success) {
       await getBlooms();
       await getProfile(state.currentUser);
     }
-
     return data;
   } catch (error) {
     // Error already handled by _apiRequest
     return {success: false};
+  }
+}
+
+async function reBloom(bloomId){
+  try {
+    const bloom = await getBloom(bloomId);
+    if (!bloom.original_sender){
+      bloom.original_sender = bloom.sender;
+    }
+    await postBloom(bloom.content, bloom.original_sender);
+    return bloom.content;
+  } catch (error) {
+    console.log(error)
   }
 }
 
@@ -292,6 +307,7 @@ const apiService = {
   getBlooms,
   postBloom,
   getBloomsByHashtag,
+  reBloom,
 
   // User methods
   getProfile,

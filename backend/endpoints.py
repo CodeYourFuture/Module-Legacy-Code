@@ -157,8 +157,11 @@ def send_bloom():
         return type_check_error
 
     user = get_current_user()
+    original_sender = None
+    if request.json.get("original_sender"):
+        original_sender = request.json["original_sender"]
 
-    blooms.add_bloom(sender=user, content=request.json["content"])
+    blooms.add_bloom(sender=user, original_sender=original_sender, content=request.json["content"])
 
     return jsonify(
         {

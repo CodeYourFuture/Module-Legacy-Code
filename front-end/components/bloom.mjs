@@ -6,10 +6,13 @@
  * btw a bloom object is composed thus
  * {"id": Number,
  * "sender": username,
+ * "original_sender": "original username", -- or null if this bloom is not reposted
  * "content": "string from textarea",
  * "sent_timestamp": "datetime as ISO 8601 formatted string"}
 
  */
+import { apiService, state } from "../index.mjs";
+
 const createBloom = (template, bloom) => {
   if (!bloom) return;
   const bloomFrag = document.getElementById(template).content.cloneNode(true);
@@ -17,13 +20,29 @@ const createBloom = (template, bloom) => {
 
   const bloomArticle = bloomFrag.querySelector("[data-bloom]");
   const bloomUsername = bloomFrag.querySelector("[data-username]");
+  const bloomOriginalUsername = bloomFrag.querySelector("[data-original-username]");
   const bloomTime = bloomFrag.querySelector("[data-time]");
   const bloomTimeLink = bloomFrag.querySelector("a:has(> [data-time])");
   const bloomContent = bloomFrag.querySelector("[data-content]");
-
+  const reBloomButton = bloomFrag.querySelector("[data-rebloom]");
+  const currentUser = state["currentUser"];
+  if (currentUser !== bloom.sender){
+    reBloomButton.addEventListener("click", async () =>{
+      const response = await apiService.reBloom(bloom.id);
+    });
+  } else {
+    //this part prevents user from reblooming his own posts
+    reBloomButton.remove();
+  }
+  
   bloomArticle.setAttribute("data-bloom-id", bloom.id);
   bloomUsername.setAttribute("href", `/profile/${bloom.sender}`);
   bloomUsername.textContent = bloom.sender;
+  if (bloom.original_sender){
+    bloomUsername.textContent = "Rebllomed by: " + bloom.sender;
+    bloomOriginalUsername.setAttribute("href", `/profile/${bloom.original_sender}`);
+    bloomOriginalUsername.textContent = "Originaly bloomed by: " + bloom.original_sender;
+  }
   bloomTime.textContent = _formatTimestamp(bloom.sent_timestamp);
   bloomTimeLink.setAttribute("href", `/bloom/${bloom.id}`);
   bloomContent.replaceChildren(
