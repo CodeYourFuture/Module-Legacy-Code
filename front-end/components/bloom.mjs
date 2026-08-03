@@ -1,3 +1,6 @@
+import { apiService } from "../index.mjs";
+import { state } from "../lib/state.mjs";
+
 /**
  * Create a bloom component
  * @param {string} template - The ID of the template to clone
@@ -20,8 +23,36 @@ const createBloom = (template, bloom) => {
   const bloomTime = bloomFrag.querySelector("[data-time]");
   const bloomTimeLink = bloomFrag.querySelector("a:has(> [data-time])");
   const bloomContent = bloomFrag.querySelector("[data-content]");
+  const rebloomBtn = bloomFrag.querySelector("[data-action='rebloom']");
+  const rebloomHeader = bloomFrag.querySelector("[data-rebloom-header]");
+  const rebloomBy = bloomFrag.querySelector("[data-rebloom-by]");
+  const rebloomCountLabel = bloomFrag.querySelector("[data-rebloom-count]");
 
   bloomArticle.setAttribute("data-bloom-id", bloom.id);
+
+  bloomArticle.removeAttribute("data-is-rebloom");
+  if (rebloomHeader) rebloomHeader.classList.add("is-hidden");
+
+  if (bloom.rebloomer) {
+    bloomArticle.setAttribute("data-is-rebloom", "true");
+
+    if (rebloomHeader && rebloomBy) {
+      rebloomHeader.classList.remove("is-hidden");
+      rebloomBy.setAttribute("href", `/profile/${bloom.rebloomer}`);
+      rebloomBy.textContent = bloom.rebloomer;
+
+    }
+  }
+
+  if (rebloomCountLabel) {
+    if (bloom.rebloom_count > 0) {
+      rebloomCountLabel.textContent = `(${bloom.rebloom_count})`;
+      rebloomCountLabel.classList.remove("is-hidden");
+    } else {
+      rebloomCountLabel.classList.add("is-hidden");
+    }
+  }
+
   bloomUsername.setAttribute("href", `/profile/${bloom.sender}`);
   bloomUsername.textContent = bloom.sender;
   bloomTime.textContent = _formatTimestamp(bloom.sent_timestamp);
@@ -30,6 +61,17 @@ const createBloom = (template, bloom) => {
     ...bloomParser.parseFromString(_formatHashtags(bloom.content), "text/html")
       .body.childNodes
   );
+
+  if (rebloomBtn) {
+    rebloomBtn.addEventListener("click", async (e) => {
+      e.preventDefault();
+      rebloomBtn.disabled = true;
+      console.log(bloom)
+      const response = await apiService.postRebloom(bloom.id);
+      console.log("API service responded with", response);
+      rebloomBtn.disabled = false;
+    })
+  }
 
   return bloomFrag;
 };

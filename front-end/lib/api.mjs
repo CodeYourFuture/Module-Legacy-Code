@@ -212,6 +212,28 @@ async function postBloom(content) {
   }
 }
 
+async function postRebloom(bloomId) {
+  try {
+    const data = await _apiRequest(`/blooms/${bloomId}/rebloom`, {
+      method: "POST"
+    });
+    console.log("Network response received:", data)
+    if (data.success) {
+      const reFetchingForHome = await getBlooms();
+      console.log("Refetching for home:", reFetchingForHome)
+      if (state.currentUser) {
+        const updateUserProfile = await getProfile(state.currentUser);
+        const updateUserBlooms = await getBlooms(state.currentUser);
+        console.log("update user profile", updateUserProfile);
+        console.log("update user blooms", updateUserBlooms);
+      }
+    }
+    return data;
+  } catch (error) {
+    return {success: false}
+  }
+}
+
 // ======= USER methods
 async function getProfile(username) {
   const endpoint = username ? `/profile/${username}` : "/profile";
@@ -292,6 +314,7 @@ const apiService = {
   getBlooms,
   postBloom,
   getBloomsByHashtag,
+  postRebloom,
 
   // User methods
   getProfile,
