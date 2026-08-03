@@ -1,3 +1,4 @@
+import { apiService } from "../lib/api.mjs";
 /**
  * Create a bloom component
  * @param {string} template - The ID of the template to clone
@@ -20,6 +21,8 @@ const createBloom = (template, bloom) => {
   const bloomTime = bloomFrag.querySelector("[data-time]");
   const bloomTimeLink = bloomFrag.querySelector("a:has(> [data-time])");
   const bloomContent = bloomFrag.querySelector("[data-content]");
+  const rebloomBanner = bloomFrag.querySelector("[data-rebloom-banner]");
+  const rebloomBtn = bloomFrag.querySelector("[data-action='rebloom']");
 
   bloomArticle.setAttribute("data-bloom-id", bloom.id);
   bloomUsername.setAttribute("href", `/profile/${bloom.sender}`);
@@ -28,8 +31,40 @@ const createBloom = (template, bloom) => {
   bloomTimeLink.setAttribute("href", `/bloom/${bloom.id}`);
   bloomContent.replaceChildren(
     ...bloomParser.parseFromString(_formatHashtags(bloom.content), "text/html")
-      .body.childNodes
+      .body.childNodes,
   );
+
+  // Handle Rebloom Header Banner
+  if (bloom.is_rebloom && bloom.rebloomed_by && rebloomBanner) {
+    rebloomBanner.textContent = `🔄 rebloomed by ${bloom.rebloomed_by}`;
+  } else if (rebloomBanner) {
+    rebloomBanner.textContent = "";
+  }
+
+  //Handle Rebloom Button
+  if (rebloomBtn) {
+    if (bloom.is_rebloom) {
+      // Disable button if it's already a rebloom
+      rebloomBtn.disabled = true;
+    } else {
+      rebloomBtn.addEventListener("click", async (e) => {
+        e.preventDefault();
+        e.stopPropagation(); // Prevent opening the single bloom view on click
+
+        rebloomBtn.disabled = true;
+        const success = await apiService.rebloom(bloom.id);
+        if (!success) {
+          rebloomBtn.disabled = false;
+        } else {
+          if (typeof onUpdate === "function") {
+            onUpdate();
+          } else {
+            window.location.reload(); // Fallback if no layout renderer handler is attached
+          }
+        }
+      });
+    }
+  }
 
   return bloomFrag;
 };
@@ -37,8 +72,8 @@ const createBloom = (template, bloom) => {
 function _formatHashtags(text) {
   if (!text) return text;
   return text.replace(
-    /\B#[^#]+/g,
-    (match) => `<a href="/hashtag/${match.slice(1)}">${match}</a>`
+    /#(\w+)/g,
+    (match, tag) => `<a href="/hashtag/${tag}">${match}</a>`,
   );
 }
 
@@ -46,9 +81,21 @@ function _formatTimestamp(timestamp) {
   if (!timestamp) return "";
 
   try {
-    const date = new Date(timestamp);
+    let formattedTimestamp = timestamp;
+    if (
+      typeof formattedTimestamp === "string" &&
+      !formattedTimestamp.endsWith("Z") &&
+      !formattedTimestamp.includes("+")
+    ) {
+      formattedTimestamp += "Z";
+    }
+    const date = new Date(formattedTimestamp);
     const now = new Date();
     const diffSeconds = Math.floor((now - date) / 1000);
+
+    if (diffSeconds == 0) {
+      return "now";
+    }
 
     // Less than a minute
     if (diffSeconds < 60) {
@@ -84,4 +131,4 @@ function _formatTimestamp(timestamp) {
   }
 }
 
-export {createBloom};
+export { createBloom };
