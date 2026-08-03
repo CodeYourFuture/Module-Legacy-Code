@@ -23,7 +23,7 @@ async function _apiRequest(endpoint, options = {}) {
       ...(token ? {Authorization: `Bearer ${token}`} : {}),
     },
     mode: "cors",
-    credentials: "include",
+    // credentials: "include",
   };
 
   const fetchOptions = {...defaultOptions, ...options};
@@ -184,7 +184,7 @@ async function getBloomsByHashtag(hashtag) {
     const blooms = await _apiRequest(endpoint);
     state.updateState({
       hashtagBlooms: blooms,
-      currentHashtag: `#${tag}`,
+      currentHashtag: hashtag,
     });
     return blooms;
   } catch (error) {
@@ -261,8 +261,9 @@ async function followUser(username) {
 
 async function unfollowUser(username) {
   try {
-    const data = await _apiRequest(`/unfollow/${username}`, {
+    const data = await _apiRequest("/unfollow", {
       method: "POST",
+      body: JSON.stringify({ unfollow_username: username }),
     });
 
     if (data.success) {

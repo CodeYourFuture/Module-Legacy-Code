@@ -1,4 +1,5 @@
 import datetime
+from datetime import timezone
 import unittest
 
 from flask import Flask
@@ -17,7 +18,7 @@ class TestCustomJsonProvider(unittest.TestCase):
                     hour=14,
                     minute=15,
                     second=16,
-                    tzinfo=datetime.UTC,
+                    tzinfo=timezone.utc,
                 )
             }
         )
