@@ -13,6 +13,15 @@ CREATE TABLE blooms (
     send_timestamp TIMESTAMP NOT NULL
 );
 
+CREATE TABLE reblooms (
+    id BIGSERIAL NOT NULL PRIMARY KEY,
+    resender_name TEXT NOT NULL,
+    original_sender_name TEXT NOT NULL,
+    content TEXT NOT NULL,
+    send_timestamp TIMESTAMP NOT NULL,
+    times_rebloomed INT NOT NULL
+);
+
 CREATE TABLE follows (
     id SERIAL PRIMARY KEY,
     follower INT NOT NULL REFERENCES users(id),

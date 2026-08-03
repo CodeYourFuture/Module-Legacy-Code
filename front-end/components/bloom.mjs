@@ -1,3 +1,6 @@
+import { apiService } from "../lib/api.mjs"
+import { state } from "../lib/state.mjs"
+
 /**
  * Create a bloom component
  * @param {string} template - The ID of the template to clone
@@ -20,6 +23,8 @@ const createBloom = (template, bloom) => {
   const bloomTime = bloomFrag.querySelector("[data-time]");
   const bloomTimeLink = bloomFrag.querySelector("a:has(> [data-time])");
   const bloomContent = bloomFrag.querySelector("[data-content]");
+  const rebloomButton = bloomFrag.querySelector("[data-rebloom]")
+  const timesRebloomedCounter = bloomFrag.querySelector("[data-times-rebloomed]")
 
   bloomArticle.setAttribute("data-bloom-id", bloom.id);
   bloomUsername.setAttribute("href", `/profile/${bloom.sender}`);
@@ -30,7 +35,16 @@ const createBloom = (template, bloom) => {
     ...bloomParser.parseFromString(_formatHashtags(bloom.content), "text/html")
       .body.childNodes
   );
-
+  rebloomButton.hidden = state.currentUser === bloom.sender
+  rebloomButton.addEventListener("click", async () => {
+    try {
+      await apiService.postRebloom(bloom.id, bloom.sender, bloom.content, bloom.sent_timestamp);
+    } catch (error) {
+      throw error;
+    }
+  });
+  timesRebloomedCounter.hidden = !bloom.rebloomed;
+  timesRebloomedCounter.textContent = `Times rebloomed: ${bloom.rebloomed}`
   return bloomFrag;
 };
 
@@ -84,4 +98,4 @@ function _formatTimestamp(timestamp) {
   }
 }
 
-export {createBloom};
+export { createBloom };

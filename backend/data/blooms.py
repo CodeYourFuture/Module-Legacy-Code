@@ -15,6 +15,14 @@ class Bloom:
     sent_timestamp: datetime.datetime
 
 
+class Rebloom:
+    id: int
+    resender: User
+    sender: User
+    content: str
+    sent_timestamp: datetime.datetime
+    rebloomed: int
+
 def add_bloom(*, sender: User, content: str) -> Bloom:
     hashtags = [word[1:] for word in content.split(" ") if word.startswith("#")]
 
@@ -37,6 +45,28 @@ def add_bloom(*, sender: User, content: str) -> Bloom:
             )
 
 
+def rebloom(*, rebloom_id: int, resender: User, sender: User, content: str, sent_timestamp: datetime.datetime) -> Rebloom:
+
+    with db_cursor() as cur:
+        cur.execute(
+            "INSERT INTO reblooms (id, resender_id, original_sender_id, content, send_timestamp, times_rebloomed) VALUES (%(rebloom_id)s, %(resender_id)s, %(sender_id)s, %(content)s, %(timestamp)s, 1) ON CONFLICT (resender_id, original_sender_id, content) DO UPDATE SET times_rebloomed = times_rebloomed + 1",
+            dict(
+                rebloom_id=rebloom_id,
+                resender_name=resender.username,
+                sender_name=sender,
+                content=content,
+                timestamp=sent_timestamp
+            ),
+        )
+        return Rebloom(
+            id=rebloom_id,
+            resender=resender,
+            sender=sender,
+            content=content,
+            sent_timestamp=sent_timestamp,
+            rebloomed=1
+        )
+        
 def get_blooms_for_user(
     username: str, *, before: Optional[int] = None, limit: Optional[int] = None
 ) -> List[Bloom]:
@@ -50,7 +80,7 @@ def get_blooms_for_user(
         else:
             before_clause = ""
 
-        limit_clause = make_limit_clause(limit, kwargs)
+        #limit_clause = make_limit_clause(limit, kwargs)
 
         cur.execute(
             f"""SELECT
@@ -60,8 +90,7 @@ def get_blooms_for_user(
             WHERE
               username = %(sender_username)s
               {before_clause}
-            ORDER BY send_timestamp DESC
-            {limit_clause}
+
             """,
             kwargs,
         )
@@ -79,6 +108,33 @@ def get_blooms_for_user(
             )
     return blooms
 
+def get_reblooms_for_user(username: str) -> List[Rebloom]:
+    with db_cursor() as cur:
+        cur.execute(
+            """SELECT
+              reblooms.id, users.username, original_sender_name, content, send_timestamp, times_rebloomed
+            FROM
+              reblooms INNER JOIN users ON users.username = reblooms.resender_name
+            WHERE
+              users.username = %(username)s
+            """,
+            {"username": username},
+        )
+        rows = cur.fetchall()
+        reblooms = []
+        for row in rows:
+            rebloom_id, resender_name, sender_name, content, timestamp, times_rebloomed = row
+            reblooms.append(
+                Rebloom(
+                    id=rebloom_id,
+                    resender=resender_name,
+                    sender=sender_name,
+                    content=content,
+                    sent_timestamp=timestamp,
+                    rebloomed=times_rebloomed
+                )
+            )
+    return reblooms
 
 def get_bloom(bloom_id: int) -> Optional[Bloom]:
     with db_cursor() as cur:
