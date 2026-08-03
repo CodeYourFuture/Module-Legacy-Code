@@ -115,7 +115,7 @@ def other_profile(profile_username):
     return jsonify(
         {
             "username": profile_username,
-            "recent_blooms": all_blooms[:10],
+            "recent_blooms": [bloom.to_dict() for bloom in all_blooms[:10]],
             "follows": get_followed_usernames(profile_user),
             "followers": list(followers),
             "is_following": current_user is not None
@@ -175,7 +175,7 @@ def get_bloom(id_str):
     bloom = blooms.get_bloom(id_int)
     if bloom is None:
         return make_response((f"Bloom not found", 404))
-    return jsonify(bloom)
+    return jsonify(bloom.to_dict())
 
 
 @jwt_required()
@@ -203,13 +203,13 @@ def home_timeline():
         sorted(all_blooms, key=lambda bloom: bloom.sent_timestamp, reverse=True)
     )
 
-    return jsonify(sorted_blooms)
+    return jsonify([bloom.to_dict() for bloom in sorted_blooms])
 
 
 def user_blooms(profile_username):
     user_blooms = blooms.get_blooms_for_user(profile_username)
     user_blooms.reverse()
-    return jsonify(user_blooms)
+    return jsonify([bloom.to_dict() for bloom in user_blooms])
 
 
 @jwt_required()
@@ -229,7 +229,7 @@ def suggested_follows(limit_str):
 
 
 def hashtag(hashtag):
-    return jsonify(blooms.get_blooms_with_hashtag(hashtag))
+    return jsonify([bloom.to_dict() for bloom in blooms.get_blooms_with_hashtag(hashtag)])
 
 
 def verify_request_fields(names_to_types: Dict[str, type]) -> Union[Response, None]:
@@ -245,3 +245,29 @@ def verify_request_fields(names_to_types: Dict[str, type]) -> Union[Response, No
                 )
             )
     return None
+
+@jwt_required()
+def do_rebloom(bloom_id):
+    try:
+        bloom_id = int(bloom_id)
+    except ValueError:
+        return make_response(("Invalid bloom id", 400))
+
+    original_bloom = blooms.get_bloom(bloom_id)
+
+    if original_bloom is None:
+        return make_response(("Bloom not found", 404))
+
+    current_user = get_current_user()
+
+    blooms.add_bloom(
+        sender=current_user,
+        content=original_bloom.content,
+        rebloom_of=bloom_id,
+    )
+
+    return jsonify(
+        {
+            "success": True,
+        }
+    )

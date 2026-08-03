@@ -10,6 +10,8 @@
  * "sent_timestamp": "datetime as ISO 8601 formatted string"}
 
  */
+import {apiService} from "../index.mjs";
+
 const createBloom = (template, bloom) => {
   if (!bloom) return;
   const bloomFrag = document.getElementById(template).content.cloneNode(true);
@@ -20,6 +22,9 @@ const createBloom = (template, bloom) => {
   const bloomTime = bloomFrag.querySelector("[data-time]");
   const bloomTimeLink = bloomFrag.querySelector("a:has(> [data-time])");
   const bloomContent = bloomFrag.querySelector("[data-content]");
+  const rebloomButton = bloomFrag.querySelector(
+  "[data-action='rebloom']"
+);
 
   bloomArticle.setAttribute("data-bloom-id", bloom.id);
   bloomUsername.setAttribute("href", `/profile/${bloom.sender}`);
@@ -30,7 +35,9 @@ const createBloom = (template, bloom) => {
     ...bloomParser.parseFromString(_formatHashtags(bloom.content), "text/html")
       .body.childNodes
   );
-
+rebloomButton?.addEventListener("click", () => {
+  apiService.rebloomBloom(bloom.id);
+});
   return bloomFrag;
 };
 
