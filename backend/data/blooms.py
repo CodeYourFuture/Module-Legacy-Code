@@ -13,6 +13,10 @@ class Bloom:
     sender: User
     content: str
     sent_timestamp: datetime.datetime
+    rebloom_count: int = 0
+    rebloomed_by: Optional[str] = None
+    rebloom_timestamp: Optional[datetime.datetime] = None
+    rebloomed_by_viewer: bool = False
 
 
 def add_bloom(*, sender: User, content: str) -> Bloom:
@@ -36,13 +40,32 @@ def add_bloom(*, sender: User, content: str) -> Bloom:
                 dict(hashtag=hashtag, bloom_id=bloom_id),
             )
 
+def add_rebloom(*, rebloomer: User, bloom_id: int) -> None:
+    now = datetime.datetime.now(tz=datetime.UTC)
+    with db_cursor() as cur:
+        cur.execute(
+            """INSERT INTO reblooms (bloom_id, user_id, rebloom_timestamp)
+               VALUES (%(bloom_id)s, %(user_id)s, %(timestamp)s)
+               ON CONFLICT (user_id, bloom_id) DO NOTHING""",
+            dict(bloom_id=bloom_id, user_id=rebloomer.id, timestamp=now),
+        )
+
+
+def remove_rebloom(*, rebloomer: User, bloom_id: int) -> None:
+    with db_cursor() as cur:
+        cur.execute(
+            "DELETE FROM reblooms WHERE bloom_id = %(bloom_id)s AND user_id = %(user_id)s",
+            dict(bloom_id=bloom_id, user_id=rebloomer.id),
+        )
+
 
 def get_blooms_for_user(
-    username: str, *, before: Optional[int] = None, limit: Optional[int] = None
+    username: str, *, before: Optional[int] = None, limit: Optional[int] = None, viewer_username: Optional[str] = None,
 ) -> List[Bloom]:
     with db_cursor() as cur:
         kwargs = {
             "sender_username": username,
+            "viewer_username": viewer_username,
         }
         if before is not None:
             before_clause = "AND send_timestamp < %(before_limit)s"
@@ -54,13 +77,25 @@ def get_blooms_for_user(
 
         cur.execute(
             f"""SELECT
-              blooms.id, users.username, content, send_timestamp
+              b.id, u.username, b.content, b.send_timestamp,
+              rb_user.username, r.rebloom_timestamp,
+              (SELECT COUNT(*) FROM reblooms WHERE bloom_id = b.id) AS rebloom_count,
+              EXISTS(
+                SELECT 1 FROM reblooms rv
+                INNER JOIN users vu ON vu.id = rv.user_id
+                WHERE rv.bloom_id = b.id AND vu.username = %(viewer_username)s
+              ) AS rebloomed_by_viewer
             FROM
-              blooms INNER JOIN users ON users.id = blooms.sender_id
+              blooms b
+              INNER JOIN users u ON u.id = b.sender_id
+              LEFT JOIN reblooms r ON r.bloom_id = b.id AND r.user_id = (
+                SELECT id FROM users WHERE username = %(sender_username)s
+              )
+              LEFT JOIN users rb_user ON rb_user.id = r.user_id
             WHERE
-              username = %(sender_username)s
+              (u.username = %(sender_username)s OR r.id IS NOT NULL)
               {before_clause}
-            ORDER BY send_timestamp DESC
+            ORDER BY COALESCE(r.rebloom_timestamp, b.send_timestamp) DESC
             {limit_clause}
             """,
             kwargs,
@@ -68,13 +103,20 @@ def get_blooms_for_user(
         rows = cur.fetchall()
         blooms = []
         for row in rows:
-            bloom_id, sender_username, content, timestamp = row
+            (bloom_id, sender_username, content, timestamp, rebloomed_by,
+                rebloom_timestamp,
+                rebloom_count,
+                rebloomed_by_viewer,) = row
             blooms.append(
                 Bloom(
                     id=bloom_id,
                     sender=sender_username,
                     content=content,
                     sent_timestamp=timestamp,
+                    rebloomed_by=rebloomed_by,
+                    rebloom_timestamp=rebloom_timestamp,
+                    rebloom_count=rebloom_count,
+                    rebloomed_by_viewer=rebloomed_by_viewer,
                 )
             )
     return blooms
