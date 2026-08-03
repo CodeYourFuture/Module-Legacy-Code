@@ -234,11 +234,20 @@
     <!-- Bloom Template -->
     <template id="bloom-template">
       <article class="bloom box" data-bloom data-bloom-id="">
+        <div class="bloom__rebloomed-by" data-rebloomed-by hidden>
+          re-bloomed by <a href="#" data-rebloomed-by-link></a>
+        </div>
         <div class="bloom__header flex">
           <a href="#" class="bloom__username" data-username>Username</a>
           <a href="#" class="bloom__time"><time class="bloom__time" data-time>2m</time></a>
         </div>
         <div class="bloom__content" data-content></div>
+
+        <div class="bloom__footer">
+          <button class="bloom__rebloom-btn" data-rebloom-btn> Re-bloom</button>
+          <br><br>
+          <span data-rebloom-count hidden></span>
+        </div>
       </article>
     </template>
 

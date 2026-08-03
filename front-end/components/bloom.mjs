@@ -10,6 +10,10 @@
  * "sent_timestamp": "datetime as ISO 8601 formatted string"}
 
  */
+
+import {apiService} from "../index.mjs"
+
+
 const createBloom = (template, bloom) => {
   if (!bloom) return;
   const bloomFrag = document.getElementById(template).content.cloneNode(true);
@@ -20,6 +24,10 @@ const createBloom = (template, bloom) => {
   const bloomTime = bloomFrag.querySelector("[data-time]");
   const bloomTimeLink = bloomFrag.querySelector("a:has(> [data-time])");
   const bloomContent = bloomFrag.querySelector("[data-content]");
+  const reBloomedByBanner  = bloomFrag.querySelector("[data-rebloomed-by]");
+  const reBloomedByLink    = bloomFrag.querySelector("[data-rebloomed-by-link]");
+  const reBloomBtn         = bloomFrag.querySelector("[data-rebloom-btn]");
+  const reBloomCount       = bloomFrag.querySelector("[data-rebloom-count]");
 
   bloomArticle.setAttribute("data-bloom-id", bloom.id);
   bloomUsername.setAttribute("href", `/profile/${bloom.sender}`);
@@ -30,6 +38,21 @@ const createBloom = (template, bloom) => {
     ...bloomParser.parseFromString(_formatHashtags(bloom.content), "text/html")
       .body.childNodes
   );
+
+  if (bloom.re_bloomed_by) {
+    reBloomedByBanner.hidden = false;
+    reBloomedByLink.textContent = bloom.re_bloomed_by;
+    reBloomedByLink.setAttribute("href", `/profile/${bloom.re_bloomed_by}`);
+  }
+
+  if (bloom.re_bloom_count > 0) {
+    reBloomCount.hidden = false;
+    reBloomCount.textContent = `${bloom.re_bloom_count} re-blooms`;
+  }
+
+  reBloomBtn.addEventListener("click", () => {
+    apiService.reBloomBloom(bloom.id);
+  });
 
   return bloomFrag;
 };

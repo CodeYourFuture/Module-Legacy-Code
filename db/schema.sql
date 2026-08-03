@@ -26,3 +26,12 @@ CREATE TABLE hashtags (
     bloom_id BIGINT NOT NULL REFERENCES blooms(id),
     UNIQUE(hashtag, bloom_id)
 );
+
+CREATE TABLE re_blooms (
+    id SERIAL PRIMARY KEY,
+    bloom_id BIGINT NOT NULL REFERENCES blooms(id),
+    re_bloomer_id INT NOT NULL REFERENCES users(id),
+    re_bloom_timestamp TIMESTAMP NOT NULL,
+    UNIQUE(bloom_id, re_bloomer_id)
+)
+
