@@ -111,11 +111,15 @@ def other_profile(profile_username):
 
     followers = get_inverse_followed_usernames(profile_user)
     all_blooms = blooms.get_blooms_for_user(profile_username)
-    all_blooms.reverse()
+    all_reblooms = blooms.get_reblooms_for_user(profile_username)
+    
+    bloom_data = all_blooms + all_reblooms
+    bloom_data.reverse()
+
     return jsonify(
         {
             "username": profile_username,
-            "recent_blooms": all_blooms[:10],
+            "recent_blooms": bloom_data[:10],
             "follows": get_followed_usernames(profile_user),
             "followers": list(followers),
             "is_following": current_user is not None
@@ -167,6 +171,26 @@ def send_bloom():
     )
 
 
+@jwt_required()
+def send_rebloom():
+    type_check_error = verify_request_fields({"content": str})
+    if type_check_error is not None:
+        return type_check_error
+
+    user = get_current_user()
+
+    if user.username == request.json["sender"]:
+        return make_response((f"Cannot rebloom own bloom", 422))
+
+    blooms.rebloom(rebloom_id=request.json["id"], resender=user, sender=request.json["sender"], content=request.json["content"], sent_timestamp=request.json["sent_timestamp"])
+
+    return jsonify(
+        {
+            "success": True,
+        }
+    )
+
+
 def get_bloom(id_str):
     try:
         id_int = int(id_str)
@@ -210,6 +234,12 @@ def user_blooms(profile_username):
     user_blooms = blooms.get_blooms_for_user(profile_username)
     user_blooms.reverse()
     return jsonify(user_blooms)
+
+
+def user_reblooms(profile_username):
+    user_reblooms = blooms.get_reblooms_for_user(profile_username)
+    user_reblooms.reverse()
+    return jsonify(user_reblooms)
 
 
 @jwt_required()
