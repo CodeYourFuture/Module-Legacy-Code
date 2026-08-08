@@ -38,6 +38,7 @@ def send_bloom(access_token: str, text: str) -> None:
     post("/bloom", data={"content": text}, access_token=access_token)
 
 
+
 def follow(*, follower_access_token: str, follow_username: str) -> None:
     post(
         "/follow",
