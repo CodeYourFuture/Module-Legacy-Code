@@ -1,11 +1,13 @@
 from typing import Dict, Union
 from data import blooms
+from data.blooms import get_user_reblooms
 from data.follows import follow, get_followed_usernames, get_inverse_followed_usernames
 from data.users import (
     UserRegistrationError,
     get_suggested_follows,
     get_user,
     register_user,
+
 )
 
 from flask import Response, jsonify, make_response, request
@@ -112,18 +114,21 @@ def other_profile(profile_username):
     followers = get_inverse_followed_usernames(profile_user)
     all_blooms = blooms.get_blooms_for_user(profile_username)
     all_blooms.reverse()
-    return jsonify(
-        {
-            "username": profile_username,
-            "recent_blooms": all_blooms[:10],
-            "follows": get_followed_usernames(profile_user),
-            "followers": list(followers),
-            "is_following": current_user is not None
-            and current_user.username in followers,
-            "is_self": current_user is not None
-            and current_user.username == profile_username,
-            "total_blooms": len(all_blooms),
-        }
+    return jsonify({
+        "username": profile_username,
+        "recent_blooms": [{
+            "id": b.id, 
+            "sender": {"id": b.sender.id, "username": b.sender.username},
+            "content": b.content, 
+            "sent_timestamp": b.sent_timestamp.isoformat(),
+            "rebloom_count": getattr(b, 'rebloom_count', 0)
+        } for b in all_blooms[:10]],
+        "follows": get_followed_usernames(profile_user),
+        "followers": list(followers),
+        "is_following": current_user is not None and current_user.username in followers,
+        "is_self": current_user is not None and current_user.username == profile_username,
+        "total_blooms": len(all_blooms),
+    }
     )
 
 
@@ -177,39 +182,65 @@ def get_bloom(id_str):
         return make_response((f"Bloom not found", 404))
     return jsonify(bloom)
 
+@jwt_required()
+def rebloom():
+    type_check_error = verify_request_fields({"bloom_id": int})
+    if type_check_error is not None:
+        return type_check_error
+
+    current_user = get_current_user()
+    bloom_id = request.json["bloom_id"]
+
+    # Add the rebloom
+    blooms.add_rebloom(user=current_user, bloom_id=bloom_id)
+
+    #return new rebloom count
+    count = blooms.get_rebloom_count(bloom_id)
+
+    return jsonify({
+        "success": True,
+        "rebloom_count": count
+    })
+
+def user_blooms(profile_username):
+    """Get all blooms for user profile"""
+    user_blooms_list = blooms.get_blooms_for_user(profile_username)
+    user_blooms_list.reverse()
+    return jsonify(user_blooms_list)
 
 @jwt_required()
 def home_timeline():
     current_user = get_current_user()
-
-    # Get blooms from followed users
+    
+    # 1. Get reblooms 
+    user_reblooms = blooms.get_user_reblooms(current_user.username, limit=50)
+    
+    # 2. Get blooms from followed users
     followed_users = get_followed_usernames(current_user)
     nested_user_blooms = [
         blooms.get_blooms_for_user(followed_user, limit=50)
         for followed_user in followed_users
     ]
-
-    # Flatten list of blooms from followed users
-    followed_blooms = [bloom for blooms in nested_user_blooms for bloom in blooms]
-
-    # Get the current user's own blooms
+    
+    # 3. Flatten followed blooms
+    followed_blooms = [bloom for blooms_list in nested_user_blooms for bloom in blooms_list]
+    
+    # 4. Get original blooms  
     own_blooms = blooms.get_blooms_for_user(current_user.username, limit=50)
-
-    # Combine own blooms with followed blooms
-    all_blooms = followed_blooms + own_blooms
-
-    # Sort by timestamp (newest first)
-    sorted_blooms = list(
-        sorted(all_blooms, key=lambda bloom: bloom.sent_timestamp, reverse=True)
-    )
-
-    return jsonify(sorted_blooms)
-
-
-def user_blooms(profile_username):
-    user_blooms = blooms.get_blooms_for_user(profile_username)
-    user_blooms.reverse()
-    return jsonify(user_blooms)
+    
+    # 5. COMBINE: followed + own + reblooms 
+    all_blooms = followed_blooms + own_blooms + user_reblooms
+    
+    # 6. Sort newest first
+    sorted_blooms = sorted(all_blooms, key=lambda b: b.sent_timestamp, reverse=True)
+    
+    return jsonify([{
+    "id": b.id, 
+    "sender": {"id": b.sender.id, "username": b.sender.username},
+    "content": b.content, 
+    "sent_timestamp": b.sent_timestamp.isoformat(),
+    "rebloom_count": b.rebloom_count
+} for b in sorted_blooms])
 
 
 @jwt_required()

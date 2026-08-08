@@ -45,6 +45,29 @@ async function init() {
   });
 }
 
+document.addEventListener("click", async (e) => {
+  if (e.target.dataset.action === "rebloom") {
+    const bloomId = Number(e.target.dataset.bloomId);
+
+    if (!bloomId) return;
+
+    try {
+      const result = await apiService.rebloomBloom(bloomId);
+      if (result.success) {
+        // Look for the span with the data attribute
+        const rebloomContainer = e.target.closest(".bloom__rebloom");
+        const countElem = rebloomContainer?.querySelector("[data-rebloom-count]");
+
+        if (countElem) {
+          countElem.textContent = result.rebloom_count || 1;
+        }
+      }
+    } catch (error) {
+      handleErrorDialog(error);
+    }
+  }
+});
+
 // TODO Check any unhandled errors bubble up to this central handler
 window.onload = () => {
   init().catch((error) => {

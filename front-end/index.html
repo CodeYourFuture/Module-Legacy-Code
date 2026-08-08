@@ -4,14 +4,14 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Purple Forest</title>
-    <link href="/index.css" rel="stylesheet" />
+    <link href="index.css" rel="stylesheet" />
   </head>
   <body id="app">
     <header>
       <a href="/"
         ><h1>
           <img
-            src="/logo.svg"
+            src="logo.svg"
             alt="Purple Forest "
             width="50"
             height="60"
@@ -233,12 +233,26 @@
     <!-- Timeline  -->
     <!-- Bloom Template -->
     <template id="bloom-template">
-      <article class="bloom box" data-bloom data-bloom-id="">
+      <article class="bloom box" data-bloom data-bloom-id="${bloom.id}">
         <div class="bloom__header flex">
           <a href="#" class="bloom__username" data-username>Username</a>
           <a href="#" class="bloom__time"><time class="bloom__time" data-time>2m</time></a>
         </div>
         <div class="bloom__content" data-content></div>
+        <!-- Rebloom section -->
+    <div class="bloom__rebloom flex">
+  <button
+    type="button"
+    class="bloom__rebloom-button"
+    data-action="rebloom"
+    data-bloom-id="${bloom.id}"
+  >
+    🌸 Rebloom
+  </button>
+  <span class="bloom__rebloom-count" data-rebloom-count>
+      ${bloom.rebloom_count || 0}
+    </span>
+</div>
       </article>
     </template>
 
@@ -256,6 +270,6 @@
       <p>Please enable JavaScript in your browser.</p>
     </noscript>
 
-    <script type="module" src="/index.mjs"></script>
+    <script type="module" src="index.mjs"></script>
   </body>
 </html>
