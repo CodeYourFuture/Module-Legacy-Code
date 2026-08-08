@@ -27,6 +27,12 @@ async function handleBloomSubmit(event) {
   const textarea = form.querySelector("textarea");
   const content = textarea.value.trim();
 
+  const maxLength = 280;
+  if (content.length > maxLength) {
+      alert(`Content must be ${maxLength} characters or less.`);
+      return;
+  }
+
   try {
     // Make form inert while we call the back end
     form.inert = true;
