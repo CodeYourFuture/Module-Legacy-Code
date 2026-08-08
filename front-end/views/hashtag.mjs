@@ -17,7 +17,15 @@ import {createHeading} from "../components/heading.mjs";
 function hashtagView(hashtag) {
   destroy();
 
-  apiService.getBloomsByHashtag(hashtag);
+  // Normalise to the same shape the API stores in state (e.g. "do" -> "#do")
+  const normalisedTag = `#${hashtag.startsWith("#") ? hashtag.substring(1) : hashtag}`;
+
+  // Only fetch if this hashtag isn't already loaded. Without this guard,
+  // every render fetches -> updates state -> fires "state-change" -> re-renders,
+  // an infinite loop that flashes the page blank and hangs the browser.
+  if (state.currentHashtag !== normalisedTag) {
+    apiService.getBloomsByHashtag(hashtag);
+  }
 
   renderOne(
     state.isLoggedIn,
