@@ -1,4 +1,4 @@
-import {apiService} from "../index.mjs";
+import { apiService } from "../index.mjs";
 
 /**
  * Create a logout component
@@ -21,4 +21,4 @@ async function handleLogout(event) {
   }
 }
 
-export {createLogout, handleLogout};
+export { createLogout, handleLogout };
