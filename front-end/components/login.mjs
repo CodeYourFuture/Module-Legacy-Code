@@ -30,6 +30,8 @@ async function handleLogin(event) {
     const password = formData.get("password");
 
     await apiService.login(username, password);
+
+    window.location.hash = "/";
   } catch (error) {
     throw error;
   } finally {
