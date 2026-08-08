@@ -61,7 +61,7 @@ def main():
     app.add_url_rule("/blooms/<profile_username>", view_func=user_blooms)
     app.add_url_rule("/hashtag/<hashtag>", view_func=hashtag)
 
-    app.run(host="0.0.0.0", port="3000", debug=True)
+    app.run(host="0.0.0.0", port=3000, debug=True)
 
 
 if __name__ == "__main__":
