@@ -1,4 +1,4 @@
-import {apiService} from "../index.mjs";
+import { apiService } from "../index.mjs";
 
 /**
  * Create a profile component
@@ -6,7 +6,7 @@ import {apiService} from "../index.mjs";
  * @param {Object} profileData - The profile data to display
  * @returns {DocumentFragment} - The profile UI
  */
-function createProfile(template, {profileData, whoToFollow, isLoggedIn}) {
+function createProfile(template, { profileData, whoToFollow, isLoggedIn }) {
   if (!template || !profileData) return;
   const profileElement = document
     .getElementById(template)
@@ -15,11 +15,13 @@ function createProfile(template, {profileData, whoToFollow, isLoggedIn}) {
   const usernameEl = profileElement.querySelector("[data-username]");
   const bloomCountEl = profileElement.querySelector("[data-bloom-count]");
   const followingCountEl = profileElement.querySelector(
-    "[data-following-count]"
+    "[data-following-count]",
   );
   const followerCountEl = profileElement.querySelector("[data-follower-count]");
   const followButtonEl = profileElement.querySelector("[data-action='follow']");
-  const whoToFollowContainer = profileElement.querySelector(".profile__who-to-follow");
+  const whoToFollowContainer = profileElement.querySelector(
+    ".profile__who-to-follow",
+  );
   // Populate with data
   usernameEl.querySelector("h2").textContent = profileData.username || "";
   usernameEl.setAttribute("href", `/profile/${profileData.username}`);
@@ -27,14 +29,22 @@ function createProfile(template, {profileData, whoToFollow, isLoggedIn}) {
   followerCountEl.textContent = profileData.followers?.length || 0;
   followingCountEl.textContent = profileData.follows?.length || 0;
   followButtonEl.setAttribute("data-username", profileData.username || "");
-  followButtonEl.hidden = profileData.is_self || profileData.is_following;
+  followButtonEl.setAttribute(
+    "data-following",
+    String(Boolean(profileData.is_following)),
+  );
+  followButtonEl.textContent = profileData.is_following ? "Unfollow" : "Follow";
+  followButtonEl.hidden = profileData.is_self;
+  followButtonEl.addEventListener("click", handleFollow);
   followButtonEl.addEventListener("click", handleFollow);
   if (!isLoggedIn) {
     followButtonEl.style.display = "none";
   }
 
   if (whoToFollow.length > 0) {
-    const whoToFollowList = whoToFollowContainer.querySelector("[data-who-to-follow]");
+    const whoToFollowList = whoToFollowContainer.querySelector(
+      "[data-who-to-follow]",
+    );
     const whoToFollowTemplate = document.querySelector("#who-to-follow-chip");
     for (const userToFollow of whoToFollow) {
       const wtfElement = whoToFollowTemplate.content.cloneNode(true);
@@ -62,8 +72,21 @@ async function handleFollow(event) {
   const username = button.getAttribute("data-username");
   if (!username) return;
 
-  await apiService.followUser(username);
+  const isFollowing = button.getAttribute("data-following") === "true";
+  button.disabled = true;
+
+  if (isFollowing) {
+    await apiService.unfollowUser(username);
+    button.setAttribute("data-following", "false");
+    button.textContent = "Follow";
+  } else {
+    await apiService.followUser(username);
+    button.setAttribute("data-following", "true");
+    button.textContent = "Unfollow";
+  }
+
   await apiService.getWhoToFollow();
+  button.disabled = false;
 }
 
-export {createProfile, handleFollow};
+export { createProfile, handleFollow };
