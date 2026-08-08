@@ -14,6 +14,7 @@ from endpoints import (
     send_bloom,
     suggested_follows,
     user_blooms,
+    do_unfollow,
 )
 
 from dotenv import load_dotenv
@@ -55,6 +56,7 @@ def main():
     app.add_url_rule("/profile/<profile_username>", view_func=other_profile)
     app.add_url_rule("/follow", methods=["POST"], view_func=do_follow)
     app.add_url_rule("/suggested-follows/<limit_str>", view_func=suggested_follows)
+    app.add_url_rule("/unfollow", methods=["POST"], view_func=do_unfollow)
 
     app.add_url_rule("/bloom", methods=["POST"], view_func=send_bloom)
     app.add_url_rule("/bloom/<id_str>", methods=["GET"], view_func=get_bloom)

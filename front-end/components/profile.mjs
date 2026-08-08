@@ -27,7 +27,8 @@ function createProfile(template, {profileData, whoToFollow, isLoggedIn}) {
   followerCountEl.textContent = profileData.followers?.length || 0;
   followingCountEl.textContent = profileData.follows?.length || 0;
   followButtonEl.setAttribute("data-username", profileData.username || "");
-  followButtonEl.hidden = profileData.is_self || profileData.is_following;
+  followButtonEl.hidden = profileData.is_self;
+  followButtonEl.textContent = profileData.is_following ? "Unfollow" : "Follow";
   followButtonEl.addEventListener("click", handleFollow);
   if (!isLoggedIn) {
     followButtonEl.style.display = "none";
@@ -62,7 +63,11 @@ async function handleFollow(event) {
   const username = button.getAttribute("data-username");
   if (!username) return;
 
-  await apiService.followUser(username);
+  if (button.textContent === "Follow") {
+    await apiService.followUser(username);
+  } else {
+    await apiService.unfollowUser(username);
+  }
   await apiService.getWhoToFollow();
 }
 
