@@ -1,3 +1,5 @@
+import {apiService} from "../index.mjs";
+
 /**
  * Create a bloom component
  * @param {string} template - The ID of the template to clone
@@ -30,6 +32,35 @@ const createBloom = (template, bloom) => {
     ...bloomParser.parseFromString(_formatHashtags(bloom.content), "text/html")
       .body.childNodes
   );
+
+  // Identify the new UI elements we added to the template
+  const rebloomIndicator = bloomFrag.querySelector("[data-rebloom-indicator]");
+  const rebloomerName = bloomFrag.querySelector("[data-rebloomer-name]");
+  const rebloomButton = bloomFrag.querySelector("[data-action='rebloom']");
+  const countElement = bloomFrag.querySelector("[data-rebloom-count]");
+
+  // Conditional Logic: "If this data object represents a re-bloom..."
+  if (bloom.rebloomer_username) {
+    // Show the "Re-bloomed by" banner and set the name
+    rebloomIndicator.style.display = "block"; 
+    rebloomerName.textContent = bloom.rebloomer_username;
+
+  }
+  countElement.textContent = bloom.rebloom_count > 0 ? `(${bloom.rebloom_count})` : "";
+
+  if (bloom.rebloomer_username || bloom.is_rebloomed_by_me) {
+    rebloomButton.style.display = "none";
+  }
+  
+  // Event Listener: "What happens when I click the button?"
+  rebloomButton?.addEventListener("click", async () => {
+    try {
+      // We will need to create this function in api.mjs next!
+      await apiService.rebloom(bloom.id); 
+    } catch (error) {
+      console.error("Re-bloom failed:", error);
+    }
+  });
 
   return bloomFrag;
 };

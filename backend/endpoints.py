@@ -108,21 +108,29 @@ def other_profile(profile_username):
         )
 
     current_user = get_current_user()
+    viewer_id = current_user.id if current_user else None
 
     followers = get_inverse_followed_usernames(profile_user)
-    all_blooms = blooms.get_blooms_for_user(profile_username)
-    all_blooms.reverse()
+
+    user_original_blooms = blooms.get_blooms_for_user(profile_username, viewer_id=viewer_id)
+
+    user_shared_blooms = blooms.get_reblooms_for_user(profile_username, viewer_id=viewer_id, limit=50)
+
+    all_items = user_original_blooms + user_shared_blooms
+    
+    all_items.sort(key=lambda x: x.sent_timestamp, reverse=True)
+
     return jsonify(
         {
             "username": profile_username,
-            "recent_blooms": all_blooms[:10],
+            "recent_blooms": all_items[:10],
             "follows": get_followed_usernames(profile_user),
             "followers": list(followers),
             "is_following": current_user is not None
             and current_user.username in followers,
             "is_self": current_user is not None
             and current_user.username == profile_username,
-            "total_blooms": len(all_blooms),
+            "total_blooms": len(all_items),
         }
     )
 
@@ -166,6 +174,19 @@ def send_bloom():
         }
     )
 
+@jwt_required()
+def do_rebloom(id_str):
+    try:
+        bloom_id = int(id_str)
+    except ValueError:
+        return make_response(("Invalid bloom id", 400))
+
+    user = get_current_user()
+
+    blooms.add_rebloom(rebloomer=user, original_bloom_id=bloom_id)
+
+    return jsonify({"success": True})
+
 
 def get_bloom(id_str):
     try:
@@ -185,18 +206,29 @@ def home_timeline():
     # Get blooms from followed users
     followed_users = get_followed_usernames(current_user)
     nested_user_blooms = [
-        blooms.get_blooms_for_user(followed_user, limit=50)
+        blooms.get_blooms_for_user(followed_user, viewer_id=current_user.id, limit=50)
         for followed_user in followed_users
     ]
 
+    # Get re-blooms from followed users
+    nested_user_reblooms = [
+        blooms.get_reblooms_for_user(followed_user, viewer_id=current_user.id, limit=50)
+        for followed_user in followed_users
+    ]
     # Flatten list of blooms from followed users
     followed_blooms = [bloom for blooms in nested_user_blooms for bloom in blooms]
 
-    # Get the current user's own blooms
-    own_blooms = blooms.get_blooms_for_user(current_user.username, limit=50)
+    # Flatten list of re-blooms from followed users
+    followed_reblooms = [rebloom for reblooms in nested_user_reblooms for rebloom in reblooms]
 
-    # Combine own blooms with followed blooms
-    all_blooms = followed_blooms + own_blooms
+    # Get the current user's own blooms
+    own_blooms = blooms.get_blooms_for_user(current_user.username, viewer_id=current_user.id, limit=50)
+
+    # Get the current user's own re-blooms
+    own_reblooms = blooms.get_reblooms_for_user(current_user.username, viewer_id=current_user.id, limit=50)
+
+    # Combine all original blooms and re-blooms together
+    all_blooms = followed_blooms + followed_reblooms + own_blooms + own_reblooms
 
     # Sort by timestamp (newest first)
     sorted_blooms = list(
