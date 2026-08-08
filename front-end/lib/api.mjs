@@ -261,12 +261,13 @@ async function followUser(username) {
 
 async function unfollowUser(username) {
   try {
-    const data = await _apiRequest(`/unfollow/${username}`, {
+    const data = await _apiRequest("/unfollow", {
       method: "POST",
+      body: JSON.stringify({follow_username: username}),
     });
 
     if (data.success) {
-      // Update both the unfollowed user's profile and the current user's profile
+            // Update both the unfollowed user's profile and the current user's profile
       await Promise.all([
         getProfile(username),
         getProfile(state.currentUser),
@@ -276,7 +277,7 @@ async function unfollowUser(username) {
 
     return data;
   } catch (error) {
-    // Error already handled by _apiRequest
+     // Error already handled by _apiRequest
     return {success: false};
   }
 }
