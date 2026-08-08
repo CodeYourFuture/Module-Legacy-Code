@@ -16,7 +16,11 @@ class Bloom:
 
 
 def add_bloom(*, sender: User, content: str) -> Bloom:
-    hashtags = [word[1:] for word in content.split(" ") if word.startswith("#")]
+    
+    if len(content) > 280:
+       raise ValueError("Bloom content cannot exceed 280 characters")
+
+    hashtags = re.findall(r'#(\w+)', content)
 
     now = datetime.datetime.now(tz=datetime.UTC)
     bloom_id = int(now.timestamp() * 1000000)
