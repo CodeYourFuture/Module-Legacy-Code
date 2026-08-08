@@ -34,10 +34,10 @@ const createBloom = (template, bloom) => {
   return bloomFrag;
 };
 
-function _formatHashtags(text) {
+export function _formatHashtags(text) {
   if (!text) return text;
   return text.replace(
-    /\B#[^#]+/g,
+    /\B#[^#\s]+/g,
     (match) => `<a href="/hashtag/${match.slice(1)}">${match}</a>`
   );
 }
