@@ -7,6 +7,7 @@ const _STATUS_MESSAGES = {
   404: "Not Found - The requested resource does not exist.",
   405: "Not Allowed - The server knows the request method, but the target resource doesn't support this method.",
   418: "I'm a teapot - Server refuses to brew coffee with a teapot.",
+  422: "Something is wrong with the information you filled out. Please check your inputs and try again.",
   500: "Internal Server Error - Something went wrong on the server.",
 };
 

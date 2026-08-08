@@ -156,7 +156,10 @@ def send_bloom():
     if type_check_error is not None:
         return type_check_error
 
-    user = get_current_user()
+    if len(request.json["content"]) > 280:
+        return make_response((f"Bloom too long", 422))
+
+    user = get_current_user() 
 
     blooms.add_bloom(sender=user, content=request.json["content"])
 
