@@ -10,8 +10,11 @@
  * "sent_timestamp": "datetime as ISO 8601 formatted string"}
 
  */
+import { apiService } from "../index.mjs";
+
 const createBloom = (template, bloom) => {
   if (!bloom) return;
+
   const bloomFrag = document.getElementById(template).content.cloneNode(true);
   const bloomParser = new DOMParser();
 
@@ -20,16 +23,51 @@ const createBloom = (template, bloom) => {
   const bloomTime = bloomFrag.querySelector("[data-time]");
   const bloomTimeLink = bloomFrag.querySelector("a:has(> [data-time])");
   const bloomContent = bloomFrag.querySelector("[data-content]");
+  const rebloomInfo = bloomFrag.querySelector("[data-rebloom-info]");
+  const rebloomButton = bloomFrag.querySelector("[data-action='rebloom']");
+  const rebloomCount = bloomFrag.querySelector("[data-rebloom-count]");
+
+  const isRebloom = Boolean(bloom.original_bloom);
+  const displayAuthor = isRebloom ? bloom.original_bloom.sender : bloom.sender;
+  const displayTimestamp = isRebloom ? bloom.original_bloom.sent_timestamp : bloom.sent_timestamp;
+  const displayContent = isRebloom ? bloom.original_bloom.content : bloom.content;
+  const displayBloomId = isRebloom ? bloom.original_bloom.id : bloom.id;
+
+  rebloomCount.textContent = bloom.rebloom_count ?? 0;
 
   bloomArticle.setAttribute("data-bloom-id", bloom.id);
-  bloomUsername.setAttribute("href", `/profile/${bloom.sender}`);
-  bloomUsername.textContent = bloom.sender;
-  bloomTime.textContent = _formatTimestamp(bloom.sent_timestamp);
-  bloomTimeLink.setAttribute("href", `/bloom/${bloom.id}`);
+  bloomArticle.classList.toggle("bloom--rebloom", isRebloom);
+  bloomUsername.setAttribute("href", `/profile/${displayAuthor}`);
+  bloomUsername.textContent = displayAuthor;
+  bloomTime.textContent = _formatTimestamp(displayTimestamp);
+  bloomTimeLink.setAttribute("href", `/bloom/${displayBloomId}`);
+
   bloomContent.replaceChildren(
-    ...bloomParser.parseFromString(_formatHashtags(bloom.content), "text/html")
+    ...bloomParser.parseFromString(_formatHashtags(displayContent), "text/html")
       .body.childNodes
   );
+
+  if (isRebloom) {
+    rebloomInfo.hidden = false;
+    rebloomInfo.textContent = `🔁 Rebloomed by ${bloom.sender}`;
+  }
+
+  // Handle rebloom
+  rebloomButton.addEventListener("click", async () => {
+    try {
+      rebloomButton.disabled = true;
+      rebloomButton.textContent = "Reblooming...";
+
+      const rebloomedBloom = await apiService.rebloom(bloom.id);
+
+      rebloomCount.textContent = rebloomedBloom.rebloom_count;
+    } catch (error) {
+      console.error("Failed to rebloom:", error);
+    } finally {
+      rebloomButton.disabled = false;
+      rebloomButton.innerHTML = `Rebloom <span data-rebloom-count>${rebloomCount.textContent}</span>`;
+    }
+  });
 
   return bloomFrag;
 };

@@ -13,6 +13,8 @@ class Bloom:
     sender: User
     content: str
     sent_timestamp: datetime.datetime
+    original_bloom: Optional["Bloom"] = None
+    rebloom_count: int = 0
 
 
 def add_bloom(*, sender: User, content: str) -> Bloom:
@@ -37,6 +39,43 @@ def add_bloom(*, sender: User, content: str) -> Bloom:
             )
 
 
+def rebloom(*, sender: User, original_bloom_id: int) -> Optional[Bloom]:
+    now = datetime.datetime.now(tz=datetime.UTC)
+    bloom_id = int(now.timestamp() * 1000000)
+
+    with db_cursor() as cur:
+        cur.execute(
+            """
+            INSERT INTO blooms (
+                id,
+                sender_id,
+                content,
+                send_timestamp,
+                original_bloom_id
+            )
+            SELECT
+                %(bloom_id)s,
+                %(sender_id)s,
+                content,
+                %(timestamp)s,
+                COALESCE(original_bloom_id, id)
+            FROM blooms
+            WHERE id = %(original_bloom_id)s
+            RETURNING id
+            """,
+            {
+                "bloom_id": bloom_id,
+                "sender_id": sender.id,
+                "timestamp": now,
+                "original_bloom_id": original_bloom_id,
+            },
+        )
+        if cur.fetchone() is None:
+            return None
+
+    return get_bloom(bloom_id)
+
+
 def get_blooms_for_user(
     username: str, *, before: Optional[int] = None, limit: Optional[int] = None
 ) -> List[Bloom]:
@@ -44,8 +83,9 @@ def get_blooms_for_user(
         kwargs = {
             "sender_username": username,
         }
+
         if before is not None:
-            before_clause = "AND send_timestamp < %(before_limit)s"
+            before_clause = "AND blooms.send_timestamp < %(before_limit)s"
             kwargs["before_limit"] = before
         else:
             before_clause = ""
@@ -53,50 +93,118 @@ def get_blooms_for_user(
         limit_clause = make_limit_clause(limit, kwargs)
 
         cur.execute(
-            f"""SELECT
-              blooms.id, users.username, content, send_timestamp
-            FROM
-              blooms INNER JOIN users ON users.id = blooms.sender_id
-            WHERE
-              username = %(sender_username)s
-              {before_clause}
-            ORDER BY send_timestamp DESC
+            f"""
+            SELECT
+                blooms.id,
+                users.username,
+                blooms.content,
+                blooms.send_timestamp,
+                blooms.original_bloom_id,
+                (
+                    SELECT COUNT(*)
+                    FROM blooms AS reblooms_of_this
+                    WHERE reblooms_of_this.original_bloom_id = COALESCE(
+                        blooms.original_bloom_id,
+                        blooms.id
+                    )
+                )  AS rebloom_count
+            FROM blooms
+            INNER JOIN users
+                ON users.id = blooms.sender_id
+            WHERE users.username = %(sender_username)s
+                {before_clause}
+            ORDER BY blooms.send_timestamp DESC
             {limit_clause}
             """,
             kwargs,
         )
+
         rows = cur.fetchall()
-        blooms = []
+        blooms_list = []
+
         for row in rows:
-            bloom_id, sender_username, content, timestamp = row
-            blooms.append(
+            (
+                bloom_id,
+                sender_username,
+                content,
+                timestamp,
+                original_bloom_id,
+                rebloom_count,
+            ) = row
+
+            original_bloom = (
+                get_bloom(original_bloom_id)
+                if original_bloom_id is not None
+                else None
+            )
+
+            blooms_list.append(
                 Bloom(
                     id=bloom_id,
                     sender=sender_username,
                     content=content,
                     sent_timestamp=timestamp,
+                    original_bloom=original_bloom,
+                    rebloom_count=rebloom_count,
                 )
             )
-    return blooms
+
+    return blooms_list
 
 
 def get_bloom(bloom_id: int) -> Optional[Bloom]:
     with db_cursor() as cur:
         cur.execute(
-            "SELECT blooms.id, users.username, content, send_timestamp FROM blooms INNER JOIN users ON users.id = blooms.sender_id WHERE blooms.id = %s",
+            """
+            SELECT
+                blooms.id,
+                users.username,
+                blooms.content,
+                blooms.send_timestamp,
+                blooms.original_bloom_id,
+                (
+                    SELECT COUNT(*)
+                    FROM blooms AS reblooms_of_this
+                    WHERE reblooms_of_this.original_bloom_id = COALESCE(
+                        blooms.original_bloom_id,
+                        blooms.id
+                    )
+                ) AS rebloom_count
+            FROM blooms
+            INNER JOIN users ON users.id = blooms.sender_id
+            WHERE blooms.id = %s
+            """,
             (bloom_id,),
         )
+
         row = cur.fetchone()
+
         if row is None:
             return None
-        bloom_id, sender_username, content, timestamp = row
+
+        (
+            bloom_id,
+            sender_username,
+            content,
+            timestamp,
+            original_bloom_id,
+            rebloom_count,
+        ) = row
+
+        original_bloom = (
+            get_bloom(original_bloom_id)
+            if original_bloom_id is not None
+            else None
+        )
+
         return Bloom(
             id=bloom_id,
             sender=sender_username,
             content=content,
             sent_timestamp=timestamp,
+            original_bloom=original_bloom,
+            rebloom_count=rebloom_count,
         )
-
 
 def get_blooms_with_hashtag(
     hashtag_without_leading_hash: str, *, limit: int = None

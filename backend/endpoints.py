@@ -111,7 +111,6 @@ def other_profile(profile_username):
 
     followers = get_inverse_followed_usernames(profile_user)
     all_blooms = blooms.get_blooms_for_user(profile_username)
-    all_blooms.reverse()
     return jsonify(
         {
             "username": profile_username,
@@ -245,3 +244,25 @@ def verify_request_fields(names_to_types: Dict[str, type]) -> Union[Response, No
                 )
             )
     return None
+
+
+@jwt_required()
+def rebloom(id_str):
+    try:
+        original_bloom_id = int(id_str)
+    except ValueError:
+        return make_response(("Invalid bloom id", 400))
+
+    current_user = get_current_user()
+
+    original_bloom = blooms.get_bloom(original_bloom_id)
+
+    if original_bloom is None:
+        return make_response(("Bloom not found", 404))
+
+    rebloomed = blooms.rebloom(
+        sender=current_user,
+        original_bloom_id=original_bloom_id,
+    )
+
+    return jsonify(rebloomed)
