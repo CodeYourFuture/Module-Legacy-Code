@@ -10,7 +10,10 @@ CREATE TABLE blooms (
     id BIGSERIAL NOT NULL PRIMARY KEY,
     sender_id INT NOT NULL REFERENCES users(id),
     content TEXT NOT NULL,
-    send_timestamp TIMESTAMP NOT NULL
+    send_timestamp TIMESTAMP NOT NULL,
+    -- refer to bloom id
+    rebloomed_from_id BIGINT REFERENCES blooms(id) 
+
 );
 
 CREATE TABLE follows (

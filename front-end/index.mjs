@@ -57,6 +57,18 @@ window.addEventListener("unhandledrejection", (event) => {
   handleErrorDialog(event.reason);
 });
 
+// Rebloom click handler
+document.querySelector("#app").addEventListener("click", async (event) => {
+  const action = event.target.dataset.action;
+
+  if (action === "rebloom") {
+    const bloomElement = event.target.closest("[data-bloom]");
+    const bloomId = bloomElement.dataset.bloomId;
+
+    await apiService.rebloom(bloomId);
+  }
+});
+
 export {
   getLogoutContainer,
   getLoginContainer,
