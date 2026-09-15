@@ -17,13 +17,16 @@ import {createHeading} from "../components/heading.mjs";
 function hashtagView(hashtag) {
   destroy();
 
-  apiService.getBloomsByHashtag(hashtag);
+  // Fetch only if hashtag data is not already loaded
+  if (state.currentHashtag !== `#${hashtag}`) {
+    apiService.getBloomsByHashtag(hashtag);
+  }
 
   renderOne(
     state.isLoggedIn,
     getLogoutContainer(),
     "logout-template",
-    createLogout
+    createLogout,
   );
   document
     .querySelector("[data-action='logout']")
@@ -32,7 +35,7 @@ function hashtagView(hashtag) {
     state.isLoggedIn,
     getLoginContainer(),
     "login-template",
-    createLogin
+    createLogin,
   );
   document
     .querySelector("[data-action='login']")
@@ -42,13 +45,13 @@ function hashtagView(hashtag) {
     state.currentHashtag,
     getHeadingContainer(),
     "heading-template",
-    createHeading
+    createHeading,
   );
   renderEach(
     state.hashtagBlooms || [],
     getTimelineContainer(),
     "bloom-template",
-    createBloom
+    createBloom,
   );
 }
 
