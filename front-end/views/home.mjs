@@ -15,10 +15,12 @@ import {
   handleBloomSubmit,
   handleTyping,
 } from "../components/bloom-form.mjs";
-import {createBloom} from "../components/bloom.mjs";
+import {createBloom, handleRebloom} from "../components/bloom.mjs";
 
 // Home view - logged in or not
 function homeView() {
+  if (window.__purpleForestRoute && window.__purpleForestRoute !== "home") return;
+  if (window.location.hash && window.location.hash !== "#/") return;
   destroy();
 
   if (state.isLoggedIn) {
@@ -57,6 +59,9 @@ function homeView() {
       .querySelector("[data-form='bloom']")
       ?.addEventListener("submit", handleBloomSubmit);
     document.querySelector("textarea")?.addEventListener("input", handleTyping);
+    document
+      .querySelectorAll("[data-action='rebloom']")
+      .forEach((button) => button.addEventListener("click", handleRebloom));
   } else {
     renderOne(
       state.isLoggedIn,
