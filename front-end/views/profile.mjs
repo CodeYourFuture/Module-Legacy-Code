@@ -7,20 +7,21 @@ import {
   getProfileContainer,
   getTimelineContainer,
 } from "../index.mjs";
-import {createLogin, handleLogin} from "../components/login.mjs";
-import {createLogout, handleLogout} from "../components/logout.mjs";
 import {createProfile, handleFollow} from "../components/profile.mjs";
 import {createBloom} from "../components/bloom.mjs";
+import {createLogin} from "../components/login.mjs";
+import {createLogout} from "../components/logout.mjs";
 
 // Profile view - just this person's blooms and their profile
-function profileView(username) {
+async function profileView(username) {
   destroy();
 
   const existingProfile = state.profiles.find((p) => p.username === username);
 
   // Only fetch profile if we don't have it or if it's incomplete
   if (!existingProfile || !existingProfile.recent_blooms) {
-    apiService.getProfile(username);
+    // Wait for the profile request before rendering to avoid stale async updates
+    await apiService.getProfile(username);
   }
 
   renderOne(
@@ -29,18 +30,12 @@ function profileView(username) {
     "logout-template",
     createLogout
   );
-  document
-    .querySelector("[data-action='logout']")
-    ?.addEventListener("click", handleLogout);
   renderOne(
     state.isLoggedIn,
     getLoginContainer(),
     "login-template",
     createLogin
   );
-  document
-    .querySelector("[data-action='login']")
-    ?.addEventListener("click", handleLogin);
 
   const profileData = state.profiles.find((p) => p.username === username);
   if (profileData) {

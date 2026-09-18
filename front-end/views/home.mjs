@@ -7,8 +7,8 @@ import {
   getTimelineContainer,
   getBloomFormContainer,
 } from "../index.mjs";
-import {createLogin, handleLogin} from "../components/login.mjs";
-import {createLogout, handleLogout} from "../components/logout.mjs";
+import {createLogin} from "../components/login.mjs";
+import {createLogout} from "../components/logout.mjs";
 import {createProfile} from "../components/profile.mjs";
 import {
   createBloomForm,
@@ -51,9 +51,6 @@ function homeView() {
       createLogout
     );
     document
-      .querySelector("[data-action='logout']")
-      ?.addEventListener("click", handleLogout);
-    document
       .querySelector("[data-form='bloom']")
       ?.addEventListener("submit", handleBloomSubmit);
     document.querySelector("textarea")?.addEventListener("input", handleTyping);
@@ -64,9 +61,6 @@ function homeView() {
       "login-template",
       createLogin
     );
-    document
-      .querySelector("[data-form='login']")
-      ?.addEventListener("submit", handleLogin);
   }
 }
 export {homeView};
