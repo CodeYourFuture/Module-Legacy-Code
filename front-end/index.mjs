@@ -3,6 +3,9 @@ import {handleRouteChange} from "./lib/router.mjs";
 import {apiService} from "./lib/api.mjs";
 import {handleErrorDialog} from "./components/error.mjs";
 
+import {handleLogin} from "./components/login.mjs";
+import {handleLogout} from "./components/logout.mjs";
+
 // get all the dynamic areas of the initial DOM
 const getLogoutContainer = () => document.getElementById("logout-container");
 const getLoginContainer = () => document.getElementById("login-container");
@@ -42,6 +45,17 @@ async function init() {
 
   document.addEventListener("state-change", () => {
     handleRouteChange();
+  });
+  // Handle login/logout globally because the forms/buttons are recreated by views
+  document.addEventListener("submit", (event) => {
+    if (event.target.closest("[data-form='login']")) {
+      handleLogin(event);
+    }
+  });
+  document.addEventListener("click", (event) => {
+    if (event.target.closest("[data-action='logout']")) {
+      handleLogout(event);
+    }
   });
 }
 
