@@ -15,7 +15,7 @@ import {handleErrorDialog} from "../components/error.mjs";
 // Helper function for making API requests
 async function _apiRequest(endpoint, options = {}) {
   const token = state.token;
-  const baseUrl = "http://localhost:3000";
+  const baseUrl = "http://127.0.0.1:3000";
 
   const defaultOptions = {
     headers: {
@@ -212,6 +212,23 @@ async function postBloom(content) {
   }
 }
 
+async function rebloom(bloomId) {
+  try {
+    const data = await _apiRequest(`/rebloom/${bloomId}`, {
+      method: "POST",
+    });
+
+    if (data.success) {
+      await getBlooms();
+      await getProfile(state.currentUser);
+    }
+
+    return data;
+  } catch (error) {
+    return {success: false};
+  }
+}
+
 // ======= USER methods
 async function getProfile(username) {
   const endpoint = username ? `/profile/${username}` : "/profile";
@@ -291,6 +308,7 @@ const apiService = {
   getBloom,
   getBlooms,
   postBloom,
+  rebloom,
   getBloomsByHashtag,
 
   // User methods
