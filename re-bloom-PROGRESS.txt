@@ -1,0 +1,45 @@
+PURPLEFOREST — REBLOOM FEATURE
+================================
+
+Branch:
+purple-forest-rebloom-feature
+
+PLAN
+----
+See: RE-BLOOM-FLOW.txt
+
+PROGRESS
+--------
+
+[✓] Step 1 — Check existing tests
+    - Confirmed Python unittest is used.
+    - Confirmed PostgreSQL is the existing database.
+    - Confirmed there are no dedicated bloom/endpoint tests.
+    - No code changes required.
+
+[✓] Step 2 — Design rebloom data
+    - Inspected the existing blooms database table.
+    - Decided to keep the existing blooms table unchanged.
+    - Decided to use a separate reblooms table to represent the
+      relationship between a bloom and the user who rebloomed it.
+    - The reblooms table will store the original bloom ID, the
+      reblooming user's ID, and the rebloom timestamp.
+    - The rebloom count will be calculated from rebloom records
+      rather than stored separately.
+    - A bloom with no reblooms will not display a rebloom count.
+    - The same user should not be able to rebloom the same bloom
+      more than once.
+    - The UI must distinguish the original author from the user
+      who rebloomed the bloom.
+    - A rebloom should have its own timestamp so it can enter the
+      timeline as a new activity while preserving the original
+      bloom's timestamp and author.
+[ ] Step 3 — Update backend data layer
+[ ] Step 4 — Update database
+[ ] Step 5 — Add backend endpoint
+[ ] Step 6 — Update home timeline
+[ ] Step 7 — Update frontend API service
+[ ] Step 8 — Update bloom data
+[ ] Step 9 — Update bloom UI
+[ ] Step 10 — Add tests
+[ ] Step 11 — Final review
