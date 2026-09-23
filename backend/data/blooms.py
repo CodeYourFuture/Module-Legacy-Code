@@ -6,6 +6,8 @@ from typing import Any, Dict, List, Optional
 from data.connection import db_cursor
 from data.users import User
 
+from psycopg2.errors import UniqueViolation
+
 
 @dataclass
 class Bloom:
@@ -13,6 +15,73 @@ class Bloom:
     sender: User
     content: str
     sent_timestamp: datetime.datetime
+
+
+# Keeps rebloom information separate from the original Bloom data.
+@dataclass
+class Rebloom:
+    bloom_id: int
+    user: User
+    rebloom_timestamp: datetime.datetime
+
+
+# Records a user's rebloom without creating another copy of the original Bloom.
+def add_rebloom(*, bloom_id: int, user: User):
+    rebloom_timestamp = datetime.datetime.now(datetime.UTC)
+
+    with db_cursor() as cur:
+        try:
+            cur.execute(
+                "INSERT INTO reblooms (bloom_id, user_id, rebloom_timestamp) VALUES (%(bloom_id)s, %(user_id)s, %(rebloom_timestamp)s)",
+                dict(
+                    bloom_id=bloom_id,
+                    user_id=user.id,
+                    rebloom_timestamp=rebloom_timestamp,
+                ),
+            )
+        except UniqueViolation:
+            # Already rebloomed - treat as an idempotent request.
+            pass
+
+
+# Counts how many users have rebloomed the specified Bloom.
+def get_rebloom_count(bloom_id: int) -> int:
+    with db_cursor() as cur:
+        cur.execute(
+            "SELECT COUNT(*) FROM reblooms WHERE bloom_id = %s",
+            (bloom_id,),
+        )
+        row = cur.fetchone()
+        return row[0]
+
+
+# Gets the users who have rebloomed the specified Bloom.
+def get_reblooms(bloom_id: int) -> List[Rebloom]:
+    with db_cursor() as cur:
+        cur.execute(
+            """
+            SELECT reblooms.bloom_id, users.username, reblooms.rebloom_timestamp
+            FROM reblooms
+            INNER JOIN users ON users.id = reblooms.user_id
+            WHERE reblooms.bloom_id = %s
+            ORDER BY reblooms.rebloom_timestamp
+            """,
+            (bloom_id,),
+        )
+        rows = cur.fetchall()
+
+        reblooms = []
+        for row in rows:
+            bloom_id, username, timestamp = row
+            reblooms.append(
+                Rebloom(
+                    bloom_id=bloom_id,
+                    user=username,
+                    rebloom_timestamp=timestamp,
+                )
+            )
+
+    return reblooms
 
 
 def add_bloom(*, sender: User, content: str) -> Bloom:

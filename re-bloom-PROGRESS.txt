@@ -34,7 +34,14 @@ PROGRESS
     - A rebloom should have its own timestamp so it can enter the
       timeline as a new activity while preserving the original
       bloom's timestamp and author.
-[ ] Step 3 — Update backend data layer
+
+[✓] Step 3 — Update backend data layer
+    - Added the Rebloom data structure.
+    - Added a function to record a user's rebloom.
+    - Added duplicate rebloom handling using the database unique constraint.
+    - Added a function to count reblooms for a Bloom.
+    - Added a function to retrieve rebloom users and timestamps.
+    - Verified the backend data module passes Python syntax checking.
 [ ] Step 4 — Update database
 [ ] Step 5 — Add backend endpoint
 [ ] Step 6 — Update home timeline
