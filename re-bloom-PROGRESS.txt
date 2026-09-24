@@ -64,7 +64,14 @@ PROGRESS
     - Sorted original Blooms and reblooms by their timeline timestamp.
     - Verified the frontend receives the updated timeline data.
 
-[ ] Step 7 — Update frontend API service
+[✓] Step 7 — Update frontend API service
+    - Added a frontend API method for sending rebloom requests.
+    - Connected the frontend method to POST /rebloom.
+    - Sent the selected Bloom ID to the backend.
+    - Refreshed the home timeline after a successful rebloom.
+    - Exported postRebloom through the API service.
+    - Verified the frontend file passes JavaScript syntax checking.
+
 [ ] Step 8 — Update bloom data
 [ ] Step 9 — Update bloom UI
 [ ] Step 10 — Add tests
