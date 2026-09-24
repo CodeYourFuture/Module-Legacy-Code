@@ -237,6 +237,8 @@ def home_timeline():
                     sent_timestamp=bloom.sent_timestamp,
                     rebloomer=rebloom.user,
                     rebloom_timestamp=rebloom.rebloom_timestamp,
+                    # Includes the total count so the frontend can show how many times this Bloom was rebloomed.
+                    rebloom_count=blooms.get_rebloom_count(bloom.id)
                 )
             )
 
@@ -247,6 +249,8 @@ def home_timeline():
             sender=bloom.sender,
             content=bloom.content,
             sent_timestamp=bloom.sent_timestamp,
+            # Includes the total count so the frontend can show how many times this Bloom was rebloomed.
+            rebloom_count=blooms.get_rebloom_count(bloom.id),
         )
         for bloom in followed_blooms + own_blooms
     ]

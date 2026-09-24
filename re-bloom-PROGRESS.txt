@@ -88,4 +88,10 @@ PROGRESS
     - Ran the Home View Playwright tests successfully: 6 passed.
 
 
-[ ] Step 11 — Final review
+[✓] Step 11 — Add rebloom count and Final review
+    - Added rebloom count data to timeline Blooms.
+    - Displayed the rebloom count only when a Bloom has been rebloomed.
+    - Added singular and plural count text.
+    - Added styling for the rebloom count.
+    - Added Playwright coverage for the rebloom count.
+    - Verified all 6 Home View tests pass.

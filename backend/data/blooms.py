@@ -34,6 +34,7 @@ class TimelineBloom:
     sent_timestamp: datetime.datetime
     rebloomer: Optional[str] = None
     rebloom_timestamp: Optional[datetime.datetime] = None
+    rebloom_count: int = 0
 
 
 # Records a user's rebloom without creating another copy of the original Bloom.

@@ -26,6 +26,15 @@ const createBloom = (template, bloom) => {
     rebloomLabel.classList.add("bloom__rebloom");
     bloomArticle.prepend(rebloomLabel);
   }
+  // Shows the rebloom count only when the Bloom has been rebloomed.
+  if (bloom.rebloom_count > 0) {
+    const rebloomCount = document.createElement("p");
+    rebloomCount.textContent = `${bloom.rebloom_count} rebloom${
+      bloom.rebloom_count === 1 ? "" : "s"
+    }`;
+    rebloomCount.classList.add("bloom__rebloom-count");
+    bloomArticle.append(rebloomCount);
+  }
   const bloomTime = bloomFrag.querySelector("[data-time]");
   const bloomTimeLink = bloomFrag.querySelector("a:has(> [data-time])");
   const bloomContent = bloomFrag.querySelector("[data-content]");

@@ -228,6 +228,13 @@ dialog {
   color: var(--accent);
 }
 
+/* Shows how many times the original Bloom has been rebloomed. */
+.bloom__rebloom-count {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--accent);
+}
+
 /* states, helpers*/
 .flex {
   display: flex;

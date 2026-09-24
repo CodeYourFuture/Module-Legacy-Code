@@ -74,8 +74,8 @@ test.describe("Home View", () => {
   });
 });
 
-// Playwright test for rebloom without creating a duplicate.
-test("can rebloom a bloom without creating a duplicate", async ({page}) => {
+// Playwright test for reblooming a Bloom and showing its rebloom count.
+test("can rebloom a bloom and show its rebloom count", async ({page}) => {
   await loginAsSample(page);
 
   const content = `Rebloom test ${Date.now()}`;
@@ -92,6 +92,14 @@ test("can rebloom a bloom without creating a duplicate", async ({page}) => {
   await expect(
     page.locator(`[data-bloom-id="${bloomId}"] .bloom__rebloom`)
   ).toHaveCount(1);
+
+  // Verifies that the rebloom shows the total number of reblooms.
+  const rebloom = page
+    .locator(`[data-bloom-id="${bloomId}"]`)
+    .filter({has: page.locator(".bloom__rebloom")})
+    .first();
+
+  await expect(rebloom.locator(".bloom__rebloom-count")).toHaveText("1 rebloom");
 
   // Clicking again should not create another rebloom because the database prevents duplicates.
   await page
