@@ -25,6 +25,17 @@ class Rebloom:
     rebloom_timestamp: datetime.datetime
 
 
+# Represents a Bloom in the home timeline, including rebloom information when applicable.
+@dataclass
+class TimelineBloom:
+    id: int
+    sender: User
+    content: str
+    sent_timestamp: datetime.datetime
+    rebloomer: Optional[str] = None
+    rebloom_timestamp: Optional[datetime.datetime] = None
+
+
 # Records a user's rebloom without creating another copy of the original Bloom.
 def add_rebloom(*, bloom_id: int, user: User):
     rebloom_timestamp = datetime.datetime.now(datetime.UTC)
@@ -67,6 +78,35 @@ def get_reblooms(bloom_id: int) -> List[Rebloom]:
             ORDER BY reblooms.rebloom_timestamp
             """,
             (bloom_id,),
+        )
+        rows = cur.fetchall()
+
+        reblooms = []
+        for row in rows:
+            bloom_id, username, timestamp = row
+            reblooms.append(
+                Rebloom(
+                    bloom_id=bloom_id,
+                    user=username,
+                    rebloom_timestamp=timestamp,
+                )
+            )
+
+    return reblooms
+
+
+# Gets the reblooms made by a specific user for their timeline.
+def get_reblooms_for_user(username: str) -> List[Rebloom]:
+    with db_cursor() as cur:
+        cur.execute(
+            """
+            SELECT reblooms.bloom_id, users.username, reblooms.rebloom_timestamp
+            FROM reblooms
+            INNER JOIN users ON users.id = reblooms.user_id
+            WHERE users.username = %s
+            ORDER BY reblooms.rebloom_timestamp DESC
+            """,
+            (username,),
         )
         rows = cur.fetchall()
 
