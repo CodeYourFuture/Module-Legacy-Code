@@ -42,7 +42,14 @@ PROGRESS
     - Added a function to count reblooms for a Bloom.
     - Added a function to retrieve rebloom users and timestamps.
     - Verified the backend data module passes Python syntax checking.
-[ ] Step 4 — Update database
+
+[✓] Step 4 — Update database
+    - Added the reblooms table.
+    - Added foreign keys linking reblooms to blooms and users.
+    - Added a unique constraint to prevent duplicate reblooms.
+    - Added a timestamp for each rebloom.
+    - Verified the reblooms table in PostgreSQL.
+
 [ ] Step 5 — Add backend endpoint
 [ ] Step 6 — Update home timeline
 [ ] Step 7 — Update frontend API service
