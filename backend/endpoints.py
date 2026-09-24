@@ -167,6 +167,27 @@ def send_bloom():
     )
 
 
+@jwt_required()
+def rebloom():
+    # Get the logged-in user so the database records who performed the rebloom.
+    user = get_current_user()
+
+    # Validate the Bloom ID using the same request validation used by other endpoints.
+    type_check_error = verify_request_fields({"bloom_id": int})
+    if type_check_error is not None:
+        return type_check_error
+
+    bloom_id = request.json["bloom_id"]
+
+    blooms.add_rebloom(bloom_id=bloom_id, user=user)
+
+    return jsonify(
+        {
+            "success": True,
+        }
+    )
+
+
 def get_bloom(id_str):
     try:
         id_int = int(id_str)

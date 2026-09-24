@@ -50,7 +50,13 @@ PROGRESS
     - Added a timestamp for each rebloom.
     - Verified the reblooms table in PostgreSQL.
 
-[ ] Step 5 — Add backend endpoint
+[✓] Step 5 — Add backend endpoint
+    - Added an authenticated endpoint for reblooming a Bloom.
+    - Validated the bloom_id request field.
+    - Recorded the logged-in user as the rebloomer.
+    - Registered POST /rebloom in the Flask application.
+    - Verified the backend files pass syntax checking and import successfully.
+
 [ ] Step 6 — Update home timeline
 [ ] Step 7 — Update frontend API service
 [ ] Step 8 — Update bloom data
