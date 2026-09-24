@@ -57,7 +57,13 @@ PROGRESS
     - Registered POST /rebloom in the Flask application.
     - Verified the backend files pass syntax checking and import successfully.
 
-[ ] Step 6 — Update home timeline
+[✓] Step 6 — Update home timeline
+    - Updated the home timeline to include reblooms from followed users and the current user.
+    - Preserved the original Bloom data when displaying a rebloom.
+    - Added rebloomer and rebloom timestamp information to timeline items.
+    - Sorted original Blooms and reblooms by their timeline timestamp.
+    - Verified the frontend receives the updated timeline data.
+
 [ ] Step 7 — Update frontend API service
 [ ] Step 8 — Update bloom data
 [ ] Step 9 — Update bloom UI
