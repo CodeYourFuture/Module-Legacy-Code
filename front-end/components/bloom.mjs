@@ -1,3 +1,5 @@
+import {apiService} from "../lib/api.mjs";
+
 /**
  * Create a bloom component
  * @param {string} template - The ID of the template to clone
@@ -17,6 +19,22 @@ const createBloom = (template, bloom) => {
 
   const bloomArticle = bloomFrag.querySelector("[data-bloom]");
   const bloomUsername = bloomFrag.querySelector("[data-username]");
+  // Show who rebloomed the original Bloom when this timeline item is a rebloom.
+  if (bloom.rebloomer) {
+    const rebloomLabel = document.createElement("p");
+    rebloomLabel.textContent = `${bloom.rebloomer} rebloomed`;
+    rebloomLabel.classList.add("bloom__rebloom");
+    bloomArticle.prepend(rebloomLabel);
+  }
+  // Shows the rebloom count only when the Bloom has been rebloomed.
+  if (bloom.rebloom_count > 0) {
+    const rebloomCount = document.createElement("p");
+    rebloomCount.textContent = `${bloom.rebloom_count} rebloom${
+      bloom.rebloom_count === 1 ? "" : "s"
+    }`;
+    rebloomCount.classList.add("bloom__rebloom-count");
+    bloomArticle.append(rebloomCount);
+  }
   const bloomTime = bloomFrag.querySelector("[data-time]");
   const bloomTimeLink = bloomFrag.querySelector("a:has(> [data-time])");
   const bloomContent = bloomFrag.querySelector("[data-content]");
@@ -33,6 +51,16 @@ const createBloom = (template, bloom) => {
 
   return bloomFrag;
 };
+
+// Sends the selected Bloom ID to the backend when the user clicks Rebloom.
+async function handleRebloom(event) {
+  const bloomArticle = event.currentTarget.closest("[data-bloom]");
+  const bloomId = Number(bloomArticle?.dataset.bloomId);
+
+  if (!bloomId) return;
+
+  await apiService.postRebloom(bloomId);
+}
 
 function _formatHashtags(text) {
   if (!text) return text;
@@ -84,4 +112,4 @@ function _formatTimestamp(timestamp) {
   }
 }
 
-export {createBloom};
+export {createBloom, handleRebloom};
