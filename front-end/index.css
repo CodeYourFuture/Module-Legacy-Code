@@ -221,6 +221,13 @@ dialog {
   gap: var(--space);
 }
 
+/* Shows which user rebloomed the original Bloom. */
+.bloom__rebloom {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--accent);
+}
+
 /* states, helpers*/
 .flex {
   display: flex;

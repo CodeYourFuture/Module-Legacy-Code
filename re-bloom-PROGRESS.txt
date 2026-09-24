@@ -76,6 +76,11 @@ PROGRESS
     - Updated the Bloom component to recognise rebloom timeline data.
     - Added a rebloom label showing who rebloomed the original Bloom.
 
-[ ] Step 9 — Update bloom UI
+[✓] Step 9 — Update bloom UI
+    - Added styling for the rebloom indicator.
+    - Used the existing accent colour and spacing variables.
+
 [ ] Step 10 — Add tests
+
+
 [ ] Step 11 — Final review
