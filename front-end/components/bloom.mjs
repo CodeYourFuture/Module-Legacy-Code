@@ -1,3 +1,5 @@
+import {apiService} from "../lib/api.mjs";
+
 /**
  * Create a bloom component
  * @param {string} template - The ID of the template to clone
@@ -40,6 +42,16 @@ const createBloom = (template, bloom) => {
 
   return bloomFrag;
 };
+
+// Sends the selected Bloom ID to the backend when the user clicks Rebloom.
+async function handleRebloom(event) {
+  const bloomArticle = event.currentTarget.closest("[data-bloom]");
+  const bloomId = Number(bloomArticle?.dataset.bloomId);
+
+  if (!bloomId) return;
+
+  await apiService.postRebloom(bloomId);
+}
 
 function _formatHashtags(text) {
   if (!text) return text;
@@ -91,4 +103,4 @@ function _formatTimestamp(timestamp) {
   }
 }
 
-export {createBloom};
+export {createBloom, handleRebloom};

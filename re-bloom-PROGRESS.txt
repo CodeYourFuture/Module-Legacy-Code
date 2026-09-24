@@ -80,7 +80,12 @@ PROGRESS
     - Added styling for the rebloom indicator.
     - Used the existing accent colour and spacing variables.
 
-[ ] Step 10 — Add tests
+[✓] Step 10 — Add tests
+    - Added a Playwright test for reblooming a Bloom.
+    - Verified that a rebloom appears in the timeline.
+    - Verified that the same user cannot create a duplicate rebloom.
+    - Updated the existing timeline test so it does not depend on Bloom ordering.
+    - Ran the Home View Playwright tests successfully: 6 passed.
 
 
 [ ] Step 11 — Final review
