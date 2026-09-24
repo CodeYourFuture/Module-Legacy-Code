@@ -17,6 +17,13 @@ const createBloom = (template, bloom) => {
 
   const bloomArticle = bloomFrag.querySelector("[data-bloom]");
   const bloomUsername = bloomFrag.querySelector("[data-username]");
+  // Show who rebloomed the original Bloom when this timeline item is a rebloom.
+  if (bloom.rebloomer) {
+    const rebloomLabel = document.createElement("p");
+    rebloomLabel.textContent = `${bloom.rebloomer} rebloomed`;
+    rebloomLabel.classList.add("bloom__rebloom");
+    bloomArticle.prepend(rebloomLabel);
+  }
   const bloomTime = bloomFrag.querySelector("[data-time]");
   const bloomTimeLink = bloomFrag.querySelector("a:has(> [data-time])");
   const bloomContent = bloomFrag.querySelector("[data-content]");

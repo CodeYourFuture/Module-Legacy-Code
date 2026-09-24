@@ -72,7 +72,10 @@ PROGRESS
     - Exported postRebloom through the API service.
     - Verified the frontend file passes JavaScript syntax checking.
 
-[ ] Step 8 — Update bloom data
+[✓] Step 8 — Update bloom data
+    - Updated the Bloom component to recognise rebloom timeline data.
+    - Added a rebloom label showing who rebloomed the original Bloom.
+
 [ ] Step 9 — Update bloom UI
 [ ] Step 10 — Add tests
 [ ] Step 11 — Final review
