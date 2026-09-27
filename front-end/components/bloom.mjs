@@ -1,3 +1,5 @@
+import {apiService} from "../lib/api.mjs";
+
 /**
  * Create a bloom component
  * @param {string} template - The ID of the template to clone
@@ -20,12 +22,23 @@ const createBloom = (template, bloom) => {
   const bloomTime = bloomFrag.querySelector("[data-time]");
   const bloomTimeLink = bloomFrag.querySelector("a:has(> [data-time])");
   const bloomContent = bloomFrag.querySelector("[data-content]");
+  const rebloomCount = bloomFrag.querySelector("[data-rebloom-count]");
+  const rebloomButton = bloomFrag.querySelector("[data-action='rebloom']");
 
   bloomArticle.setAttribute("data-bloom-id", bloom.id);
+
+  rebloomButton?.addEventListener("click", () => {
+    apiService.rebloom(bloom.id);
+  });
   bloomUsername.setAttribute("href", `/profile/${bloom.sender}`);
   bloomUsername.textContent = bloom.sender;
+
+  if (bloom.rebloomed_by) {
+  bloomUsername.textContent = `${bloom.sender} (re-bloomed by ${bloom.rebloomed_by})`;
+  }
   bloomTime.textContent = _formatTimestamp(bloom.sent_timestamp);
   bloomTimeLink.setAttribute("href", `/bloom/${bloom.id}`);
+  rebloomCount.textContent = bloom.rebloom_count;
   bloomContent.replaceChildren(
     ...bloomParser.parseFromString(_formatHashtags(bloom.content), "text/html")
       .body.childNodes
@@ -37,8 +50,9 @@ const createBloom = (template, bloom) => {
 function _formatHashtags(text) {
   if (!text) return text;
   return text.replace(
-    /\B#[^#]+/g,
-    (match) => `<a href="/hashtag/${match.slice(1)}">${match}</a>`
+    /(^|\s)(#[A-Za-z0-9_]+)/g,
+    (match, prefix, hashtag) =>
+      `${prefix}<a href="/hashtag/${hashtag.slice(1)}">${hashtag}</a>`
   );
 }
 
