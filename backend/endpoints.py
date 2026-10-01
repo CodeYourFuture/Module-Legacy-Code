@@ -158,7 +158,7 @@ def send_bloom():
 
     user = get_current_user()
 
-    blooms.add_bloom(sender=user, content=request.json["content"][:280])
+    blooms.add_bloom(sender=user, content=request.json["content"])
 
     return jsonify(
         {
