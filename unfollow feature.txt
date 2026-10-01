@@ -1,0 +1,272 @@
+# PURPLEFOREST — UNFOLLOW FEATURE DEVELOPMENT PLAN
+
+## Goal
+
+Add **Unfollow** to the existing Follow feature.
+
+Reuse the existing Follow architecture wherever possible.
+
+---
+
+## Current Follow Flow
+
+```text
+Follow button
+    ↓
+followUser()
+    ↓
+POST /follow
+    ↓
+do_follow()
+    ↓
+follow()
+    ↓
+INSERT INTO follows
+```
+
+## New Unfollow Flow
+
+```text
+Unfollow button
+    ↓
+unfollowUser()
+    ↓
+POST /unfollow
+    ↓
+do_unfollow()
+    ↓
+unfollow()
+    ↓
+DELETE FROM follows
+```
+
+---
+
+## Files to Change
+
+### Backend
+
+```text
+backend/data/follows.py
+    → Add unfollow()
+
+backend/endpoints.py
+    → Add do_unfollow()
+
+backend/main.py
+    → Add POST /unfollow
+```
+
+### Frontend
+
+```text
+API service
+    → Add unfollowUser(username)
+
+Profile component
+    → Show Follow / Unfollow / Hidden
+
+Tests
+    → Test Follow and Unfollow behaviour
+```
+
+---
+
+## Implementation Steps
+
+### 1. Data Layer
+
+**File:** `backend/data/follows.py`
+
+Add:
+
+```text
+unfollow(follower, followee)
+```
+
+Use `DELETE` to remove the relationship:
+
+```sql
+DELETE FROM follows
+WHERE follower = follower.id
+AND followee = followee.id
+```
+
+---
+
+### 2. Backend Endpoint
+
+**File:** `backend/endpoints.py`
+
+Add:
+
+```text
+do_unfollow()
+```
+
+It should:
+
+```text
+Authenticate user
+    ↓
+Validate follow_username
+    ↓
+Get current user
+    ↓
+Get followee
+    ↓
+Check user exists
+    ↓
+Call unfollow()
+    ↓
+Return success
+```
+
+Response:
+
+```json
+{
+    "success": true
+}
+```
+
+---
+
+### 3. Register Route
+
+**File:** `backend/main.py`
+
+Add:
+
+```text
+POST /unfollow → do_unfollow()
+```
+
+---
+
+### 4. Frontend API
+
+Find the existing:
+
+```text
+followUser(username)
+```
+
+Add:
+
+```text
+unfollowUser(username)
+```
+
+It should call:
+
+```text
+POST /unfollow
+```
+
+---
+
+### 5. Profile Button
+
+Use the existing:
+
+```text
+profileData.is_self
+profileData.is_following
+```
+
+Behaviour:
+
+```text
+Own profile?
+    YES → Hide button
+
+    NO
+     ↓
+Already following?
+    YES → Show "Unfollow"
+    NO  → Show "Follow"
+```
+
+Actions:
+
+```text
+Follow    → handleFollow()
+Unfollow  → handleUnfollow()
+```
+
+The **Who To Follow** section remains Follow-only.
+
+---
+
+### 6. Update UI State
+
+After Follow:
+
+```text
+Follow → API → refresh state → Unfollow
+```
+
+After Unfollow:
+
+```text
+Unfollow → API → refresh state → Follow
+```
+
+---
+
+### 7. Tests
+
+Test:
+
+```text
+1. Not following → Follow → Unfollow shown
+
+2. Following → Unfollow → Follow shown
+
+3. Follow → Unfollow → Follow
+
+4. Own profile → button hidden
+```
+
+---
+
+## Implementation Order
+
+```text
+1. follows.py
+      ↓
+2. endpoints.py
+      ↓
+3. main.py
+      ↓
+4. API service
+      ↓
+5. Profile component
+      ↓
+6. UI state
+      ↓
+7. Tests
+      ↓
+8. Run existing tests
+```
+
+## Key Principle
+
+Keep Unfollow as the mirror of Follow:
+
+```text
+FOLLOW                         UNFOLLOW
+
+followUser()                   unfollowUser()
+     ↓                              ↓
+/follow                         /unfollow
+     ↓                              ↓
+do_follow()                    do_unfollow()
+     ↓                              ↓
+follow()                       unfollow()
+     ↓                              ↓
+INSERT                         DELETE
+```
+
+This keeps the new feature consistent with the existing codebase.
