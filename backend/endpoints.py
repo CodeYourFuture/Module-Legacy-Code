@@ -1,5 +1,4 @@
-from datetime import timedelta
-
+from typing import Dict, Union
 from data import blooms
 from data.follows import follow, get_followed_usernames, get_inverse_followed_usernames
 from data.users import (
@@ -8,12 +7,15 @@ from data.users import (
     get_user,
     register_user,
 )
+
 from flask import Response, jsonify, make_response, request
 from flask_jwt_extended import (
     create_access_token,
     get_current_user,
     jwt_required,
 )
+
+from datetime import timedelta
 
 MINIMUM_PASSWORD_LENGTH = 5
 
@@ -169,10 +171,10 @@ def get_bloom(id_str):
     try:
         id_int = int(id_str)
     except ValueError:
-        return make_response(("Invalid bloom id", 400))
+        return make_response((f"Invalid bloom id", 400))
     bloom = blooms.get_bloom(id_int)
     if bloom is None:
-        return make_response(("Bloom not found", 404))
+        return make_response((f"Bloom not found", 404))
     return jsonify(bloom)
 
 
@@ -197,8 +199,8 @@ def home_timeline():
     all_blooms = followed_blooms + own_blooms
 
     # Sort by timestamp (newest first)
-    sorted_blooms = sorted(
-        all_blooms, key=lambda bloom: bloom.sent_timestamp, reverse=True
+    sorted_blooms = list(
+        sorted(all_blooms, key=lambda bloom: bloom.sent_timestamp, reverse=True)
     )
 
     return jsonify(sorted_blooms)
@@ -215,7 +217,7 @@ def suggested_follows(limit_str):
     try:
         limit_int = int(limit_str)
     except ValueError:
-        return make_response(("Invalid limit", 400))
+        return make_response((f"Invalid limit", 400))
 
     current_user = get_current_user()
 
@@ -230,7 +232,7 @@ def hashtag(hashtag):
     return jsonify(blooms.get_blooms_with_hashtag(hashtag))
 
 
-def verify_request_fields(names_to_types: dict[str, type]) -> Response | None:
+def verify_request_fields(names_to_types: Dict[str, type]) -> Union[Response, None]:
     for name, expected_type in names_to_types.items():
         if name not in request.json:
             return make_response((f"Request missing field: {name}", 400))
