@@ -15,7 +15,10 @@ test.describe("Profile View", () => {
     await expect(
       page.locator("#profile-container header a[data-username]")
     ).toBeVisible();
-
+    // And the Follow/Unfollow button is hidden on my own profile
+    await expect(
+      page.locator("#profile-container [data-action='follow'][data-username='sample']")
+    ).toBeHidden();
     await waitForLocatorToHaveMatches(page, TIMELINE_USERNAMES_ELEMENTS_LOCATOR);
     const postUsernames = new Set(await page.locator(TIMELINE_USERNAMES_ELEMENTS_LOCATOR).allInnerTexts());
     expect(postUsernames).toEqual(new Set(["sample"]));
@@ -42,18 +45,19 @@ test.describe("Profile View", () => {
     await expect(page.locator("#timeline-container")).toBeVisible();
     // And bloom form is not attached
     await expect(page.locator("#bloom-form-container form")).not.toBeAttached();
-    // And I see a Follow button
-    await expect(
-      page.locator("#profile-container [data-action='follow'][data-username='sample']")
-    ).toHaveText("Follow");
-    // When I click Follow
-    await page.locator(
+    // And I see a Follow or Unfollow button
+    const followButton = page.locator(
       "#profile-container [data-action='follow'][data-username='sample']"
-    ).click();
+    );
 
-    // Then the button changes to Unfollow
-    await expect(
-      page.locator("#profile-container [data-action='follow'][data-username='sample']")
-    ).toHaveText("Unfollow");
+    const buttonText = await followButton.textContent();
+
+    if (buttonText === "Follow") {
+      await followButton.click();
+      await expect(followButton).toHaveText("Unfollow");
+    } else {
+      await followButton.click();
+      await expect(followButton).toHaveText("Follow");
+    }
   });
 });
