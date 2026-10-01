@@ -42,5 +42,18 @@ test.describe("Profile View", () => {
     await expect(page.locator("#timeline-container")).toBeVisible();
     // And bloom form is not attached
     await expect(page.locator("#bloom-form-container form")).not.toBeAttached();
+    // And I see a Follow button
+    await expect(
+      page.locator("#profile-container [data-action='follow'][data-username='sample']")
+    ).toHaveText("Follow");
+    // When I click Follow
+    await page.locator(
+      "#profile-container [data-action='follow'][data-username='sample']"
+    ).click();
+
+    // Then the button changes to Unfollow
+    await expect(
+      page.locator("#profile-container [data-action='follow'][data-username='sample']")
+    ).toHaveText("Unfollow");
   });
 });
