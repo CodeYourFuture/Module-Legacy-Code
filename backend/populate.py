@@ -45,6 +45,13 @@ def follow(*, follower_access_token: str, follow_username: str) -> None:
         access_token=follower_access_token,
     )
 
+def first_bloom_id(username: str) -> int:
+    return requests.get(f"http://127.0.0.1:3000/blooms/{username}").json()[0]["id"]
+
+
+def rebloom(access_token: str, bloom_id: int) -> None:
+    post(f"/rebloom/{bloom_id}", data={}, access_token=access_token)
+
 
 def main():
     sample_access_token = create_user("sample", "sosecret")
