@@ -179,6 +179,28 @@ def get_bloom(id_str):
 
 
 @jwt_required()
+def rebloom():
+    type_check_error = verify_request_fields({"bloom_id": int})
+    if type_check_error is not None:
+        return type_check_error
+
+    user = get_current_user()
+
+    bloom = blooms.get_bloom(request.json["bloom_id"])
+
+    if bloom is None:
+        return make_response(("Bloom not found", 404))
+
+    blooms.rebloom(sender=user, bloom=bloom)
+
+    return jsonify(
+        {
+            "success": True,
+        }
+    )
+
+
+@jwt_required()
 def home_timeline():
     current_user = get_current_user()
 
