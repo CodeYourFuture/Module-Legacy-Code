@@ -178,6 +178,10 @@ async function getBlooms(username) {
  */
 async function getBloomsByHashtag(hashtag) {
   const tag = hashtag.startsWith("#") ? hashtag.substring(1) : hashtag;
+  if (`#${tag}` === state.currentHashtag) {
+      return state.hashtagBlooms;
+   }
+
   const endpoint = `/hashtag/${encodeURIComponent(tag)}`;
 
   try {
