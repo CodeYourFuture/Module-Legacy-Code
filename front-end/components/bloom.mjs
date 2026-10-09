@@ -37,7 +37,7 @@ const createBloom = (template, bloom) => {
 function _formatHashtags(text) {
   if (!text) return text;
   return text.replace(
-    /(^|\s)(#[A-Za-z0-9_]+)/g,
+    /(^|\s)(#[A-Za-z0-9_-]+)/g,
     (match, prefix, hashtag) =>
       `${prefix}<a href="/hashtag/${hashtag.slice(1)}">${hashtag}</a>`
   );
