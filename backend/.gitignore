@@ -1,3 +1,5 @@
 /.env
 /.venv/
 *.pyc
+/backend/test-results/.last-run.json
+/.vscode/settings.json
