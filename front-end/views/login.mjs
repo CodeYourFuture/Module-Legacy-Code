@@ -11,8 +11,11 @@ function loginView() {
     "login-template",
     createLogin
   );
-  const form = document.querySelector("[data-form='login']");
-  form?.addEventListener("submit", handleLogin);
+  const form = getLoginContainer().querySelector("[data-form='login']");
+ form?.addEventListener("submit", (event) => { 
+  event.preventDefault();
+   handleLogin(event);
+ })
 }
 
 export {loginView};

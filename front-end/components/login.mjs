@@ -6,6 +6,7 @@ import {apiService} from "../index.mjs";
  * @param {Object} isLoggedIn - if you're logged in we don't need this component
  * @returns {DocumentFragment} - The login fragment
  */
+
 function createLogin(template, isLoggedIn) {
   if (isLoggedIn) return;
   const loginElement = document
@@ -17,7 +18,9 @@ function createLogin(template, isLoggedIn) {
 // HANDLER
 async function handleLogin(event) {
   event.preventDefault();
-  const form = event.target;
+   event.stopPropagation();
+
+  const form = event.currentTarget
   const submitButton = form.querySelector("[data-submit]");
   const originalText = submitButton.textContent;
 
