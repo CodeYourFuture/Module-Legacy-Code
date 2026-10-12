@@ -5,10 +5,10 @@ To run:
 ### One time
 
 1. In the `backend` directory, create a file named `.env` with values for the following environment variables:
-   * `JWT_SECRET_KEY`: Any random string.
-   * `POSTGRES_PASSWORD`: Any random string.
-   * `POSTGRES_USER`: `postgres`, assuming you're using the bundled docker-based database, or whatever user you need if you have a custom postgres set up.
-   * Optionally, `POSTGRES_DB`, `POSTGRES_HOST`, and `POSTGRES_PORT` if you're not using default postgres values.
+   - `JWT_SECRET_KEY`: Any random string.
+   - `POSTGRES_PASSWORD`: Any random string.
+   - `POSTGRES_USER`: `postgres`, assuming you're using the bundled docker-based database, or whatever user you need if you have a custom postgres set up.
+   - Optionally, `POSTGRES_DB`, `POSTGRES_HOST`, and `POSTGRES_PORT` if you're not using default postgres values.
 2. Make a virtual environment: `python3 -m venv .venv`
 3. Activate the virtual environment: `. .venv/bin/activate`
 4. Install dependencies: `pip install -r requirements.txt`
