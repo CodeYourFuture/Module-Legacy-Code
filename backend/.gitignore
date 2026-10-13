@@ -1,3 +1,4 @@
 /.env
 /.venv/
 *.pyc
+/test-results/.last-run.json
