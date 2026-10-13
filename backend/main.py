@@ -3,6 +3,7 @@ import os
 from custom_json_provider import CustomJsonProvider
 from data.users import lookup_user
 from endpoints import (
+    do_unfollow,
     do_follow,
     get_bloom,
     hashtag,
@@ -54,6 +55,7 @@ def main():
     app.add_url_rule("/profile", view_func=self_profile)
     app.add_url_rule("/profile/<profile_username>", view_func=other_profile)
     app.add_url_rule("/follow", methods=["POST"], view_func=do_follow)
+    app.add_url_rule("/unfollow", methods=["POST"], view_func=do_unfollow)
     app.add_url_rule("/suggested-follows/<limit_str>", view_func=suggested_follows)
 
     app.add_url_rule("/bloom", methods=["POST"], view_func=send_bloom)
