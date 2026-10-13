@@ -53,6 +53,11 @@ function handleRouteChange() {
  * @param {string} path - The path to navigate to
  */
 function navigateTo(path) {
+  if (window.location.hash === `#${path}`) {
+    handleRouteChange();
+    return;
+  }
+
   window.location.hash = path;
 }
 

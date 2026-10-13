@@ -166,6 +166,24 @@ def send_bloom():
         }
     )
 
+@jwt_required()
+def rebloom(id_str):
+    try:
+        bloom_id = int(id_str)
+    except ValueError:
+        return make_response(("Invalid bloom id", 400))
+
+    bloom = blooms.get_bloom(bloom_id)
+    if bloom is None:
+        return make_response(("Bloom not found", 404))
+    if bloom.sender == get_current_user().username:
+        return make_response(("You cannot re-bloom your own Bloom", 400))
+
+    user = get_current_user()
+    blooms.add_rebloom(user=user, bloom_id=bloom_id)
+
+    return jsonify({"success": True})
+
 
 def get_bloom(id_str):
     try:
@@ -194,9 +212,11 @@ def home_timeline():
 
     # Get the current user's own blooms
     own_blooms = blooms.get_blooms_for_user(current_user.username, limit=50)
+    own_reblooms = blooms.get_reblooms_for_user(current_user.username)
+    followed_reblooms = blooms.get_reblooms_for_users(followed_users)
 
     # Combine own blooms with followed blooms
-    all_blooms = followed_blooms + own_blooms
+    all_blooms = followed_blooms + own_blooms + own_reblooms + followed_reblooms
 
     # Sort by timestamp (newest first)
     sorted_blooms = list(

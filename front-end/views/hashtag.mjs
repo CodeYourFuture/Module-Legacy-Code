@@ -18,7 +18,8 @@ function hashtagView(hashtag) {
   destroy();
 
   apiService.getBloomsByHashtag(hashtag);
-
+  
+  
   renderOne(
     state.isLoggedIn,
     getLogoutContainer(),
