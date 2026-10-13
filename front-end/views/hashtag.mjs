@@ -26,8 +26,8 @@ function hashtagView(hashtag) {
     createLogout
   );
   document
-    .querySelector("[data-action='logout']")
-    ?.addEventListener("click", handleLogout);
+    .querySelector("[data-form='logout']")
+    ?.addEventListener("submit", handleLogout);
   renderOne(
     state.isLoggedIn,
     getLoginContainer(),
