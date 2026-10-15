@@ -179,6 +179,21 @@ def get_bloom(id_str):
 
 
 @jwt_required()
+def rebloom():
+    user = get_current_user()
+
+    bloom_id = request.json.get("bloom_id")
+    original = blooms.get_bloom(bloom_id)
+
+    if not original:
+        return jsonify({"error": "Not found"}), 404
+
+    blooms.add_rebloom(sender=user, bloom_id=bloom_id)
+
+    return jsonify({"success": True})
+
+
+@jwt_required()
 def home_timeline():
     current_user = get_current_user()
 

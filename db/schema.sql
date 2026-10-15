@@ -12,6 +12,12 @@ CREATE TABLE blooms (
     content TEXT NOT NULL,
     send_timestamp TIMESTAMP NOT NULL
 );
+CREATE TABLE reblooms (
+    id BIGSERIAL NOT NULL PRIMARY KEY,
+    sender_id INT NOT NULL REFERENCES users(id),
+    bloom_id BIGINT NOT NULL REFERENCES blooms(id),
+    send_timestamp TIMESTAMP NOT NULL
+);
 
 CREATE TABLE follows (
     id SERIAL PRIMARY KEY,
