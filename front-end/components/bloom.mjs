@@ -10,6 +10,7 @@
  * "sent_timestamp": "datetime as ISO 8601 formatted string"}
 
  */
+import { apiService, state } from "../index.mjs";
 const createBloom = (template, bloom) => {
   if (!bloom) return;
   const bloomFrag = document.getElementById(template).content.cloneNode(true);
@@ -28,9 +29,43 @@ const createBloom = (template, bloom) => {
   bloomTimeLink.setAttribute("href", `/bloom/${bloom.id}`);
   bloomContent.replaceChildren(
     ...bloomParser.parseFromString(_formatHashtags(bloom.content), "text/html")
-      .body.childNodes
+      .body.childNodes,
   );
+  // --- Re-bloom UI ---
+  const rebloomBanner = bloomFrag.querySelector("[data-rebloom-banner]");
+  const rebloomer = bloomFrag.querySelector("[data-rebloomer]");
+  const rebloomTime = bloomFrag.querySelector("[data-rebloom-time]");
+  const rebloomButton = bloomFrag.querySelector("[data-action='rebloom']");
+  const rebloomCount = bloomFrag.querySelector("[data-rebloom-count]");
 
+  // Re-bloomed item: show who re-bloomed it and when, and mark the card as different
+  if (bloom.rebloomed_by) {
+    bloomArticle.setAttribute("data-rebloomed", "");
+    rebloomBanner.hidden = false;
+    rebloomer.setAttribute("href", `/profile/${bloom.rebloomed_by}`);
+    rebloomer.textContent = bloom.rebloomed_by;
+    rebloomTime.textContent = _formatTimestamp(bloom.rebloomed_at);
+  }
+
+  // Count only appears once someone has re-bloomed it
+  if (bloom.rebloom_count > 0) {
+    rebloomCount.textContent = bloom.rebloom_count;
+  }
+
+  // Logged-out users can't re-bloom
+  if (!state.isLoggedIn) {
+    rebloomButton.remove();
+  } else {
+    rebloomButton.addEventListener("click", async (event) => {
+      const button = event.currentTarget;
+      button.disabled = true;
+      try {
+        await apiService.rebloom(bloom.id);
+      } finally {
+        button.disabled = false;
+      }
+    });
+  }
   return bloomFrag;
 };
 
@@ -38,7 +73,7 @@ function _formatHashtags(text) {
   if (!text) return text;
   return text.replace(
     /\B#[^#]+/g,
-    (match) => `<a href="/hashtag/${match.slice(1)}">${match}</a>`
+    (match) => `<a href="/hashtag/${match.slice(1)}">${match}</a>`,
   );
 }
 
@@ -84,4 +119,4 @@ function _formatTimestamp(timestamp) {
   }
 }
 
-export {createBloom};
+export { createBloom };
