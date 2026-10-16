@@ -13,6 +13,15 @@ CREATE TABLE blooms (
     send_timestamp TIMESTAMP NOT NULL
 );
 
+-- Stores which users rebloomed each Bloom without copying the original Bloom.
+CREATE TABLE reblooms (
+    id SERIAL PRIMARY KEY,
+    bloom_id BIGINT NOT NULL REFERENCES blooms(id),
+    user_id INT NOT NULL REFERENCES users(id),
+    rebloom_timestamp TIMESTAMP NOT NULL,
+    UNIQUE(bloom_id, user_id)
+);
+
 CREATE TABLE follows (
     id SERIAL PRIMARY KEY,
     follower INT NOT NULL REFERENCES users(id),

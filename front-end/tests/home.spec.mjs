@@ -38,8 +38,10 @@ test.describe("Home View", () => {
     // When I create a bloom
     await postBloom(page, "My first bloom!");
 
-    // Then I see the bloom in the timeline
-    await expect(page.locator("[data-bloom] [data-content]").first()).toContainText("My first bloom!");
+    // Finds at least one Bloom with the content created by this test.
+    await expect(
+      page.locator("[data-bloom] [data-content]").filter({hasText: "My first bloom!"}).first()
+    ).toBeVisible();
   });
 
   test("hides components after logout", async ({page}) => {
@@ -70,4 +72,42 @@ test.describe("Home View", () => {
     // And I see my a followed user's posts in my timeline
     expect(postUsernames).toContain("JustSomeGuy");
   });
+});
+
+// Playwright test for reblooming a Bloom and showing its rebloom count.
+test("can rebloom a bloom and show its rebloom count", async ({page}) => {
+  await loginAsSample(page);
+
+  const content = `Rebloom test ${Date.now()}`;
+  await postBloom(page, content);
+
+  // Finds the specific Bloom created by this test so we do not depend on existing data.
+  const bloom = page.locator("[data-bloom]").filter({hasText: content}).first();
+  await expect(bloom).toBeVisible();
+
+  const bloomId = await bloom.getAttribute("data-bloom-id");
+
+  // Rebloom the Bloom and wait for the refreshed timeline to show the rebloom.
+  await bloom.locator("[data-action='rebloom']").click();
+  await expect(
+    page.locator(`[data-bloom-id="${bloomId}"] .bloom__rebloom`)
+  ).toHaveCount(1);
+
+  // Verifies that the rebloom shows the total number of reblooms.
+  const rebloom = page
+    .locator(`[data-bloom-id="${bloomId}"]`)
+    .filter({has: page.locator(".bloom__rebloom")})
+    .first();
+
+  await expect(rebloom.locator(".bloom__rebloom-count")).toHaveText("1 rebloom");
+
+  // Clicking again should not create another rebloom because the database prevents duplicates.
+  await page
+    .locator(`[data-bloom-id="${bloomId}"] [data-action='rebloom']`)
+    .first()
+    .click();
+
+  await expect(
+    page.locator(`[data-bloom-id="${bloomId}"] .bloom__rebloom`)
+  ).toHaveCount(1);
 });

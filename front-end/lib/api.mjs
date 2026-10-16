@@ -212,6 +212,25 @@ async function postBloom(content) {
   }
 }
 
+// Sends the selected Bloom to the backend as a rebloom by the logged-in user.
+async function postRebloom(bloomId) {
+  try {
+    const data = await _apiRequest("/rebloom", {
+      method: "POST",
+      body: JSON.stringify({bloom_id: bloomId}),
+    });
+
+    if (data.success) {
+      await getBlooms();
+    }
+
+    return data;
+  } catch (error) {
+    // Error already handled by _apiRequest
+    return {success: false};
+  }
+}
+
 // ======= USER methods
 async function getProfile(username) {
   const endpoint = username ? `/profile/${username}` : "/profile";
@@ -291,6 +310,7 @@ const apiService = {
   getBloom,
   getBlooms,
   postBloom,
+  postRebloom,
   getBloomsByHashtag,
 
   // User methods
