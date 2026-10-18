@@ -1,9 +1,9 @@
-import {bloomView} from "../views/bloom.mjs";
-import {profileView} from "../views/profile.mjs";
-import {signupView} from "../views/signup.mjs";
-import {loginView} from "../views/login.mjs";
-import {homeView} from "../views/home.mjs";
-import {hashtagView} from "../views/hashtag.mjs";
+import { bloomView } from "../views/bloom.mjs";
+import { profileView } from "../views/profile.mjs";
+import { signupView } from "../views/signup.mjs";
+import { loginView } from "../views/login.mjs";
+import { homeView } from "../views/home.mjs";
+import { hashtagView } from "../views/hashtag.mjs";
 
 /**
  * Handle route changes based on the current URL
@@ -29,7 +29,7 @@ function handleRouteChange() {
   // Hashtag path
   if (hash.startsWith("/hashtag/")) {
     const hashtag = hash.split("/")[2];
-    hashtagView(hashtag);
+    hashtagView(hashtag.trim());
     return;
   }
 
@@ -71,4 +71,4 @@ document.addEventListener("click", (event) => {
   }
 });
 
-export {handleRouteChange, navigateTo};
+export { handleRouteChange, navigateTo };
