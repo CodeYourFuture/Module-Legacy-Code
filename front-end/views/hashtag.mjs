@@ -12,13 +12,9 @@ import {createLogout, handleLogout} from "../components/logout.mjs";
 import {createBloom} from "../components/bloom.mjs";
 import {createHeading} from "../components/heading.mjs";
 
-// Hashtag view: show all tweets containing this tag
 
-function hashtagView(hashtag) {
-  destroy();
-
-  apiService.getBloomsByHashtag(hashtag);
-
+// helper function to separate the UI from the data fetching 
+function renderHashtagUI() {
   renderOne(
     state.isLoggedIn,
     getLogoutContainer(),
@@ -50,6 +46,21 @@ function hashtagView(hashtag) {
     "bloom-template",
     createBloom
   );
+}
+
+// Hashtag view: show all tweets containing this tag
+function hashtagView(hashtag) {
+  destroy();
+
+  const formattedTag = hashtag.startsWith("#") ? hashtag : `#${hashtag}`;
+  
+  if (state.currentHashtag === formattedTag) {
+    renderHashtagUI();
+    return;
+  }
+
+  apiService.getBloomsByHashtag(hashtag);
+  renderHashtagUI();
 }
 
 export {hashtagView};
