@@ -20,6 +20,8 @@ function createProfile(template, {profileData, whoToFollow, isLoggedIn}) {
   const followerCountEl = profileElement.querySelector("[data-follower-count]");
   const followButtonEl = profileElement.querySelector("[data-action='follow']");
   const whoToFollowContainer = profileElement.querySelector(".profile__who-to-follow");
+  const unfollowButtonEl = profileElement.querySelector("[data-action='unfollow']");
+
   // Populate with data
   usernameEl.querySelector("h2").textContent = profileData.username || "";
   usernameEl.setAttribute("href", `/profile/${profileData.username}`);
@@ -29,6 +31,11 @@ function createProfile(template, {profileData, whoToFollow, isLoggedIn}) {
   followButtonEl.setAttribute("data-username", profileData.username || "");
   followButtonEl.hidden = profileData.is_self || profileData.is_following;
   followButtonEl.addEventListener("click", handleFollow);
+
+  unfollowButtonEl.setAttribute('data-username', profileData.username || "");
+  unfollowButtonEl.hidden = !profileData.is_following;
+  unfollowButtonEl.addEventListener("click", handleUnfollow);
+
   if (!isLoggedIn) {
     followButtonEl.style.display = "none";
   }
@@ -66,4 +73,13 @@ async function handleFollow(event) {
   await apiService.getWhoToFollow();
 }
 
-export {createProfile, handleFollow};
+async function handleUnfollow(event) {
+  const button = event.target;
+  const username = button.getAttribute("data-username");
+  if (!username) return;
+
+  await apiService.unfollowUser(username);
+  await apiService.getWhoToFollow();
+}
+
+export {createProfile, handleFollow, handleUnfollow};
