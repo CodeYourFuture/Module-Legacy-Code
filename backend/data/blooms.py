@@ -1,142 +1,76 @@
-import datetime
 
-from dataclasses import dataclass
-from typing import Any, Dict, List, Optional
+const createBloom = (template, bloom) => {
+  if (!bloom) return;
+  const bloomFrag = document.getElementById(template).content.cloneNode(true);
+  const bloomParser = new DOMParser();
 
-from data.connection import db_cursor
-from data.users import User
+  const bloomArticle = bloomFrag.querySelector("[data-bloom]");
+  const bloomUsername = bloomFrag.querySelector("[data-username]");
+  const bloomTime = bloomFrag.querySelector("[data-time]");
+  const bloomTimeLink = bloomFrag.querySelector("a:has(> [data-time])");
+  const bloomContent = bloomFrag.querySelector("[data-content]");
 
+  bloomArticle.setAttribute("data-bloom-id", bloom.id);
+  bloomUsername.setAttribute("href", `/profile/${bloom.sender}`);
+  bloomUsername.textContent = bloom.sender;
+  bloomTime.textContent = _formatTimestamp(bloom.sent_timestamp);
+  bloomTimeLink.setAttribute("href", `/bloom/${bloom.id}`);
+  bloomContent.replaceChildren(
+    ...bloomParser.parseFromString(_formatHashtags(bloom.content), "text/html")
+      .body.childNodes
+  );
 
-@dataclass
-class Bloom:
-    id: int
-    sender: User
-    content: str
-    sent_timestamp: datetime.datetime
+  return bloomFrag;
+};
 
+function _formatHashtags(text) {
+  if (!text) return text;
+  return text.replace(
+    /\B#\w+/g,
+    (match) => `<a href="/hashtag/${match.slice(1)}">${match}</a>`
+  );
+}
 
-def add_bloom(*, sender: User, content: str) -> Bloom:
-    hashtags = [word[1:] for word in content.split(" ") if word.startswith("#")]
+function _formatTimestamp(timestamp) {
+  if (!timestamp) return "";
 
-    now = datetime.datetime.now(tz=datetime.UTC)
-    bloom_id = int(now.timestamp() * 1000000)
-    with db_cursor() as cur:
-        cur.execute(
-            "INSERT INTO blooms (id, sender_id, content, send_timestamp) VALUES (%(bloom_id)s, %(sender_id)s, %(content)s, %(timestamp)s)",
-            dict(
-                bloom_id=bloom_id,
-                sender_id=sender.id,
-                content=content,
-                timestamp=datetime.datetime.now(datetime.UTC),
-            ),
-        )
-        for hashtag in hashtags:
-            cur.execute(
-                "INSERT INTO hashtags (hashtag, bloom_id) VALUES (%(hashtag)s, %(bloom_id)s)",
-                dict(hashtag=hashtag, bloom_id=bloom_id),
-            )
+  try {
+    const date = new Date(timestamp);
+    const now = new Date();
+    const diffSeconds = Math.floor((now - date) / 1000);
 
-
-def get_blooms_for_user(
-    username: str, *, before: Optional[int] = None, limit: Optional[int] = None
-) -> List[Bloom]:
-    with db_cursor() as cur:
-        kwargs = {
-            "sender_username": username,
-        }
-        if before is not None:
-            before_clause = "AND send_timestamp < %(before_limit)s"
-            kwargs["before_limit"] = before
-        else:
-            before_clause = ""
-
-        limit_clause = make_limit_clause(limit, kwargs)
-
-        cur.execute(
-            f"""SELECT
-              blooms.id, users.username, content, send_timestamp
-            FROM
-              blooms INNER JOIN users ON users.id = blooms.sender_id
-            WHERE
-              username = %(sender_username)s
-              {before_clause}
-            ORDER BY send_timestamp DESC
-            {limit_clause}
-            """,
-            kwargs,
-        )
-        rows = cur.fetchall()
-        blooms = []
-        for row in rows:
-            bloom_id, sender_username, content, timestamp = row
-            blooms.append(
-                Bloom(
-                    id=bloom_id,
-                    sender=sender_username,
-                    content=content,
-                    sent_timestamp=timestamp,
-                )
-            )
-    return blooms
-
-
-def get_bloom(bloom_id: int) -> Optional[Bloom]:
-    with db_cursor() as cur:
-        cur.execute(
-            "SELECT blooms.id, users.username, content, send_timestamp FROM blooms INNER JOIN users ON users.id = blooms.sender_id WHERE blooms.id = %s",
-            (bloom_id,),
-        )
-        row = cur.fetchone()
-        if row is None:
-            return None
-        bloom_id, sender_username, content, timestamp = row
-        return Bloom(
-            id=bloom_id,
-            sender=sender_username,
-            content=content,
-            sent_timestamp=timestamp,
-        )
-
-
-def get_blooms_with_hashtag(
-    hashtag_without_leading_hash: str, *, limit: int = None
-) -> List[Bloom]:
-    kwargs = {
-        "hashtag_without_leading_hash": hashtag_without_leading_hash,
+    // Less than a minute
+    if (diffSeconds < 60) {
+      return `${diffSeconds}s`;
     }
-    limit_clause = make_limit_clause(limit, kwargs)
-    with db_cursor() as cur:
-        cur.execute(
-            f"""SELECT
-              blooms.id, users.username, content, send_timestamp
-            FROM
-              blooms INNER JOIN hashtags ON blooms.id = hashtags.bloom_id INNER JOIN users ON blooms.sender_id = users.id
-            WHERE
-              hashtag = %(hashtag_without_leading_hash)s
-            ORDER BY send_timestamp DESC
-            {limit_clause}
-            """,
-            kwargs,
-        )
-        rows = cur.fetchall()
-        blooms = []
-        for row in rows:
-            bloom_id, sender_username, content, timestamp = row
-            blooms.append(
-                Bloom(
-                    id=bloom_id,
-                    sender=sender_username,
-                    content=content,
-                    sent_timestamp=timestamp,
-                )
-            )
-    return blooms
 
+    // Less than an hour
+    const diffMinutes = Math.floor(diffSeconds / 60);
+    if (diffMinutes < 60) {
+      return `${diffMinutes}m`;
+    }
 
-def make_limit_clause(limit: Optional[int], kwargs: Dict[Any, Any]) -> str:
-    if limit is not None:
-        limit_clause = "LIMIT %(limit)s"
-        kwargs["limit"] = limit
-    else:
-        limit_clause = ""
-    return limit_clause
+    // Less than a day
+    const diffHours = Math.floor(diffMinutes / 60);
+    if (diffHours < 24) {
+      return `${diffHours}h`;
+    }
+
+    // Less than a week
+    const diffDays = Math.floor(diffHours / 24);
+    if (diffDays < 7) {
+      return `${diffDays}d`;
+    }
+
+    // Format as month and day for older dates
+    return new Intl.DateTimeFormat("en-US", {
+      month: "short",
+      day: "numeric",
+    }).format(date);
+  } catch (error) {
+    console.error("Failed to format timestamp:", error);
+    return "";
+  }
+}
+
+export {createBloom};
