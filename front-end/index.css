@@ -221,6 +221,13 @@ dialog {
   gap: var(--space);
 }
 
+.bloom__content {
+  min-width: 0;
+  max-width: 100%;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
 /* states, helpers*/
 .flex {
   display: flex;

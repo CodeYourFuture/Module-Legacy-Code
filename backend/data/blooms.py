@@ -1,6 +1,6 @@
 import datetime
-
 from dataclasses import dataclass
+from psycopg2.errors import UniqueViolation
 from typing import Any, Dict, List, Optional
 
 from data.connection import db_cursor
@@ -36,6 +36,38 @@ def add_bloom(*, sender: User, content: str) -> Bloom:
                 dict(hashtag=hashtag, bloom_id=bloom_id),
             )
 
+def add_rebloom(*, user: User, bloom_id: int) -> bool:
+    try:
+        with db_cursor() as cur:
+            cur.execute(
+                """
+                INSERT INTO reblooms (user_id, bloom_id)
+                VALUES (%(user_id)s, %(bloom_id)s)
+                """,
+                {
+                    "user_id": user.id,
+                    "bloom_id": bloom_id,
+                },
+            )
+    except UniqueViolation:
+        return False
+
+    return True
+
+def has_rebloomed(*, user: User, bloom_id: int) -> bool:
+    with db_cursor() as cur:
+        cur.execute(
+            """
+            SELECT EXISTS (
+                SELECT 1
+                FROM reblooms
+                WHERE user_id = %(user_id)s
+                  AND bloom_id = %(bloom_id)s
+            )
+            """,
+            {"user_id": user.id, "bloom_id": bloom_id},
+        )
+        return cur.fetchone()[0]
 
 def get_blooms_for_user(
     username: str, *, before: Optional[int] = None, limit: Optional[int] = None
@@ -79,6 +111,41 @@ def get_blooms_for_user(
             )
     return blooms
 
+def get_reblooms_for_user(username: str) -> list:
+    with db_cursor() as cur:
+        cur.execute(
+            """
+            SELECT
+                blooms.id,
+                original_user.username,
+                blooms.content,
+                blooms.send_timestamp,
+                rebloomer.username,
+                reblooms.rebloom_timestamp
+            FROM reblooms
+            INNER JOIN users AS rebloomer
+                ON rebloomer.id = reblooms.user_id
+            INNER JOIN blooms
+                ON blooms.id = reblooms.bloom_id
+            INNER JOIN users AS original_user
+                ON original_user.id = blooms.sender_id
+            WHERE rebloomer.username = %(username)s
+            ORDER BY reblooms.rebloom_timestamp DESC
+            """,
+            {"username": username},
+        )
+
+        return [
+            {
+                "id": row[0],
+                "sender": row[1],
+                "content": row[2],
+                "sent_timestamp": row[3],
+                "rebloomed_by": row[4],
+                "rebloom_timestamp": row[5],
+            }
+            for row in cur.fetchall()
+        ]
 
 def get_bloom(bloom_id: int) -> Optional[Bloom]:
     with db_cursor() as cur:

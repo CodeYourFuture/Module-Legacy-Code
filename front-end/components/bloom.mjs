@@ -1,3 +1,5 @@
+import { apiService } from "../index.mjs";
+import { state } from "../lib/state.mjs";
 /**
  * Create a bloom component
  * @param {string} template - The ID of the template to clone
@@ -16,15 +18,45 @@ const createBloom = (template, bloom) => {
   const bloomParser = new DOMParser();
 
   const bloomArticle = bloomFrag.querySelector("[data-bloom]");
+  const rebloomButton = bloomFrag.querySelector("[data-action='rebloom']");
+   if (rebloomButton && (bloom.sender === state.currentUser || bloom.has_rebloomed)) {
+      rebloomButton.hidden = true;
+   } 
+  rebloomButton?.addEventListener("click", async () => {
+  rebloomButton.disabled = true;
+  const originalText = rebloomButton.textContent;
+
+  try {
+    const result = await apiService.rebloomBloom(bloom.id);
+
+    if (result.success) {
+      rebloomButton.hidden = true;
+    } else {
+      rebloomButton.disabled = false;
+      rebloomButton.textContent = "Already re-bloomed";
+    }
+  } catch (error) {
+    rebloomButton.disabled = false;
+    rebloomButton.textContent = originalText;
+    console.error("Failed to re-bloom:", error);
+  }
+});
   const bloomUsername = bloomFrag.querySelector("[data-username]");
   const bloomTime = bloomFrag.querySelector("[data-time]");
   const bloomTimeLink = bloomFrag.querySelector("a:has(> [data-time])");
   const bloomContent = bloomFrag.querySelector("[data-content]");
+  const rebloomedBy = bloomFrag.querySelector("[data-rebloomed-by]");
 
   bloomArticle.setAttribute("data-bloom-id", bloom.id);
+  if (bloom.rebloomed_by) {
+      rebloomedBy.textContent = `${bloom.rebloomed_by} re-bloomed this`;
+      rebloomedBy.hidden = false;
+   }
   bloomUsername.setAttribute("href", `/profile/${bloom.sender}`);
   bloomUsername.textContent = bloom.sender;
-  bloomTime.textContent = _formatTimestamp(bloom.sent_timestamp);
+  bloomTime.textContent = _formatTimestamp(
+     bloom.rebloom_timestamp || bloom.sent_timestamp
+  );
   bloomTimeLink.setAttribute("href", `/bloom/${bloom.id}`);
   bloomContent.replaceChildren(
     ...bloomParser.parseFromString(_formatHashtags(bloom.content), "text/html")

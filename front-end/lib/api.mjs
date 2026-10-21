@@ -39,15 +39,18 @@ async function _apiRequest(endpoint, options = {}) {
       );
       error.status = response.status;
 
-      // Handle auth errors
+      // Handle authentication errors
       if (error.status === 401 || error.status === 403) {
         if (!endpoint.includes("/login") && !endpoint.includes("/register")) {
           state.destroyState();
         }
       }
 
-      // Pass all errors forward to a dialog on the screen
-      handleErrorDialog(error);
+      // Don't show a dialog for duplicate re-blooms
+      if (!(error.status === 409 && endpoint.includes("/rebloom"))) {
+        handleErrorDialog(error);
+      }
+
       throw error;
     }
 
@@ -57,12 +60,14 @@ async function _apiRequest(endpoint, options = {}) {
       : {success: true};
   } catch (error) {
     if (!error.status) {
-      // Only handle network errors here, response errors are handled above
+      // Handle network errors
       handleErrorDialog(error);
     }
-    throw error; // Re-throw so it can be caught by the calling function
+
+    throw error;
   }
 }
+
 
 // Local helper to update a profile in the profiles array
 function _updateProfile(username, profileData) {
@@ -163,7 +168,6 @@ async function getBlooms(username) {
 
     return blooms;
   } catch (error) {
-    // Error already handled by _apiRequest
     if (username) {
       _updateProfile(username, {blooms: []});
     } else {
@@ -172,7 +176,21 @@ async function getBlooms(username) {
     return [];
   }
 }
+async function rebloomBloom(bloomId) {
+  try {
+    const result = await _apiRequest(`/bloom/${bloomId}/rebloom`, {
+      method: "POST",
+    });
 
+    if (result.success) {
+      await getBlooms();
+    }
+
+    return result;
+  } catch (error) {
+    return { success: false };
+  }
+}
 /**
  * Fetches blooms containing a specific hashtag
  */
@@ -291,6 +309,7 @@ const apiService = {
   getBloom,
   getBlooms,
   postBloom,
+  rebloomBloom,
   getBloomsByHashtag,
 
   // User methods
