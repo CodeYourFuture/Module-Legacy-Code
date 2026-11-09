@@ -302,17 +302,20 @@ function _markRebloomedInState(bloomId, rebloomCount) {
 }
 
 async function rebloom(bloomId) {
-    const data = await _apiRequest(`/bloom/${bloomId}/rebloom`, {
-      method: "POST",
-    });
+  const data = await _apiRequest(`/bloom/${bloomId}/rebloom`, {method: "POST"});
 
-    if (data.success) {
-      _markRebloomedInState(bloomId, data.rebloom_count);
-      // Refetch only what gains a brand-new item: your timeline and profile
-      await Promise.all([getBlooms(), getProfile(state.currentUser)]);
+  if (data.success) {
+    _markRebloomedInState(bloomId, data.rebloom_count);
+
+    const route = window.location.hash.substring(1) || "/";
+    const refreshes = [];
+    if (route === "/") refreshes.push(getBlooms());
+    if (route === `/profile/${state.currentUser}`) {
+      refreshes.push(getProfile(state.currentUser));
     }
-    
-    return data; 
+    await Promise.allSettled(refreshes);
+  }
+  return data;
 }
 
 const apiService = {
