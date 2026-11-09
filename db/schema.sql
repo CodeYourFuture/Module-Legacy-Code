@@ -26,3 +26,14 @@ CREATE TABLE hashtags (
     bloom_id BIGINT NOT NULL REFERENCES blooms(id),
     UNIQUE(hashtag, bloom_id)
 );
+
+CREATE TABLE reblooms (
+    id BIGSERIAL PRIMARY KEY,
+    user_id INT NOT NULL REFERENCES users(id),
+    bloom_id BIGINT NOT NULL REFERENCES blooms(id),
+    rebloom_timestamp TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(user_id, bloom_id)
+);
+
+CREATE INDEX reblooms_bloom_id_idx ON reblooms(bloom_id);                       -- counts per bloom
+CREATE INDEX reblooms_user_ts_idx ON reblooms(user_id, rebloom_timestamp DESC); -- profile/timeline

@@ -57,6 +57,21 @@ window.addEventListener("unhandledrejection", (event) => {
   handleErrorDialog(event.reason);
 });
 
+document.addEventListener("click", async (event) => {
+  const button = event.target.closest("[data-rebloom-btn]");
+  if (!button) return;
+
+  const bloomId = button.closest("[data-bloom]").dataset.bloomId;
+  button.disabled = true; // stops double-clicks while the request runs
+  try {
+    await apiService.rebloom(bloomId);
+  } catch (err) {
+    handleErrorDialog(err)
+  } finally {
+    button.disabled = false;
+  }
+});
+
 export {
   getLogoutContainer,
   getLoginContainer,

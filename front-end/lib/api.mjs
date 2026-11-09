@@ -281,6 +281,43 @@ async function unfollowUser(username) {
   }
 }
 
+// Mark a bloom as rebloomed by the current user, wherever it is held in state
+function _markRebloomedInState(bloomId, rebloomCount) {
+  const id = Number(bloomId);
+  const update = (b) =>
+    b.id === id ? {...b, rebloomed_by_me: true, rebloom_count: rebloomCount} : b;
+
+  state.updateState({
+    timelineBlooms: (state.timelineBlooms ?? []).map(update),
+    hashtagBlooms: (state.hashtagBlooms ?? []).map(update),
+    singleBloomToShow: state.singleBloomToShow
+      ? update(state.singleBloomToShow)
+      : null,
+    profiles: (state.profiles ?? []).map((p) => ({
+      ...p,
+      ...(p.recent_blooms ? {recent_blooms: p.recent_blooms.map(update)} : {}),
+      ...(p.blooms ? {blooms: p.blooms.map(update)} : {}),
+    })),
+  });
+}
+
+async function rebloom(bloomId) {
+  const data = await _apiRequest(`/bloom/${bloomId}/rebloom`, {method: "POST"});
+
+  if (data.success) {
+    _markRebloomedInState(bloomId, data.rebloom_count);
+
+    const route = window.location.hash.substring(1) || "/";
+    const refreshes = [];
+    if (route === "/") refreshes.push(getBlooms());
+    if (route === `/profile/${state.currentUser}`) {
+      refreshes.push(getProfile(state.currentUser));
+    }
+    await Promise.allSettled(refreshes);
+  }
+  return data;
+}
+
 const apiService = {
   // Auth methods
   login,
@@ -292,6 +329,7 @@ const apiService = {
   getBlooms,
   postBloom,
   getBloomsByHashtag,
+  rebloom,
 
   // User methods
   getProfile,

@@ -75,6 +75,18 @@ def register():
     )
 
 
+def _mark_rebloomed_by_me(bloom_list, user):
+    """Set rebloomed_by_me on each bloom for the logged-in viewer."""
+    if user is None:  # logged-out viewers on public pages
+        return bloom_list
+    ids = blooms.get_rebloomed_bloom_ids(
+        user=user, bloom_ids=list({b.id for b in bloom_list})
+    )
+    for b in bloom_list:
+        b.rebloomed_by_me = b.id in ids
+    return bloom_list
+
+
 @jwt_required()
 def self_profile():
     username = get_current_user().username
@@ -111,7 +123,8 @@ def other_profile(profile_username):
 
     followers = get_inverse_followed_usernames(profile_user)
     all_blooms = blooms.get_blooms_for_user(profile_username)
-    all_blooms.reverse()
+    _mark_rebloomed_by_me(all_blooms, current_user)  # edits the blooms list in place
+
     return jsonify(
         {
             "username": profile_username,
@@ -167,16 +180,36 @@ def send_bloom():
     )
 
 
+@jwt_required(optional=True)
 def get_bloom(id_str):
     try:
         id_int = int(id_str)
     except ValueError:
-        return make_response((f"Invalid bloom id", 400))
+        return make_response(("Invalid bloom id", 400))
     bloom = blooms.get_bloom(id_int)
     if bloom is None:
-        return make_response((f"Bloom not found", 404))
+        return make_response(("Bloom not found", 404))
+    _mark_rebloomed_by_me([bloom], get_current_user())
     return jsonify(bloom)
 
+
+@jwt_required()
+def send_rebloom(bloom_id: int):
+    user = get_current_user()
+
+    if blooms.get_bloom(bloom_id) is None:
+        return make_response(("Bloom not found", 404))
+
+    created = blooms.add_rebloom(rebloomer=user, bloom_id=bloom_id)
+    bloom = blooms.get_bloom(bloom_id)  # fetched again so the count includes this rebloom
+
+    return jsonify(
+        {
+            "success": True,
+            "created": created,
+            "rebloom_count": bloom.rebloom_count,
+        }
+    )
 
 @jwt_required()
 def home_timeline():
@@ -198,18 +231,23 @@ def home_timeline():
     # Combine own blooms with followed blooms
     all_blooms = followed_blooms + own_blooms
 
-    # Sort by timestamp (newest first)
+    # Sort by timestamp of rebloom or timestamp of creation (newest first)
     sorted_blooms = list(
-        sorted(all_blooms, key=lambda bloom: bloom.sent_timestamp, reverse=True)
+        sorted(
+            all_blooms, 
+            key=lambda bloom: bloom.rebloom_timestamp or bloom.sent_timestamp, 
+            reverse=True
+        )
     )
 
-    return jsonify(sorted_blooms)
+    return jsonify(_mark_rebloomed_by_me(sorted_blooms, current_user))
 
 
+@jwt_required(optional=True)
 def user_blooms(profile_username):
+    current_user = get_current_user()
     user_blooms = blooms.get_blooms_for_user(profile_username)
-    user_blooms.reverse()
-    return jsonify(user_blooms)
+    return jsonify(_mark_rebloomed_by_me(user_blooms, current_user))
 
 
 @jwt_required()
@@ -228,8 +266,10 @@ def suggested_follows(limit_str):
     return jsonify(suggestions)
 
 
+@jwt_required(optional=True)
 def hashtag(hashtag):
-    return jsonify(blooms.get_blooms_with_hashtag(hashtag))
+    hashtag_blooms = blooms.get_blooms_with_hashtag(hashtag)
+    return jsonify(_mark_rebloomed_by_me(hashtag_blooms, get_current_user()))
 
 
 def verify_request_fields(names_to_types: Dict[str, type]) -> Union[Response, None]:

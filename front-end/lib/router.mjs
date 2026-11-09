@@ -5,12 +5,42 @@ import {loginView} from "../views/login.mjs";
 import {homeView} from "../views/home.mjs";
 import {hashtagView} from "../views/hashtag.mjs";
 
+import {apiService} from "./api.mjs";
+import {state} from "./state.mjs";
+
+/**
+ * Refresh the data for the current route. Runs once per navigation and once
+ * on page load. It must not run on state-change re-renders, or it would loop.
+ */
+function refreshRouteData() {
+  const hash = window.location.hash.substring(1) || "/";
+
+  if (hash.startsWith("/bloom/")) {
+    // getBloom has no error handling of its own, and the dialog already showed
+    apiService.getBloom(hash.split("/")[2]).catch(() => {});
+  } else if (hash.startsWith("/profile/")) {
+    apiService.getProfile(hash.split("/")[2]);
+  } else if (hash.startsWith("/hashtag/")) {
+    apiService.getBloomsByHashtag(hash.split("/")[2]);
+  } else if (hash === "/" && state.isLoggedIn) {
+    apiService.getBlooms();
+  }
+}
+
+
+let lastRoute = null;
+
 /**
  * Handle route changes based on the current URL
  */
 function handleRouteChange() {
   // We're going to use hash for routing
   const hash = window.location.hash.substring(1) || "/";
+
+  // True for a real navigation, false for re-renders caused by state changes
+  const isNavigation = hash !== lastRoute;
+  lastRoute = hash;
+  if (isNavigation) refreshRouteData();
 
   // Bloom path for a single bloom
   if (hash.startsWith("/bloom/")) {

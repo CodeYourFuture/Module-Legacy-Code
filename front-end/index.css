@@ -14,6 +14,7 @@
   --inset: inset 0px -3.25px 12px var(--outline);
   --corner: 2.5px;
   --pill: 9999px;
+  --highlight-border: 4px solid green;
 }
 
 * {
@@ -263,7 +264,54 @@ dialog {
   }
 }
 
+
+
+/* BLOOM */
+
+.bloom__footer {
+  align-items: center;
+}
+
+.bloom__rebloom-info,
+.bloom__rebloom-count,
+.bloom__rebloomed-label {
+  font-family: monospace;
+}
+
+.bloom__rebloom-info,
+.bloom__rebloom-count {
+  color: var(--accent);
+}
+
+.bloom__rebloom-info {
+  font-size: 0.85em;
+}
+
+.bloom__rebloomed-label {
+  color: var(--brand);
+  font-weight: 600;
+}
+
+/* A rebloom item in the feed */
+.bloom.bloom--rebloom {
+  background-color: hsl(var(--key), 45%, 93%);
+  border-left: 4px solid var(--brand);
+}
+
+/* A rebloom item made by the logged-in user: used green as more purple doesn't distinguish enough */
+.bloom.bloom--own-rebloom {
+  background-color: hsl(var(--key), 45%, 89%);
+  border-left: var(--highlight-border);
+}
+
+.bloom--own-rebloom .bloom__rebloom-info {
+  color: var(--brand);
+  font-weight: 900;
+}
+
+
 /* We always want attribute hidden to sync with display:none, no matter what */
 [hidden] {
   display: none !important;
 }
+
