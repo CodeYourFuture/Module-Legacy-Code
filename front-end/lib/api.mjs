@@ -302,7 +302,6 @@ function _markRebloomedInState(bloomId, rebloomCount) {
 }
 
 async function rebloom(bloomId) {
-  try {
     const data = await _apiRequest(`/bloom/${bloomId}/rebloom`, {
       method: "POST",
     });
@@ -312,12 +311,8 @@ async function rebloom(bloomId) {
       // Refetch only what gains a brand-new item: your timeline and profile
       await Promise.all([getBlooms(), getProfile(state.currentUser)]);
     }
-
-    return data;
-  } catch (error) {
-    console.error("rebloom failed:", error);
-    return {success: false};
-  }
+    
+    return data; 
 }
 
 const apiService = {
