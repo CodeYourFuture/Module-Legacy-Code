@@ -308,7 +308,6 @@ async function rebloom(bloomId) {
     });
 
     if (data.success) {
-      console.log(data.rebloom_count)
       _markRebloomedInState(bloomId, data.rebloom_count);
       // Refetch only what gains a brand-new item: your timeline and profile
       await Promise.all([getBlooms(), getProfile(state.currentUser)]);
