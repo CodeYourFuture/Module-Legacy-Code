@@ -39,7 +39,6 @@ async function init() {
   }
 
   handleRouteChange();
-  refreshRouteData();
 
   document.addEventListener("state-change", () => {
     handleRouteChange();
