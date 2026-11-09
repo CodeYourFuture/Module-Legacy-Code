@@ -14,6 +14,7 @@
   --inset: inset 0px -3.25px 12px var(--outline);
   --corner: 2.5px;
   --pill: 9999px;
+  --highlight-border: 4px solid green;
 }
 
 * {
@@ -297,10 +298,10 @@ dialog {
   border-left: 4px solid var(--brand);
 }
 
-/* A rebloom item made by the logged-in user: stronger tint, brand bar */
+/* A rebloom item made by the logged-in user: used green as more purple doesn't distinguish enough */
 .bloom.bloom--own-rebloom {
   background-color: hsl(var(--key), 45%, 89%);
-  border-left: 4px solid green;
+  border-left: var(--highlight-border);
 }
 
 .bloom--own-rebloom .bloom__rebloom-info {
